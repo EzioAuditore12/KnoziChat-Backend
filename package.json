@@ -1,18 +1,37 @@
 {
   "name": "knozichat-backend",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "bun src/index.ts",
-    "dev": "bun run --hot src/index.ts",
+    "dev": "bun run --watch src/index.ts",
+    "db:generate": "bun drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "bun drizzle-kit migrate --config=drizzle.config.ts",
+    "db:push": "bun drizzle-kit push --config=drizzle.config.ts",
+    "db:pull": "bun drizzle-kit pull --config=drizzle.config.ts",
+    "db:check": "bun drizzle-kit check --config=drizzle.config.ts",
+    "db:up": "bun drizzle-kit up --config=drizzle.config.ts",
+    "db:studio": "bun drizzle-kit studio --config=drizzle.config.ts",
     "lint": "biome check src",
     "lint:format": "biome check src --write",
     "prepare": "husky"
   },
   "dependencies": {
-    "hono": "^4.8.4"
+    "@hono/zod-openapi": "^0.19.9",
+    "@scalar/hono-api-reference": "^0.9.9",
+    "drizzle-orm": "^0.44.2",
+    "hono": "^4.8.4",
+    "hono-pino": "^0.9.1",
+    "pg": "^8.16.3",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "stoker": "^1.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/bun": "latest",
+    "@types/bun": "^1.2.18",
+    "@types/pg": "^8.15.4",
+    "drizzle-kit": "^0.31.4",
     "husky": "^9.1.7"
   }
 }
