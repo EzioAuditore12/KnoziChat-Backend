@@ -1,35 +1,32 @@
 import { createRouter } from "@/lib/create-app";
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
+import * as HttpStatusCodes from "stoker/http-status-codes";
+import { jsonContent } from "stoker/openapi/helpers";
+import { createMessageObjectSchema } from "stoker/openapi/schemas";
 
 const router = createRouter().openapi(
 	createRoute({
+		tags: ["index"],
 		method: "get",
 		path: "/",
 		responses: {
-			200: {
-				content: {
-					"application/json": {
-						schema: z
-							.object({
-								message: z.string().openapi({
-									example: "Task API",
-									type: "string",
-								}),
-							})
-							.openapi({
-								title: "IndexResponse",
-								type: "object",
-							}),
-					},
-				},
-				description: "Knozichat API Index",
-			},
+			[HttpStatusCodes.OK]: jsonContent(
+				createMessageObjectSchema("KnoziCHat").openapi({
+					title: "IndexResponse",
+					type: "object",
+					description: "Knozichat API Index",
+				}),
+				"Knozichat API Index",
+			),
 		},
 	}),
 	(c) => {
-		return c.json({
-			message: "Task API",
-		});
+		return c.json(
+			{
+				message: "Task API",
+			},
+			HttpStatusCodes.OK,
+		);
 	},
 );
 
