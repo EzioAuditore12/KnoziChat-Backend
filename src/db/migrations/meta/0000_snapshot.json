@@ -1,5 +1,5 @@
 {
-	"id": "b3279681-f2ee-40d6-a3d8-a33dced82280",
+	"id": "1f7fa5e2-867d-4ab8-a988-028f148bd865",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -17,7 +17,7 @@
 				},
 				"name": {
 					"name": "name",
-					"type": "varchar(50)",
+					"type": "varchar(10)",
 					"primaryKey": false,
 					"notNull": true
 				},
@@ -25,19 +25,19 @@
 					"name": "done",
 					"type": "boolean",
 					"primaryKey": false,
-					"notNull": false,
+					"notNull": true,
 					"default": false
 				},
 				"createdAt": {
 					"name": "createdAt",
-					"type": "time",
+					"type": "timestamp",
 					"primaryKey": false,
 					"notNull": false,
 					"default": "now()"
 				},
 				"updatedAt": {
 					"name": "updatedAt",
-					"type": "time",
+					"type": "timestamp",
 					"primaryKey": false,
 					"notNull": false
 				}

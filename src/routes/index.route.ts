@@ -11,11 +11,7 @@ const router = createRouter().openapi(
 		path: "/",
 		responses: {
 			[HttpStatusCodes.OK]: jsonContent(
-				createMessageObjectSchema("KnoziCHat").openapi({
-					title: "IndexResponse",
-					type: "object",
-					description: "Knozichat API Index",
-				}),
+				createMessageObjectSchema("KnoziChat"),
 				"Knozichat API Index",
 			),
 		},

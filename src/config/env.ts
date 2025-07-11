@@ -4,8 +4,8 @@ export const envSchema = z
 	.object({
 		PORT: z.coerce.number().int().positive().default(3000),
 		LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]),
-		NODE_ENV: z.enum(["production", "development"]),
-		DATABASE_URL: z.url(),
+		NODE_ENV: z.enum(["production", "development", "test"]),
+		DATABASE_URL: z.string().url(),
 		DATABASE_AUTH_TOKEN: z.string().optional(),
 	})
 	.refine(

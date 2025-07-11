@@ -6,3 +6,7 @@ node_modules/
 
 # drizzle generations
 drizzle
+migrations
+
+#builds
+dist
