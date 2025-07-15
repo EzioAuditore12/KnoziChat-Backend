@@ -1,11 +1,11 @@
 import env from "@/env";
-import { sign ,verify} from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 
 export async function generateAuthToken(id: string) {
 	const accessToken = await sign(
 		{
 			id,
-            iat:Math.floor(Date.now()/1000),
+			iat: Math.floor(Date.now() / 1000),
 			exp: Math.floor(Date.now() / 1000) + 240,
 		},
 		env.ACCESS_SECRET_KEY,
@@ -14,7 +14,7 @@ export async function generateAuthToken(id: string) {
 	const refreshToken = await sign(
 		{
 			id,
-            iat:Math.floor(Date.now()/1000),
+			iat: Math.floor(Date.now() / 1000),
 			exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 1 day = 86400 seconds
 		},
 		env.REFRESH_SECRET_KEY,
@@ -25,13 +25,16 @@ export async function generateAuthToken(id: string) {
 	return tokens;
 }
 
-interface DecodedTokenResponse{
-    id:string,
-    iat:number
-    exp:number
+interface DecodedTokenResponse {
+	id: string;
+	iat: number;
+	exp: number;
 }
 
-export async function validateToken(token:string){
-	 const decodedToken = await verify(token, env.ACCESS_SECRET_KEY) as unknown as DecodedTokenResponse;
-     return decodedToken 
+export async function validateToken(token: string) {
+	const decodedToken = (await verify(
+		token,
+		env.ACCESS_SECRET_KEY,
+	)) as unknown as DecodedTokenResponse;
+	return decodedToken;
 }

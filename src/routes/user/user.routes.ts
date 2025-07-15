@@ -30,10 +30,10 @@ export const userProfile = createRoute({
 			forbiddenRequestSchema,
 			"Token is expired",
 		),
-        [HTTPStatusCode.NOT_FOUND]: jsonContent(
-            notFoundSchema,
-            "User is not found"
-        )
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(
+			notFoundSchema,
+			"User is not found",
+		),
 	},
 });
 
