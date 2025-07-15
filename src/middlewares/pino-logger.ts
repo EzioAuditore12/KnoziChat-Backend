@@ -1,4 +1,4 @@
-import env from "@/config/env";
+import env from "@/env";
 import { type PinoLogger, pinoLogger as logger } from "hono-pino";
 import pino from "pino";
 import pretty from "pino-pretty";

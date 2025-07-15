@@ -1,11 +1,11 @@
 {
-	"id": "1f7fa5e2-867d-4ab8-a988-028f148bd865",
+	"id": "1931969f-8a36-4dfe-a7b3-fc03dd12fa1d",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
-		"public.tasks": {
-			"name": "tasks",
+		"public.users": {
+			"name": "users",
 			"schema": "",
 			"columns": {
 				"id": {
@@ -15,18 +15,41 @@
 					"notNull": true,
 					"default": "gen_random_uuid()"
 				},
-				"name": {
-					"name": "name",
-					"type": "varchar(10)",
+				"firstName": {
+					"name": "firstName",
+					"type": "varchar(50)",
 					"primaryKey": false,
 					"notNull": true
 				},
-				"done": {
-					"name": "done",
-					"type": "boolean",
+				"lastName": {
+					"name": "lastName",
+					"type": "varchar(50)",
 					"primaryKey": false,
-					"notNull": true,
-					"default": false
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "varchar(254)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"password": {
+					"name": "password",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"profilePicture": {
+					"name": "profilePicture",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"refreshToken": {
+					"name": "refreshToken",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
 				},
 				"createdAt": {
 					"name": "createdAt",
@@ -46,10 +69,10 @@
 			"foreignKeys": {},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
-				"tasks_id_unique": {
-					"name": "tasks_id_unique",
+				"users_email_unique": {
+					"name": "users_email_unique",
 					"nullsNotDistinct": false,
-					"columns": ["id"]
+					"columns": ["email"]
 				}
 			},
 			"policies": {},
