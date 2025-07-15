@@ -15,6 +15,7 @@ import {
 	registerUserBodyValidation,
 	registerUserResponseValidation,
 } from "@/validations/auth/register.validation";
+import { z } from "@hono/zod-openapi";
 
 export const registerUser = createRoute({
 	tags: ["Authentication"],
@@ -57,6 +58,26 @@ export const loginUser = createRoute({
 		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
 			unauthorizedRequestSchema,
 			"Invalid email or password",
+		),
+	},
+});
+export const refreshToken = createRoute({
+	tags: ["Authentication"],
+	path: "/refresh",
+	method: "post",
+	request: {
+		cookies: z.object({
+			"knozichat-cookie": z.string().describe("Refresh token cookie"),
+		}),
+	},
+	responses: {
+		[HTTPStatusCode.OK]: jsonContent(
+			z.object({ message: z.string() }),
+			"Token refreshed successfully",
+		),
+		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
+			unauthorizedRequestSchema,
+			"Invalid or missing refresh token",
 		),
 	},
 });

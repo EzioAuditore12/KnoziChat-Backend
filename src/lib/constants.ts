@@ -24,3 +24,7 @@ export const unauthorizedRequestSchema = createMessageObjectSchema(
 export const conflictRequestSchema = createMessageObjectSchema(
 	HTTPStatusPhrases.CONFLICT,
 );
+
+export const forbiddenRequestSchema = createMessageObjectSchema(
+	HTTPStatusPhrases.FORBIDDEN,
+);

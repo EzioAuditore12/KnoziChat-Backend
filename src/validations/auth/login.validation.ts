@@ -9,5 +9,5 @@ export const loginUserBodyValidation = UsersInsertSchema.extend({
 	.strict();
 
 export const loginUserResponseValidation = UsersSelectSchema.extend({
-	accessToken: z.string(),
+	accessToken: z.string()
 });
