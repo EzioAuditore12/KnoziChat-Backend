@@ -2,40 +2,12 @@ import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
 import { HTTPStatusCode } from "@/lib/constants";
 import type { AppRouteHandler } from "@/lib/types";
-import { validateToken } from "@/utils/jwt";
 import { eq } from "drizzle-orm";
 import type { UserProfile } from "./user.routes";
+import type { AuthMiddlewareBindings } from "@/middlewares/auth-middleware";
 
 export const userProfile: AppRouteHandler<UserProfile> = async (c) => {
-	const authHeader = c.req.header("Authorization");
-
-	if (!authHeader)
-		return c.json(
-			{ message: "Authorization header is not provied" },
-			HTTPStatusCode.UNAUTHORIZED,
-		);
-
-	const [scheme, token] = authHeader.split(" ");
-
-	if (scheme !== "Bearer" || !token) {
-		return c.json(
-			{
-				message:
-					"Haven't Provided valid scheme which is Bearer or haven't given token",
-			},
-			HTTPStatusCode.FORBIDDEN,
-		);
-	}
-
-	const decodeToken = await validateToken(token);
-
-	if (!decodeToken)
-		return c.json(
-			{ message: "Given token is invalid or expired" },
-			HTTPStatusCode.FORBIDDEN,
-		);
-
-	const { id } = decodeToken;
+	const id = c.get("userId");
 
 	const [user] = await db
 		.select()
