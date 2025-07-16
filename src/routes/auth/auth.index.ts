@@ -5,6 +5,7 @@ import * as routes from "./auth.routes";
 
 const authentication = createRouter()
 	.openapi(routes.registerUser, handlers.registerUser)
-	.openapi(routes.loginUser, handlers.loginUser);
+	.openapi(routes.loginUser, handlers.loginUser)
+	.openapi(routes.regenerateRefreshToken, handlers.regenerateRefreshToken);
 
 export default authentication;

@@ -4,10 +4,7 @@ import {
 	notFoundSchema,
 	unauthorizedRequestSchema,
 } from "@/lib/constants";
-import {
-	type AuthMiddlewareBindings,
-	authMiddleware,
-} from "@/middlewares/auth-middleware";
+import { authMiddleware } from "@/middlewares/auth-middleware";
 import { profileResponseValidation } from "@/validations/app/profile.validation";
 import { createRoute } from "@hono/zod-openapi";
 import { jsonContent } from "stoker/openapi/helpers";

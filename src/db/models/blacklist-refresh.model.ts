@@ -22,7 +22,6 @@ export const BlacklistRefreshTokenInsertionSchema = createInsertSchema(
 )
 	.omit({
 		id: true,
-		userId: true,
 	})
 	.extend({
 		token: z.string().refine((val) => isJWT(val), {

@@ -9,8 +9,13 @@ import type {
 } from "./auth.routes";
 
 import { db } from "@/db";
+import { blackListedRefreshTokenTable } from "@/db/models/blacklist-refresh.model";
 import { usersTable } from "@/db/models/users.model";
-import { generateAuthToken } from "@/utils/jwt";
+import {
+	generateAuthToken,
+	validateRefreshToken,
+	validateToken,
+} from "@/utils/jwt";
 import { eq } from "drizzle-orm";
 
 export const registerUser: AppRouteHandler<RegisterUser> = async (c) => {
@@ -68,7 +73,7 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 	if (!user)
 		return c.json({ message: "User does not exist" }, HTTPStatusCode.NOT_FOUND);
 
-	const validPassword = comparePasswords(password, user.password);
+	const validPassword = await comparePasswords(password, user.password);
 
 	if (!validPassword)
 		return c.json(
@@ -93,6 +98,65 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 
 	return c.json(
 		{ ...loggedInUser, accessToken: tokens.accessToken },
+		HTTPStatusCode.OK,
+	);
+};
+
+/* Refresh Token logic
+1. Take refresh token(r0) from cookie
+2. Decode refresh Token and check if it is expired
+   - If expired then return
+   - If not expired then send user id
+3. Validate userid with database and check it it exists or not
+4. Blacklist old refresh token(r0) and add into blacklisted refresh token table
+4. Make new accessToken and refresh Token and add payload signature data userId
+5. (optional) Check for expired if they are expired and delete them from database table of blacklisted refresh token table
+*/
+export const regenerateRefreshToken: AppRouteHandler<
+	RegenerateRefreshToken
+> = async (c) => {
+	const oldRefreshToken = c.req.valid("cookie");
+
+	const oldDecodeRefreshToken = await validateRefreshToken(
+		oldRefreshToken["knozichat-cookie"],
+	);
+
+	if (!oldDecodeRefreshToken)
+		return c.json(
+			{ message: "Given refresh token is not valid or Unauthorized" },
+			401,
+		);
+
+	const userId = oldDecodeRefreshToken.id;
+
+	const [user] = await db
+		.select()
+		.from(usersTable)
+		.where(eq(usersTable.id, userId));
+
+	if (!user)
+		return c.json(
+			{ message: "Given user id does not exist" },
+			HTTPStatusCode.NOT_FOUND,
+		);
+
+	await db.insert(blackListedRefreshTokenTable).values({
+		userId: user.id,
+		token: oldRefreshToken["knozichat-cookie"],
+		createdAt: new Date(oldDecodeRefreshToken.iat * 1000), // convert UNIX to Date
+		expiredAt: new Date(oldDecodeRefreshToken.exp * 1000), // convert UNIX to Date
+	});
+
+	const { accessToken, refreshToken } = await generateAuthToken(user.id);
+
+	setCookie(c, "knozichat-cookie", refreshToken, {
+		httpOnly: true,
+		maxAge: 24 * 60 * 60, // 1 day
+		secure: true,
+	});
+
+	return c.json(
+		{ message: "Generation successfull", accessToken: accessToken },
 		HTTPStatusCode.OK,
 	);
 };

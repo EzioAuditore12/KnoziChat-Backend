@@ -11,11 +11,16 @@ import {
 	loginUserBodyValidation,
 	loginUserResponseValidation,
 } from "@/validations/auth/login.validation";
+
 import {
 	registerUserBodyValidation,
 	registerUserResponseValidation,
 } from "@/validations/auth/register.validation";
-import { z } from "@hono/zod-openapi";
+
+import {
+	regenerateRefreshTokenRequestValidationSchema,
+	regenerateRefreshTokenResponse,
+} from "@/validations/auth/regerateRefreshToken.validation";
 
 export const registerUser = createRoute({
 	tags: ["Authentication"],
@@ -66,18 +71,20 @@ export const regenerateRefreshToken = createRoute({
 	path: "/refresh",
 	method: "post",
 	request: {
-		cookies: z.object({
-			"knozichat-cookie": z.string().describe("Refresh token cookie"),
-		}),
+		cookies: regenerateRefreshTokenRequestValidationSchema,
 	},
 	responses: {
 		[HTTPStatusCode.OK]: jsonContent(
-			z.object({ message: z.string() }),
+			regenerateRefreshTokenResponse,
 			"Token refreshed successfully",
 		),
 		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
 			unauthorizedRequestSchema,
 			"Invalid or missing refresh token",
+		),
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(
+			notFoundSchema,
+			"Given user not exists with userid provided in refresh token",
 		),
 	},
 });

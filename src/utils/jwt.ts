@@ -43,3 +43,16 @@ export async function validateToken(token: string) {
 		return null;
 	}
 }
+
+export async function validateRefreshToken(token: string) {
+	try {
+		const decodedToken = (await verify(
+			token,
+			env.REFRESH_SECRET_KEY,
+		)) as unknown as DecodedTokenResponse;
+		return decodedToken;
+	} catch (err) {
+		console.log(err);
+		return null;
+	}
+}
