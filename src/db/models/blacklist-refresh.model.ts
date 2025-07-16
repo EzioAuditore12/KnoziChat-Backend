@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { isJWT } from "validator";
 import { usersTable } from "./users.model";

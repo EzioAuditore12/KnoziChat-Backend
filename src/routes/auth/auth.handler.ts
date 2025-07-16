@@ -34,8 +34,6 @@ export const registerUser: AppRouteHandler<RegisterUser> = async (c) => {
 
 	const tokens = await generateAuthToken(createUser.id);
 
-	await db.update(usersTable).set({ refreshToken: tokens.refreshToken });
-
 	setCookie(c, "knozichat-cookie", tokens.refreshToken, {
 		httpOnly: true,
 		maxAge: 24 * 60 * 60, // 1 day
@@ -76,8 +74,6 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 
 	const tokens = await generateAuthToken(user.id);
 
-	await db.update(usersTable).set({ refreshToken: tokens.refreshToken });
-
 	setCookie(c, "knozichat-cookie", tokens.refreshToken, {
 		httpOnly: true,
 		maxAge: 24 * 60 * 60, // 1 day
@@ -88,7 +84,6 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 		password: _password,
 		createdAt: _createdAt,
 		updatedAt: _updatedAt,
-		refreshToken: _refreshToken,
 		...loggedInUser
 	} = user;
 

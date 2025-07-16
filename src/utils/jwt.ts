@@ -25,16 +25,21 @@ export async function generateAuthToken(id: string) {
 	return tokens;
 }
 
-interface DecodedTokenResponse {
+export interface DecodedTokenResponse {
 	id: string;
 	iat: number;
 	exp: number;
 }
 
 export async function validateToken(token: string) {
-	const decodedToken = (await verify(
-		token,
-		env.ACCESS_SECRET_KEY,
-	)) as unknown as DecodedTokenResponse;
-	return decodedToken;
+	try {
+		const decodedToken = (await verify(
+			token,
+			env.ACCESS_SECRET_KEY,
+		)) as unknown as DecodedTokenResponse;
+		return decodedToken;
+	} catch (err) {
+		console.log(err);
+		return null;
+	}
 }

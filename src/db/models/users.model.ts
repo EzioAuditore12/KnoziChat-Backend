@@ -8,7 +8,6 @@ export const usersTable = pgTable("users", {
 	email: varchar({ length: 254 }).unique().notNull(),
 	password: text().notNull(),
 	profilePicture: text(),
-	refreshToken: text(),
 	createdAt: timestamp().defaultNow(),
 	updatedAt: timestamp().$onUpdate(() => new Date()),
 });
@@ -17,7 +16,6 @@ export const UsersInsertSchema = createInsertSchema(usersTable).omit({
 	id: true,
 	createdAt: true,
 	updatedAt: true,
-	refreshToken: true,
 });
 
 export const UsersSelectSchema = createSelectSchema(usersTable).pick({
