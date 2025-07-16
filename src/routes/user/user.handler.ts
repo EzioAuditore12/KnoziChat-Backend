@@ -1,12 +1,13 @@
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
 import { HTTPStatusCode } from "@/lib/constants";
-import type { AppRouteHandler } from "@/lib/types";
-import type { AuthMiddlewareBindings } from "@/middlewares/auth-middleware";
+import type { AuthenticatedAppRouteHandler } from "@/lib/types";
 import { eq } from "drizzle-orm";
 import type { UserProfile } from "./user.routes";
 
-export const userProfile: AppRouteHandler<UserProfile> = async (c) => {
+export const userProfile: AuthenticatedAppRouteHandler<UserProfile> = async (
+	c,
+) => {
 	const id = c.get("userId");
 
 	const [user] = await db

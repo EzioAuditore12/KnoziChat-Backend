@@ -2,7 +2,11 @@ import { HTTPStatusCode } from "@/lib/constants";
 import type { AppRouteHandler } from "@/lib/types";
 import { comparePasswords, generateHashedPassword } from "@/utils/bcrypt";
 import { setCookie } from "hono/cookie";
-import type { LoginUser, RegisterUser } from "./auth.routes";
+import type {
+	LoginUser,
+	RegenerateRefreshToken,
+	RegisterUser,
+} from "./auth.routes";
 
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";

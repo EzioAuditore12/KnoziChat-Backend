@@ -4,10 +4,21 @@ import { requestId } from "hono/request-id";
 import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
 import { defaultHook } from "stoker/openapi";
 
-import type { AppBindings, AppOpenAPI } from "./types";
+import type {
+	AppBindings,
+	AppOpenAPI,
+	AuthenticatedAppBindings,
+} from "./types";
 
 export function createRouter() {
 	return new OpenAPIHono<AppBindings>({
+		strict: false,
+		defaultHook,
+	});
+}
+
+export function createProtectedRouter() {
+	return new OpenAPIHono<AuthenticatedAppBindings>({
 		strict: false,
 		defaultHook,
 	});

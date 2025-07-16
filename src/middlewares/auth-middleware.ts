@@ -18,8 +18,8 @@ const AuthroizationHeaderSchema = z.object({
 });
 
 export interface AuthMiddlewareBindings {
-	accessToken?: string;
-	userId?: string;
+	accessToken: string;
+	userId: string;
 }
 
 export const authMiddleware = createMiddleware<{

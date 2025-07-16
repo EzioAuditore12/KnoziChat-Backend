@@ -61,7 +61,7 @@ export const loginUser = createRoute({
 		),
 	},
 });
-export const refreshToken = createRoute({
+export const regenerateRefreshToken = createRoute({
 	tags: ["Authentication"],
 	path: "/refresh",
 	method: "post",
@@ -84,3 +84,4 @@ export const refreshToken = createRoute({
 
 export type RegisterUser = typeof registerUser;
 export type LoginUser = typeof loginUser;
+export type RegenerateRefreshToken = typeof regenerateRefreshToken;
