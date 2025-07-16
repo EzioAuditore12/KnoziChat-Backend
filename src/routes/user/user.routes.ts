@@ -4,9 +4,12 @@ import {
 	notFoundSchema,
 	unauthorizedRequestSchema,
 } from "@/lib/constants";
-import { authMiddleware,type AuthMiddlewareBindings } from "@/middlewares/auth-middleware";
+import {
+	type AuthMiddlewareBindings,
+	authMiddleware,
+} from "@/middlewares/auth-middleware";
 import { profileResponseValidation } from "@/validations/app/profile.validation";
-import { createRoute} from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { jsonContent } from "stoker/openapi/helpers";
 
 export const userProfile = createRoute({
