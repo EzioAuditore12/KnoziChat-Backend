@@ -1,6 +1,6 @@
 import { HTTPStatusCode } from "@/lib/constants";
 import type { AppRouteHandler } from "@/lib/types";
-import { comparePasswords, generateHashedPassword } from "@/utils/bcrypt";
+import { validatePassword, generateHashedPassword } from "@/utils/crypto-password";
 import { setCookie } from "hono/cookie";
 import type {
 	LoginUser,
@@ -72,7 +72,7 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 	if (!user)
 		return c.json({ message: "User does not exist" }, HTTPStatusCode.NOT_FOUND);
 
-	const validPassword = await comparePasswords(password, user.password);
+	const validPassword = await validatePassword(password, user.password);
 
 	if (!validPassword)
 		return c.json(

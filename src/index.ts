@@ -1,7 +1,6 @@
 import app from "./app";
 import env from "./env";
 
-
 import "./jobs";
 
 const server = Bun.serve({
