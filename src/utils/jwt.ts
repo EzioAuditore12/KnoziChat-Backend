@@ -6,7 +6,7 @@ export async function generateAuthToken(id: string) {
 		{
 			id,
 			iat: Math.floor(Date.now() / 1000),
-			exp: Math.floor(Date.now() / 1000) + 240,
+			exp: Math.floor(Date.now() / 1000) + 20,
 		},
 		env.ACCESS_SECRET_KEY,
 	);
@@ -31,7 +31,7 @@ export interface DecodedTokenResponse {
 	exp: number;
 }
 
-export async function validateToken(token: string) {
+export async function validateAccessToken(token: string) {
 	try {
 		const decodedToken = (await verify(
 			token,
@@ -39,7 +39,6 @@ export async function validateToken(token: string) {
 		)) as unknown as DecodedTokenResponse;
 		return decodedToken;
 	} catch (err) {
-		console.log(err);
 		return null;
 	}
 }

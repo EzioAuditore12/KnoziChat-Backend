@@ -1,3 +1,4 @@
+import { redisClient } from "@/configs/redis.client";
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
 import { HTTPStatusCode } from "@/lib/constants";

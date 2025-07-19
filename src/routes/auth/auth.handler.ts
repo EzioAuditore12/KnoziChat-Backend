@@ -6,16 +6,15 @@ import type {
 	LoginUser,
 	RegenerateRefreshToken,
 	RegisterUser,
+	VerifyOtp,
 } from "./auth.routes";
 
 import { db } from "@/db";
 import { blackListedRefreshTokenTable } from "@/db/models/blacklist-refresh.model";
 import { usersTable } from "@/db/models/users.model";
-import {
-	generateAuthToken,
-	validateRefreshToken,
-	validateToken,
-} from "@/utils/jwt";
+import { emailQueue, emailQueueName } from "@/jobs/sendEmail.job";
+import { sendEmail } from "@/services/email";
+import { generateAuthToken, validateRefreshToken } from "@/utils/jwt";
 import { eq } from "drizzle-orm";
 
 export const registerUser: AppRouteHandler<RegisterUser> = async (c) => {
@@ -102,6 +101,46 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 	);
 };
 
+export const verifyOtp: AppRouteHandler<VerifyOtp> = async (c) => {
+	const { email, otp } = c.req.valid("json");
+
+	const payload = [
+		{
+			toMail: email,
+			subject: "Just testing email",
+			body: `<h1>Here is your otp ${otp}</h1>`,
+		},
+		{
+			toMail: email,
+			subject: "Just testing email",
+			body: `<h1>Here is your otp ${otp}</h1>`,
+		},
+		{
+			toMail: email,
+			subject: "Just testing email",
+			body: `<h1>Here is your otp ${otp}</h1>`,
+		},
+		{
+			toMail: email,
+			subject: "Just testing email",
+			body: `<h1>Here is your otp ${otp}</h1>`,
+		},
+		{
+			toMail: email,
+			subject: "Just testing email",
+			body: `<h1>Here is your otp ${otp}</h1>`,
+		},
+	];
+
+	await emailQueue.add(emailQueueName, payload);
+
+	//const sendOtp=await sendEmail(payload);
+
+	//if(!sendOtp) return c.json({message:"Something went wrong"},HTTPStatusCode.INTERNAL_SERVER_ERROR)
+
+	return c.json({ message: "Done succesfully" }, HTTPStatusCode.CREATED);
+};
+
 /* Refresh Token logic
 1. Take refresh token(r0) from cookie
 2. Decode refresh Token and check if it is expired
@@ -142,9 +181,9 @@ export const regenerateRefreshToken: AppRouteHandler<
 
 	await db.insert(blackListedRefreshTokenTable).values({
 		userId: user.id,
-		token: oldRefreshToken["knozichat-cookie"],
-		createdAt: new Date(oldDecodeRefreshToken.iat * 1000), // convert UNIX to Date
-		expiredAt: new Date(oldDecodeRefreshToken.exp * 1000), // convert UNIX to Date
+		refresh_token: oldRefreshToken["knozichat-cookie"],
+		createdAt: new Date(oldDecodeRefreshToken.iat * 1000),
+		expiredAt: new Date(oldDecodeRefreshToken.exp * 1000),
 	});
 
 	const { accessToken, refreshToken } = await generateAuthToken(user.id);

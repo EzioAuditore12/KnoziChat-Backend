@@ -11,7 +11,7 @@ export const blackListedRefreshTokenTable = pgTable(
 		userId: uuid()
 			.notNull()
 			.references(() => usersTable.id),
-		token: text().notNull(),
+		refresh_token: text().notNull(),
 		createdAt: timestamp().notNull(),
 		expiredAt: timestamp().notNull(),
 	},

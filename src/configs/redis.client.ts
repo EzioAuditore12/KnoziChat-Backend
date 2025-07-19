@@ -1,13 +1,6 @@
 import env from "@/env";
-import { createClient } from "redis";
+import IORedis from "ioredis";
 
-export const redisClient = createClient({
-	url: env.REDIS_URL,
+export const redisClient = new IORedis(env.REDIS_URL, {
+	maxRetriesPerRequest: null,
 });
-
-redisClient
-	.connect()
-	.then(() => console.log("Redis datbaase started"))
-	.catch(console.error);
-
-export const RedisClient = () => redisClient;

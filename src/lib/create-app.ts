@@ -4,6 +4,7 @@ import { requestId } from "hono/request-id";
 import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
 import { defaultHook } from "stoker/openapi";
 
+import { secureHeaders } from "hono/secure-headers";
 import type {
 	AppBindings,
 	AppOpenAPI,
@@ -27,7 +28,11 @@ export function createProtectedRouter() {
 export default function createApp() {
 	const app = createRouter();
 
-	app.use(requestId()).use(pinoLogger()).use(serveEmojiFavicon("😄"));
+	app
+		.use(secureHeaders())
+		.use(requestId())
+		.use(pinoLogger())
+		.use(serveEmojiFavicon("😄"));
 
 	app.notFound(notFound);
 	app.onError(onError);

@@ -13,7 +13,7 @@ export const userProfile = createRoute({
 	tags: ["Profile"],
 	method: "get",
 	path: "/profile",
-	middleware: authMiddleware,
+	middleware: [authMiddleware],
 	responses: {
 		[HTTPStatusCode.OK]: jsonContent(
 			profileResponseValidation,

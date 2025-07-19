@@ -30,19 +30,13 @@ const redisEnvSchema = z.object({
 	REDIS_URL: z.string().url(),
 });
 
-// RabbitMQ config
-const rabbitEnvSchema = z.object({
-	RABBIT_MQ_PROTOCOL: z.enum(["amqp", "amqp"]),
-	RABBIT_MQ_PORT: z.coerce.number().int().positive().default(5672),
-	RABBIT_MQ_HOSTNAME: z.string(),
-	RABBIT_MQ_USERNAME: z.string(),
-	RABBIT_MQ_PASSWORD: z.string(),
-});
-
 // Nodemailer config
 const mailEnvSchema = z.object({
-	NODEMAILER_USERNAME: z.string(),
-	NODEMAILER_PASSWORD: z.string(),
+	SMTP_HOST: z.string(),
+	SMTP_USER: z.string().email(),
+	SMTP_PORT: z.coerce.number().positive(),
+	SMTP_PASS: z.string(),
+	FROM_EMAIL: z.string().email(),
 });
 
 const otpAuthEnvSchema = z.object({
@@ -54,7 +48,6 @@ export const envSchema = serverEnvSchema
 	.merge(jwtEnvSchema)
 	.merge(dbEnvSchema)
 	.merge(redisEnvSchema)
-	.merge(rabbitEnvSchema)
 	.merge(mailEnvSchema)
 	.merge(otpAuthEnvSchema)
 	.refine(

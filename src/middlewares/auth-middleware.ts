@@ -1,5 +1,5 @@
 import { HTTPStatusCode } from "@/lib/constants";
-import { validateToken } from "@/utils/jwt";
+import { validateAccessToken } from "@/utils/jwt";
 import { z } from "@hono/zod-openapi";
 import { createMiddleware } from "hono/factory";
 import { isJWT } from "validator";
@@ -45,7 +45,7 @@ export const authMiddleware = createMiddleware<{
 	}
 
 	const [, token] = authHeader.split(" ");
-	const decoded = await validateToken(token);
+	const decoded = await validateAccessToken(token);
 	if (!decoded) {
 		return c.json(
 			{ message: "Given token is invalid or expired" },
