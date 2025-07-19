@@ -1,6 +1,9 @@
 import { HTTPStatusCode } from "@/lib/constants";
 import type { AppRouteHandler } from "@/lib/types";
-import { validatePassword, generateHashedPassword } from "@/utils/crypto-password";
+import {
+	generateHashedPassword,
+	validatePassword,
+} from "@/utils/crypto-password";
 import { setCookie } from "hono/cookie";
 import type {
 	LoginUser,
