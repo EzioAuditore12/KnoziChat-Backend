@@ -12,7 +12,7 @@ const router = createRouter().openapi(
 						schema: z
 							.object({
 								message: z.string().openapi({
-									example: "Task API",
+									example: "KnoziChat API",
 									type: "string",
 								}),
 							})
@@ -28,7 +28,7 @@ const router = createRouter().openapi(
 	}),
 	(c) => {
 		return c.json({
-			message: "Task API",
+			message: "Knozichat base API",
 		});
 	},
 );
