@@ -3,10 +3,20 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Schema } from "hono";
 import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
 
-import type { AppBindings, AppOpenAPI } from "./types";
+import type {
+	AppBindings,
+	AppOpenAPI,
+	AuthenticatedAppBindings,
+} from "./types";
 
 export function createRouter() {
 	return new OpenAPIHono<AppBindings>({
+		strict: false,
+	});
+}
+
+export function createProtectedRouter() {
+	return new OpenAPIHono<AuthenticatedAppBindings>({
 		strict: false,
 	});
 }

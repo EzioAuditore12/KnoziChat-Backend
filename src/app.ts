@@ -4,13 +4,13 @@ import createApp from "@/lib/create-app";
 const app = createApp();
 
 import index from "@/routes/index.route";
-
-const routes = [index];
+import authRoutes from "./routes/auth/auth.index";
+import user from "./routes/user/user.index";
 
 configureOpenApi(app);
 
-routes.forEach((route) => {
-	app.route("/", route);
-});
+app.route("/", index);
+app.route("/auth", authRoutes);
+app.route("/user", user);
 
 export default app;

@@ -5,7 +5,7 @@ import packageJSON from "../../package.json";
 
 export default function configureOpenAPI(app: AppOpenAPI) {
 	app.doc("/doc", {
-		openapi: "3.1.0",
+		openapi: "3.0.0",
 		info: {
 			version: packageJSON.version,
 			title: "KnoziChatAPI API",
@@ -17,7 +17,7 @@ export default function configureOpenAPI(app: AppOpenAPI) {
 		Scalar((c) => {
 			return {
 				url: "/doc",
-				theme: "laserwave",
+				theme: "deepSpace",
 			};
 		}),
 	);

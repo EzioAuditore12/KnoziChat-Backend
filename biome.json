@@ -7,11 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": []
+		"ignore": ["./src/db/migrations"]
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
+		"indentStyle": "tab",
+		"ignore":["./src/db/migrations"]
 	},
 	"organizeImports": {
 		"enabled": true
