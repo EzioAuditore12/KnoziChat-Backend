@@ -1,29 +1,35 @@
-import { HTTPStatusCode, conflictRequestSchema } from "@/lib/constants";
+import {
+	HTTPStatusCode,
+	conflictRequestSchema,
+	unauthorizedRequestSchema,
+} from "@/lib/constants";
 import { rateLimiter } from "@/middlewares/rate-limiter";
 import {
-	registerUserRequestBodySchema,
+	registerUserFormRequestBodySchema,
+	registerUserFormResponse,
 	registerUserResponseSchema,
+	validateRegisterUserOTPBodyValidation,
 } from "@/validations/auth/register.validation";
 import { createRoute } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 
 //TODO: In this need to add verify otp
 
-export const registerUser = createRoute({
+export const registerUserForm = createRoute({
 	tags: ["Authentication"],
 	path: "/register",
 	method: "post",
 	request: {
 		body: jsonContentRequired(
-			registerUserRequestBodySchema,
+			registerUserFormRequestBodySchema,
 			"Fields required for registeration of user",
 		),
 	},
 	middleware: [rateLimiter({ limit: 5, windowTime: 15 * 60 })],
 	responses: {
-		[HTTPStatusCode.CREATED]: jsonContent(
-			registerUserResponseSchema,
-			"Registeration is successfull and details of the created users are sent",
+		[HTTPStatusCode.ACCEPTED]: jsonContent(
+			registerUserFormResponse,
+			"OTP has been sent successfully",
 		),
 		[HTTPStatusCode.CONFLICT]: jsonContent(
 			conflictRequestSchema,
@@ -32,4 +38,27 @@ export const registerUser = createRoute({
 	},
 });
 
-export type RegisterUser = typeof registerUser;
+export const validateRegisterOTP = createRoute({
+	tags: ["Authentication"],
+	path: "/verify-otp-register",
+	method: "post",
+	request: {
+		body: jsonContentRequired(
+			validateRegisterUserOTPBodyValidation,
+			"Body for otp validation",
+		),
+	},
+	responses: {
+		[HTTPStatusCode.CREATED]: jsonContent(
+			registerUserResponseSchema,
+			"User created successfully",
+		),
+		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
+			unauthorizedRequestSchema,
+			"Invalid or expired OTP",
+		),
+	},
+});
+
+export type RegisterUserForm = typeof registerUserForm;
+export type ValidateRegisterationOTP = typeof validateRegisterOTP;

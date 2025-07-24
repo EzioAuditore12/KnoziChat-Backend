@@ -17,7 +17,7 @@ export default function configureOpenAPI(app: AppOpenAPI) {
 		Scalar((c) => {
 			return {
 				url: "/doc",
-				theme: "deepSpace",
+				theme: "laserwave",
 			};
 		}),
 	);

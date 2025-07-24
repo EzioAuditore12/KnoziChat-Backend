@@ -1,8 +1,8 @@
 import { pinoLogger } from "@/middlewares/pino-logger";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Schema } from "hono";
+import { cors } from "hono/cors";
 import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
-
 import type {
 	AppBindings,
 	AppOpenAPI,
@@ -23,6 +23,8 @@ export function createProtectedRouter() {
 
 export default function createApp() {
 	const app = createRouter();
+
+	app.use(cors({ origin: "*" }));
 
 	app.use(serveEmojiFavicon("😄"));
 	app.use(pinoLogger());

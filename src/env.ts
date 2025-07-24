@@ -8,6 +8,20 @@ const serverEnvSchema = z.object({
 	REDIS_URL: z.string().url(),
 });
 
+const otpAuthConfigSchema = z.object({
+	OTPAUTH_ISSUER: z.string(),
+	OTPAUTH_SECRET: z.string(),
+	OTPAUTH_ALGORITHIM: z.enum(["SHA1", "SHA224", "SHA256", "SHA384", "SHA512"]),
+});
+
+const nodemailerConfigSchema = z.object({
+	NODEMAILER_SMTP_PASS: z.string(),
+	NODEMAILER_SMTP_HOST: z.string(),
+	NODEMAILER_SMTP_USER: z.string().email(),
+	NODEMAILER_SMTP_PORT: z.coerce.number().int().positive(),
+	NODEMAILER_FROM_EMAIL: z.string().email(),
+});
+
 const cryptoPasswordConfigSchema = z
 	.object({
 		CRYPTO_PASSWORD_ALGORITHIM: z.enum([
@@ -44,6 +58,8 @@ const jwtConfigSchema = z.object({
 });
 
 const envSchema = serverEnvSchema
+	.and(otpAuthConfigSchema)
+	.and(nodemailerConfigSchema)
 	.and(cryptoPasswordConfigSchema)
 	.and(jwtConfigSchema);
 

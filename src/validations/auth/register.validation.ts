@@ -2,7 +2,8 @@ import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
 import { isStrongPassword } from "validator";
 
-export const registerUserRequestBodySchema = UsersInsertSchema.extend({
+//Form
+export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
 	email: z.string().email().max(254),
 	password: z
 		.string()
@@ -25,7 +26,22 @@ export const registerUserRequestBodySchema = UsersInsertSchema.extend({
 	profilePicture: z.string().url().optional(),
 }).strict();
 
-export type registerUserInputs = z.infer<typeof registerUserRequestBodySchema>;
+export const registerUserFormResponse = z.object({
+	success: z.boolean(),
+	message: z.string(),
+	otpDuration: z.number(),
+});
+
+export interface RegisterUserInputs extends z.infer<typeof registerUserFormRequestBodySchema>{
+	otp:string
+}
+//Validate-OTP
+export const validateRegisterUserOTPBodyValidation = z
+	.object({
+		email: z.string().email(),
+		otp: z.coerce.number().max(999999).nonnegative(),
+	})
+	.strict();
 
 export const registerUserResponseSchema = z.object({
 	success: z.boolean(),
