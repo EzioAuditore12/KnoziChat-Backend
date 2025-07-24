@@ -7,12 +7,12 @@ import type { AppRouteHandler } from "@/lib/types";
 import { generateHashedPassword } from "@/utils/crypto-password";
 import { generateAuthToken } from "@/utils/jwt";
 import { otpHelper } from "@/utils/otp-auth";
+import type { RegisterUserInputs } from "@/validations/auth/register.validation";
 import { eq } from "drizzle-orm";
 import type {
 	RegisterUserForm,
 	ValidateRegisterationOTP,
 } from "./register.route";
-import type { RegisterUserInputs } from "@/validations/auth/register.validation";
 
 //TODO: Need to add options for fallback of user profile photo, for now assuming it to be null
 
@@ -32,8 +32,8 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 			HTTPStatusCode.CONFLICT,
 		);
 
-		const otp = Math.floor(100000 + Math.random() * 900000).toString();
-		const period=300
+	const otp = Math.floor(100000 + Math.random() * 900000).toString();
+	const period = 300;
 
 	// 10mins
 	await redisClient.setex(
@@ -82,7 +82,7 @@ export const validateRegisterationOTP: AppRouteHandler<
 		firstName,
 		lastName,
 		password,
-	} = JSON.parse(storedUserData) as RegisterUserInputs
+	} = JSON.parse(storedUserData) as RegisterUserInputs;
 
 	if (otp !== Number(storedOtp)) {
 		return c.json({ message: "Invalid OTP" }, HTTPStatusCode.UNAUTHORIZED);

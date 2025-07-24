@@ -32,8 +32,9 @@ export const registerUserFormResponse = z.object({
 	otpDuration: z.number(),
 });
 
-export interface RegisterUserInputs extends z.infer<typeof registerUserFormRequestBodySchema>{
-	otp:string
+export interface RegisterUserInputs
+	extends z.infer<typeof registerUserFormRequestBodySchema> {
+	otp: string;
 }
 //Validate-OTP
 export const validateRegisterUserOTPBodyValidation = z

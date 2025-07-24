@@ -9,7 +9,10 @@ import { registerHandler, registerRoute } from "./registeration/register.index";
 
 const authRoutes = createRouter()
 	.openapi(registerRoute.registerUserForm, registerHandler.registerUserForm)
-	.openapi(registerRoute.validateRegisterOTP,registerHandler.validateRegisterationOTP)
+	.openapi(
+		registerRoute.validateRegisterOTP,
+		registerHandler.validateRegisterationOTP,
+	)
 	.openapi(loginRoute.loginUser, loginHandler.loginUser)
 	.openapi(
 		regenerateTokensRoute.regenerateTokens,
