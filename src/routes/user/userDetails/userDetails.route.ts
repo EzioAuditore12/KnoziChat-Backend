@@ -49,8 +49,7 @@ export const updateUserProfilePhoto = createRoute({
 		authMiddleware,
 		honoMulter({
 			fieldNames: ["photo"],
-			allowedTypes: ["image/png"],
-			maxSize: 26 * 1024 * 1024, // 5MB
+			maxSize: 120 * 1024 * 1024, // 5MB
 			uploadToAppwrite: true, // Enable Appwrite upload
 		}),
 	],
