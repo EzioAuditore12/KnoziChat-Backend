@@ -6,7 +6,6 @@ import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
 import { generateHashedPassword } from "@/utils/crypto-password";
 import { generateAuthToken } from "@/utils/jwt";
-import { otpHelper } from "@/utils/otp-auth";
 import type { RegisterUserInputs } from "@/validations/auth/register.validation";
 import { eq } from "drizzle-orm";
 import type {

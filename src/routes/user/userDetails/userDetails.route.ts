@@ -50,7 +50,7 @@ export const updateUserProfilePhoto = createRoute({
 		honoMulter({
 			fieldNames: ["photo"],
 			allowedTypes: ["image/png"],
-			maxSize: 5 * 1024 * 1024, // 5MB
+			maxSize: 26 * 1024 * 1024, // 5MB
 			uploadToAppwrite: true, // Enable Appwrite upload
 		}),
 	],
