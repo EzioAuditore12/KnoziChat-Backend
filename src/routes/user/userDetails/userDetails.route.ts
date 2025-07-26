@@ -54,14 +54,14 @@ export const updateUserProfilePhoto = createRoute({
 			uploadToAppwrite: true, // Enable Appwrite upload
 		}),
 	],
-	request:{
-		body:{
-			content:{
-				"multipart/form-data":{
+	request: {
+		body: {
+			content: {
+				"multipart/form-data": {
 					schema: updateProfileRequestBody,
-				}
-			}
-		}
+				},
+			},
+		},
 	},
 	responses: {
 		[HTTPStatusCode.ACCEPTED]: jsonContent(

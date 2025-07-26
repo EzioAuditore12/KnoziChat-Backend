@@ -38,7 +38,7 @@ interface HonoMulterProps {
 	fileNameConvertor?: (originalFileName: string) => string;
 	fieldNames?: string[];
 	requireAllFields?: boolean;
-	uploadToAppwrite?: boolean; 
+	uploadToAppwrite?: boolean;
 }
 
 export function honoMulter({
