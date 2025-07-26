@@ -21,3 +21,9 @@ export const loginUserResponseSchema = z.object({
 		refreshToken: z.string(),
 	}),
 });
+
+export const forgetPasswordRequestBody = z
+	.object({
+		email: z.string().email(),
+	})
+	.strict();

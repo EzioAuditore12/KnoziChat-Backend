@@ -1,14 +1,14 @@
 import {
 	HTTPStatusCode,
 	notFoundSchema,
-	tooManyRequestSchema,
 	unauthorizedRequestSchema,
 } from "@/lib/constants";
 import { rateLimiter } from "@/middlewares/rate-limiter";
 import {
+	forgetPasswordRequestBody,
 	loginUserRequestBodySchema,
 	loginUserResponseSchema,
-} from "@/validations/auth/login.validation";
+} from "@/validations/auth/login/loginUser.validation";
 import { createRoute } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 

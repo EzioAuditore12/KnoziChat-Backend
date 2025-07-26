@@ -57,11 +57,19 @@ const jwtConfigSchema = z.object({
 	REFRESH_EXPIRATION_DURATION: z.coerce.number().positive(),
 });
 
+const appWriteConfigSchema = z.object({
+	APPWRITE_ENDPOINT: z.string().url(),
+	APPWRITE_PROJECT_ID: z.string(),
+	APPWRITE_API_KEY: z.string(),
+	APPWRITE_BUCKET_ID: z.string(),
+});
+
 const envSchema = serverEnvSchema
 	.and(otpAuthConfigSchema)
 	.and(nodemailerConfigSchema)
 	.and(cryptoPasswordConfigSchema)
-	.and(jwtConfigSchema);
+	.and(jwtConfigSchema)
+	.and(appWriteConfigSchema);
 
 const env = envSchema.parse(process.env);
 

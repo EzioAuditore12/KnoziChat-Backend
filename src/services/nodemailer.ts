@@ -25,10 +25,8 @@ export const sendEmail = async ({ toMail, subject, body }: SendEmailProps) => {
 			subject: subject,
 			html: body,
 		});
-		console.log(info);
 		return true;
 	} catch (error) {
-		console.log(error);
 		return false;
 	}
 };

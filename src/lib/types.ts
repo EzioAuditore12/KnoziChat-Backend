@@ -1,4 +1,5 @@
 import type { AuthMiddlewareBindings } from "@/middlewares/auth-middleware";
+import type { UploadedFile } from "@/middlewares/file-uploader";
 import type { PinoLogger } from "@/middlewares/pino-logger";
 import type { OpenAPIHono, RouteConfig, RouteHandler } from "@hono/zod-openapi";
 import type { Schema } from "hono";
@@ -6,6 +7,8 @@ import type { Schema } from "hono";
 export interface AppBindings {
 	Variables: {
 		logger: PinoLogger;
+		uploadedFiles?: Record<string, UploadedFile>;
+		uploadedFields?: Record<string, string>;
 	};
 }
 

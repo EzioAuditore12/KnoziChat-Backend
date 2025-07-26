@@ -28,3 +28,7 @@ export const conflictRequestSchema = createMessageObjectSchema(
 export const forbiddenRequestSchema = createMessageObjectSchema(
 	HTTPStatusPhrases.FORBIDDEN,
 );
+
+export const notAcceptedRequestSchema = createMessageObjectSchema(
+	HTTPStatusPhrases.NOT_ACCEPTABLE,
+);
