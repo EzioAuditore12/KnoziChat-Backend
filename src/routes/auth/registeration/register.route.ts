@@ -3,6 +3,7 @@ import {
 	conflictRequestSchema,
 	unauthorizedRequestSchema,
 } from "@/lib/constants";
+import { honoMulter } from "@/middlewares/hono-multer";
 import { rateLimiter } from "@/middlewares/rate-limiter";
 import {
 	registerUserFormRequestBodySchema,
@@ -12,7 +13,6 @@ import {
 } from "@/validations/auth/register.validation";
 import { createRoute } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { honoMulter } from "@/middlewares/hono-multer";
 
 //TODO: Need to change middleware of profilePicture to run after no error is detected
 
@@ -20,21 +20,24 @@ export const registerUserForm = createRoute({
 	tags: ["Authentication"],
 	path: "/register",
 	method: "post",
-	middleware: [rateLimiter({ limit: 5, windowTime: 15 * 60 }),honoMulter({
-		fieldNames:["profilePicture"],
-		allowedTypes:["image/png", "image/jpeg"],
-		maxSize:10 * 1024 * 1024,
-		uploadToAppwrite:true
-	})],
+	middleware: [
+		rateLimiter({ limit: 5, windowTime: 15 * 60 }),
+		honoMulter({
+			fieldNames: ["profilePicture"],
+			allowedTypes: ["image/png", "image/jpeg"],
+			maxSize: 10 * 1024 * 1024,
+			uploadToAppwrite: true,
+		}),
+	],
 	request: {
 		body: {
-			content:{
+			content: {
 				"multipart/form-data": {
 					schema: registerUserFormRequestBodySchema,
-					description: "Registeration Schema"
-				}
-			}
-		}
+					description: "Registeration Schema",
+				},
+			},
+		},
 	},
 	responses: {
 		[HTTPStatusCode.ACCEPTED]: jsonContent(

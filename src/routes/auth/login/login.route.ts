@@ -39,5 +39,4 @@ export const loginUser = createRoute({
 	},
 });
 
-
 export type LoginUser = typeof loginUser;

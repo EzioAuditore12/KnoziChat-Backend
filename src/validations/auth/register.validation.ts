@@ -1,7 +1,7 @@
+import { File } from "node:buffer";
 import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
 import { isStrongPassword } from "validator";
-import { File } from "node:buffer";
 
 //Form
 export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
@@ -24,15 +24,16 @@ export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
 					"Password should contain minimum one uppercase, number, symbol and lowercase",
 			},
 		),
-	profilePicture: z.instanceof(File)
-			.refine((file) => ["image/png", "image/jpeg"].includes(file.type), {
-				message: "Only PNG and JPEG files are allowed",
-			}),
+	profilePicture: z
+		.instanceof(File)
+		.refine((file) => ["image/png", "image/jpeg"].includes(file.type), {
+			message: "Only PNG and JPEG files are allowed",
+		}),
 }).strict();
 
 export const registerUserFormResponse = z.object({
 	success: z.boolean(),
-	email:z.string().email(),
+	email: z.string().email(),
 	message: z.string(),
 	otpDuration: z.number(),
 });

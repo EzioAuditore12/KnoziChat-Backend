@@ -4,6 +4,7 @@ import { addEmailJob } from "@/jobs/sendEmail";
 import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
+import type { UploadedFile } from "@/middlewares/hono-multer";
 import { generateHashedPassword } from "@/utils/crypto-password";
 import { generateAuthToken } from "@/utils/jwt";
 import { otpHelper } from "@/utils/otp-auth";
@@ -13,7 +14,6 @@ import type {
 	RegisterUserForm,
 	ValidateRegisterationOTP,
 } from "./register.route";
-import type { UploadedFile } from "@/middlewares/hono-multer";
 
 //TODO: Need to change middleware to run after if no errors found
 
@@ -33,11 +33,14 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 			HTTPStatusCode.CONFLICT,
 		);
 
-	const {profilePicture}=c.get("uploadedFiles") as Record<string,UploadedFile>
+	const { profilePicture } = c.get("uploadedFiles") as Record<
+		string,
+		UploadedFile
+	>;
 
-	const profilePictureURL=profilePicture.appwrite?.viewUrl
+	const profilePictureURL = profilePicture.appwrite?.viewUrl;
 
-	console.log(profilePictureURL, typeof profilePictureURL)
+	console.log(profilePictureURL, typeof profilePictureURL);
 
 	const otp = Math.floor(100000 + Math.random() * 900000).toString();
 	const period = 300;
@@ -51,7 +54,7 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 			firstName,
 			lastName,
 			password,
-			profilePicture:profilePictureURL,
+			profilePicture: profilePictureURL,
 			timestamp: Date.now(),
 		}),
 	);
@@ -65,7 +68,7 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 	return c.json(
 		{
 			success: true,
-			email:email,
+			email: email,
 			message: "OTP sent successfully",
 			otpDuration: period,
 		},
@@ -91,7 +94,7 @@ export const validateRegisterationOTP: AppRouteHandler<
 		firstName,
 		lastName,
 		password,
-		profilePicture
+		profilePicture,
 	} = JSON.parse(storedUserData) as RegisterUserInputs;
 
 	if (otp !== Number(storedOtp)) {
@@ -107,7 +110,8 @@ export const validateRegisterationOTP: AppRouteHandler<
 			firstName,
 			lastName,
 			password: hashedPassword,
-			profilePicture: typeof profilePicture === "string" ? profilePicture : null
+			profilePicture:
+				typeof profilePicture === "string" ? profilePicture : null,
 		})
 		.returning({
 			id: usersTable.id,
