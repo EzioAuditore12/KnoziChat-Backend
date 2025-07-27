@@ -12,20 +12,30 @@ import {
 } from "@/validations/auth/register.validation";
 import { createRoute } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
+import { honoMulter } from "@/middlewares/hono-multer";
 
-//TODO: In this need to add verify otp
+//TODO: Need to change middleware of profilePicture to run after no error is detected
 
 export const registerUserForm = createRoute({
 	tags: ["Authentication"],
 	path: "/register",
 	method: "post",
+	middleware: [rateLimiter({ limit: 5, windowTime: 15 * 60 }),honoMulter({
+		fieldNames:["profilePicture"],
+		allowedTypes:["image/png", "image/jpeg"],
+		maxSize:10 * 1024 * 1024,
+		uploadToAppwrite:true
+	})],
 	request: {
-		body: jsonContentRequired(
-			registerUserFormRequestBodySchema,
-			"Fields required for registeration of user",
-		),
+		body: {
+			content:{
+				"multipart/form-data": {
+					schema: registerUserFormRequestBodySchema,
+					description: "Registeration Schema"
+				}
+			}
+		}
 	},
-	middleware: [rateLimiter({ limit: 5, windowTime: 15 * 60 })],
 	responses: {
 		[HTTPStatusCode.ACCEPTED]: jsonContent(
 			registerUserFormResponse,
