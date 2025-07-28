@@ -19,7 +19,7 @@ export interface SendEmailProps {
 
 export const sendEmail = async ({ toMail, subject, body }: SendEmailProps) => {
 	try {
-		const info = await tranporter.sendMail({
+		await tranporter.sendMail({
 			from: env.NODEMAILER_FROM_EMAIL,
 			to: toMail,
 			subject: subject,

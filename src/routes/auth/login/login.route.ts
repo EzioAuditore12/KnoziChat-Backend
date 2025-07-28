@@ -56,9 +56,7 @@ export const forgetPasswordTrigger = createRoute({
 	path: "/forget-password-trigger",
 	request: {
 		body: jsonContentRequired(
-			z.object({
-				email: z.string().email(),
-			}),
+			forgetPasswordRequestBody,
 			"Forgotten password request",
 		),
 	},

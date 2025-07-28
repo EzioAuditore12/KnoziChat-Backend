@@ -1,7 +1,6 @@
-import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
-import { addEmailJob } from "@/jobs/sendEmail";
+import { addSMSJob } from "@/jobs/sendSMS";
 import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
@@ -10,6 +9,7 @@ import {
 	validatePassword,
 } from "@/utils/crypto-password";
 import { generateAuthToken } from "@/utils/jwt";
+import { randomUUIDv7 } from "bun";
 import { eq } from "drizzle-orm";
 import type {
 	ChangeUserPasswordWithLogin,
@@ -20,12 +20,12 @@ import type {
 export const forgotPasswordTrigger: AppRouteHandler<
 	ForgotPasswordTrigger
 > = async (c) => {
-	const { email } = c.req.valid("json");
+	const { phoneNumber } = c.req.valid("json");
 
 	const [user] = await db
 		.select()
 		.from(usersTable)
-		.where(eq(usersTable.email, email));
+		.where(eq(usersTable.phoneNumber, phoneNumber));
 
 	if (!user)
 		return c.json(
@@ -36,28 +36,35 @@ export const forgotPasswordTrigger: AppRouteHandler<
 	const otp = Math.floor(100000 + Math.random() * 900000).toString();
 	const period = 600;
 
-	const requestToken = randomUUID();
+	const requestToken = randomUUIDv7();
 
 	await redisClient.setex(
-		`otp:forgot-password:${email}`,
+		`otp:forgot-password:${phoneNumber}`,
 		period,
 		JSON.stringify({
 			otp,
-			email,
+			phoneNumber,
 			requestToken,
 		}),
 	);
 
+	await addSMSJob({
+		recipient: phoneNumber,
+		message: `OTP for changing password is ${otp}`,
+	});
+
+	/*
 	await addEmailJob({
 		toMail: email,
 		subject: "Otp for changing password",
 		body: `<h1>Your OTP is: ${otp}</h1><p>Valid for 5 minutes.</p>`,
 	});
+	*/
 
 	return c.json(
 		{
 			status: true,
-			email: email,
+			phoneNumber,
 			requestToken,
 			message: "Otp sent successfully to email",
 			otpDuration: period,
@@ -69,10 +76,10 @@ export const forgotPasswordTrigger: AppRouteHandler<
 export const verifyChangeUserPasswordRequest: AppRouteHandler<
 	VerifyChangeUserPassword
 > = async (c) => {
-	const { email, otp, requestToken } = c.req.valid("json");
+	const { phoneNumber, otp, requestToken } = c.req.valid("json");
 
 	const storedCredentials = await redisClient.get(
-		`otp:forgot-password:${email}`,
+		`otp:forgot-password:${phoneNumber}`,
 	);
 
 	if (!storedCredentials)
@@ -83,17 +90,17 @@ export const verifyChangeUserPasswordRequest: AppRouteHandler<
 
 	const {
 		otp: storedOTP,
-		email: storedEmail,
+		phoneNumber: storedPhoneNumber,
 		requestToken: storedRequestToken,
 	} = JSON.parse(storedCredentials) as {
 		otp: string;
-		email: string;
+		phoneNumber: string;
 		requestToken: string;
 	};
 
 	if (
 		otp !== Number(storedOTP) ||
-		email !== storedEmail ||
+		phoneNumber !== storedPhoneNumber ||
 		requestToken !== storedRequestToken
 	)
 		return c.json(
@@ -104,16 +111,16 @@ export const verifyChangeUserPasswordRequest: AppRouteHandler<
 			HTTPStatusCode.NOT_ACCEPTABLE,
 		);
 
-	await redisClient.del(`otp:forgot-password:${email}`);
+	await redisClient.del(`otp:forgot-password:${phoneNumber}`);
 
-	const verificationRequestToken = randomUUID();
+	const verificationRequestToken = randomUUIDv7();
 
 	await redisClient.setex(
-		`verifiedPasswordRequest:${email}`,
+		`verifiedPasswordRequest:${phoneNumber}`,
 		600,
 		JSON.stringify({
 			verified: true,
-			email,
+			phoneNumber,
 			verificationRequestToken,
 		}),
 	);
@@ -122,7 +129,7 @@ export const verifyChangeUserPasswordRequest: AppRouteHandler<
 		{
 			status: true,
 			message: "Request is authenticated",
-			email,
+			phoneNumber,
 			verificationRequestToken,
 		},
 		HTTPStatusCode.ACCEPTED,
@@ -132,10 +139,11 @@ export const verifyChangeUserPasswordRequest: AppRouteHandler<
 export const changeUserPasswordWithLogin: AppRouteHandler<
 	ChangeUserPasswordWithLogin
 > = async (c) => {
-	const { email, newPassword, verificationRequestToken } = c.req.valid("json");
+	const { phoneNumber, newPassword, verificationRequestToken } =
+		c.req.valid("json");
 
 	const storedRequestStatus = await redisClient.get(
-		`verifiedPasswordRequest:${email}`,
+		`verifiedPasswordRequest:${phoneNumber}`,
 	);
 
 	if (!storedRequestStatus)
@@ -146,17 +154,17 @@ export const changeUserPasswordWithLogin: AppRouteHandler<
 
 	const {
 		verified,
-		email: storedEmail,
+		phoneNumber: storedPhoneNumber,
 		verificationRequestToken: storedVerificationRequestToken,
 	} = JSON.parse(storedRequestStatus) as {
 		verified: boolean;
-		email: string;
+		phoneNumber: string;
 		verificationRequestToken: string;
 	};
 
 	if (
 		!verified ||
-		storedEmail !== email ||
+		storedPhoneNumber !== phoneNumber ||
 		storedVerificationRequestToken !== verificationRequestToken
 	)
 		return c.json(
@@ -167,7 +175,7 @@ export const changeUserPasswordWithLogin: AppRouteHandler<
 	const [user] = await db
 		.select()
 		.from(usersTable)
-		.where(eq(usersTable.email, email));
+		.where(eq(usersTable.phoneNumber, phoneNumber));
 
 	const samePassword = await validatePassword(newPassword, user.password);
 
@@ -180,11 +188,14 @@ export const changeUserPasswordWithLogin: AppRouteHandler<
 			HTTPStatusCode.CONFLICT,
 		);
 
-	await redisClient.del(`verifiedPasswordRequest:${email}`);
+	await redisClient.del(`verifiedPasswordRequest:${phoneNumber}`);
 
 	const newHashedPassword = await generateHashedPassword(newPassword);
 
-	await db.update(usersTable).set({ password: newHashedPassword });
+	await db
+		.update(usersTable)
+		.set({ password: newHashedPassword })
+		.where(eq(usersTable.phoneNumber, phoneNumber));
 
 	const tokens = await generateAuthToken(user.id);
 
@@ -197,6 +208,7 @@ export const changeUserPasswordWithLogin: AppRouteHandler<
 				firstName: user.firstName,
 				lastName: user.lastName,
 				profilePicture: user.profilePicture,
+				phoneNumber: user.phoneNumber,
 			},
 			tokens,
 			message: "User logged in successfully",

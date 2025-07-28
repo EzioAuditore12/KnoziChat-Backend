@@ -22,6 +22,12 @@ const nodemailerConfigSchema = z.object({
 	NODEMAILER_FROM_EMAIL: z.string().email(),
 });
 
+const textBeeConfigSchema = z.object({
+	TEXTBEE_BASE_URL: z.string().url(),
+	TEXTBEE_API_KEY: z.string(),
+	TEXTBEE_DEVICE_ID: z.string(),
+});
+
 const cryptoPasswordConfigSchema = z
 	.object({
 		CRYPTO_PASSWORD_ALGORITHIM: z.enum([
@@ -67,6 +73,7 @@ const appWriteConfigSchema = z.object({
 const envSchema = serverEnvSchema
 	.and(otpAuthConfigSchema)
 	.and(nodemailerConfigSchema)
+	.and(textBeeConfigSchema)
 	.and(cryptoPasswordConfigSchema)
 	.and(jwtConfigSchema)
 	.and(appWriteConfigSchema);

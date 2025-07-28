@@ -1,34 +1,58 @@
 import { UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
-import { isStrongPassword } from "validator";
+import { isMobilePhone, isStrongPassword } from "validator";
 
 export const forgetPasswordRequestBody = z.object({
-	email: z.string().email().max(254),
+	phoneNumber: z
+		.string()
+		.max(20)
+		.refine(
+			(input) => {
+				return isMobilePhone(input);
+			},
+			{ message: "Entered phone number is not valid" },
+		),
 });
 
 export const forgetPasswordRequestResponse = z.object({
 	status: z.boolean(),
 	message: z.string(),
-	email: z.string().email(),
+	phoneNumber: z.string(),
 	otpDuration: z.number(),
 	requestToken: z.string().uuid(),
 });
 
 export const verifyChangePasswordRequestBody = z.object({
-	email: z.string().email(),
-	otp: z.coerce.number().max(9999),
+	phoneNumber: z
+		.string()
+		.max(20)
+		.refine(
+			(input) => {
+				return isMobilePhone(input);
+			},
+			{ message: "Entered phone number is not valid" },
+		),
+	otp: z.coerce.number().max(999999),
 	requestToken: z.string().uuid(),
 });
 
 export const verifyChangePasswordResponse = z.object({
 	status: z.boolean(),
 	message: z.string(),
-	email: z.string().email(),
+	phoneNumber: z.string(),
 	verificationRequestToken: z.string().uuid(),
 });
 
 export const changeUserPasswordRequestBody = z.object({
-	email: z.string(),
+	phoneNumber: z
+		.string()
+		.max(20)
+		.refine(
+			(input) => {
+				return isMobilePhone(input);
+			},
+			{ message: "Entered phone number is not valid" },
+		),
 	newPassword: z
 		.string()
 		.max(64)

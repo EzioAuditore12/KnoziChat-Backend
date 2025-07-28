@@ -1,7 +1,7 @@
 import { createJobWorker } from "@/lib/create-job-worker";
-import { type SendEmailProps, sendEmail } from "@/services/nodemailer";
+import { type SendEmailProps, sendEmail } from "@/providers/nodemailer";
 
-const { queue, worker } = createJobWorker({
+const { queue: emailQueue, worker: emailWorker } = createJobWorker({
 	queueName: "email-queue",
 	jobProcessor: async (job) => {
 		const { toMail, subject, body } = job.data;
@@ -15,10 +15,8 @@ const { queue, worker } = createJobWorker({
 	},
 });
 
-export const emailQueue = queue;
-export const emailWorker = worker;
+export { emailQueue, emailWorker };
 
-// Or export a function to add email jobs
 export const addEmailJob = async (emailData: SendEmailProps) => {
 	return emailQueue.add("send-email", emailData);
 };

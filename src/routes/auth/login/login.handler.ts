@@ -8,12 +8,12 @@ import { eq } from "drizzle-orm";
 import type { LoginUser } from "./login.route";
 
 export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
-	const { email, password } = c.req.valid("json");
+	const { phoneNumber, password } = c.req.valid("json");
 
 	const [user] = await db
 		.select()
 		.from(usersTable)
-		.where(eq(usersTable.email, email));
+		.where(eq(usersTable.phoneNumber, phoneNumber));
 
 	if (!user)
 		return c.json(
@@ -38,7 +38,8 @@ export const loginUser: AppRouteHandler<LoginUser> = async (c) => {
 			email: user.email,
 			firstName: user.firstName,
 			lastName: user.lastName,
-			profilePicture: null,
+			profilePicture: user.profilePicture,
+			phoneNumber: user.phoneNumber,
 		},
 		tokens,
 		message: "User logged in successfully",

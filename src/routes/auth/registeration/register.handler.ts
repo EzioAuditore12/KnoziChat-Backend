@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
-import { addEmailJob } from "@/jobs/sendEmail";
+import { addSMSJob } from "@/jobs/sendSMS";
 import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
@@ -9,6 +9,7 @@ import { generateHashedPassword } from "@/utils/crypto-password";
 import { generateAuthToken } from "@/utils/jwt";
 import { otpHelper } from "@/utils/otp-auth";
 import type { RegisterUserInputs } from "@/validations/auth/register.validation";
+import { randomUUIDv7 } from "bun";
 import { eq } from "drizzle-orm";
 import type {
 	RegisterUserForm,
@@ -20,16 +21,16 @@ import type {
 export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 	c,
 ) => {
-	const { firstName, lastName, email, password } = c.req.valid("form");
+	const { firstName, lastName, password, phoneNumber } = c.req.valid("form");
 
 	const [existingUser] = await db
 		.select()
 		.from(usersTable)
-		.where(eq(usersTable.email, email));
+		.where(eq(usersTable.phoneNumber, phoneNumber));
 
 	if (existingUser)
 		return c.json(
-			{ message: "User with this email already exists" },
+			{ message: "User with this phone number already exists" },
 			HTTPStatusCode.CONFLICT,
 		);
 
@@ -45,30 +46,34 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 	const otp = Math.floor(100000 + Math.random() * 900000).toString();
 	const period = 300;
 
+	const registerationToken = randomUUIDv7();
+
 	// 10mins
 	await redisClient.setex(
-		`otp:register:${email}`,
+		`otp:register:${phoneNumber}`,
 		600,
 		JSON.stringify({
 			otp,
 			firstName,
 			lastName,
 			password,
+			registerationToken,
+			phoneNumber,
 			profilePicture: profilePictureURL,
 			timestamp: Date.now(),
 		}),
 	);
 
-	await addEmailJob({
-		toMail: email,
-		subject: "Verify your registration",
-		body: `<h1>Your OTP is: ${otp}</h1><p>Valid for 5 minutes.</p>`,
+	await addSMSJob({
+		recipient: phoneNumber,
+		message: `OTP for registeration is ${otp}`,
 	});
 
 	return c.json(
 		{
 			success: true,
-			email: email,
+			registerationToken,
+			phoneNumber,
 			message: "OTP sent successfully",
 			otpDuration: period,
 		},
@@ -79,9 +84,9 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 export const validateRegisterationOTP: AppRouteHandler<
 	ValidateRegisterationOTP
 > = async (c) => {
-	const { email, otp } = c.req.valid("json");
+	const { otp, phoneNumber, registerationToken } = c.req.valid("json");
 
-	const storedUserData = await redisClient.get(`otp:register:${email}`);
+	const storedUserData = await redisClient.get(`otp:register:${phoneNumber}`);
 
 	if (!storedUserData)
 		return c.json(
@@ -95,9 +100,15 @@ export const validateRegisterationOTP: AppRouteHandler<
 		lastName,
 		password,
 		profilePicture,
+		phoneNumber: storedPhoneNumber,
+		registerationToken: storedRegisterationToken,
 	} = JSON.parse(storedUserData) as RegisterUserInputs;
 
-	if (otp !== Number(storedOtp)) {
+	if (
+		otp !== Number(storedOtp) ||
+		storedPhoneNumber !== phoneNumber ||
+		storedRegisterationToken !== registerationToken
+	) {
 		return c.json({ message: "Invalid OTP" }, HTTPStatusCode.UNAUTHORIZED);
 	}
 
@@ -106,7 +117,7 @@ export const validateRegisterationOTP: AppRouteHandler<
 	const [createdUser] = await db
 		.insert(usersTable)
 		.values({
-			email,
+			phoneNumber,
 			firstName,
 			lastName,
 			password: hashedPassword,
@@ -119,9 +130,10 @@ export const validateRegisterationOTP: AppRouteHandler<
 			firstName: usersTable.firstName,
 			lastName: usersTable.lastName,
 			profilePicture: usersTable.profilePicture,
+			phoneNumber: usersTable.phoneNumber,
 		});
 
-	await redisClient.del(`otp:register:${email}`);
+	await redisClient.del(`otp:register:${phoneNumber}`);
 
 	const tokens = await generateAuthToken(createdUser.id);
 

@@ -1,12 +1,21 @@
 import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
+import { isMobilePhone } from "validator";
 
 export const loginUserRequestBodySchema = UsersInsertSchema.pick({
-	email: true,
+	phoneNumber: true,
 	password: true,
 })
 	.extend({
-		email: z.string().email().max(254),
+		phoneNumber: z
+			.string()
+			.max(20)
+			.refine(
+				(input) => {
+					return isMobilePhone(input);
+				},
+				{ message: "Entered phone number is not valid" },
+			),
 		password: z.string().max(64),
 	})
 	.strict();
@@ -24,6 +33,14 @@ export const loginUserResponseSchema = z.object({
 
 export const forgetPasswordRequestBody = z
 	.object({
-		email: z.string().email(),
+		phoneNumber: z
+			.string()
+			.max(20)
+			.refine(
+				(input) => {
+					return isMobilePhone(input);
+				},
+				{ message: "Entered phone number is not valid" },
+			),
 	})
 	.strict();

@@ -1,11 +1,10 @@
 import { File } from "node:buffer";
 import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
-import { isStrongPassword } from "validator";
+import { isMobilePhone, isStrongPassword } from "validator";
 
 //Form
 export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
-	email: z.string().email().max(254),
 	password: z
 		.string()
 		.max(64)
@@ -24,29 +23,49 @@ export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
 					"Password should contain minimum one uppercase, number, symbol and lowercase",
 			},
 		),
+	phoneNumber: z.string().refine(
+		(input) => {
+			return isMobilePhone(input);
+		},
+		{
+			message: "Entered field is not a mobile number",
+		},
+	),
 	profilePicture: z
 		.instanceof(File)
 		.refine((file) => ["image/png", "image/jpeg"].includes(file.type), {
 			message: "Only PNG and JPEG files are allowed",
 		}),
-}).strict();
+})
+	.omit({ email: true })
+	.strict();
 
 export const registerUserFormResponse = z.object({
 	success: z.boolean(),
-	email: z.string().email(),
+	phoneNumber: z.string(),
 	message: z.string(),
+	registerationToken: z.string().uuid(),
 	otpDuration: z.number(),
 });
 
 export interface RegisterUserInputs
 	extends z.infer<typeof registerUserFormRequestBodySchema> {
 	otp: string;
+	registerationToken: string;
 }
 //Validate-OTP
 export const validateRegisterUserOTPBodyValidation = z
 	.object({
-		email: z.string().email(),
+		phoneNumber: z.string().refine(
+			(input) => {
+				return isMobilePhone(input);
+			},
+			{
+				message: "Entered field is not a mobile number",
+			},
+		),
 		otp: z.coerce.number().max(999999).nonnegative(),
+		registerationToken: z.string().uuid(),
 	})
 	.strict();
 

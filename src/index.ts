@@ -3,6 +3,7 @@ import env from "./env";
 
 //Workers
 import "@/jobs/sendEmail";
+import "@/jobs/sendSMS";
 
 const server = Bun.serve({
 	port: env.PORT,
