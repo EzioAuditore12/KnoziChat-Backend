@@ -1,5 +1,5 @@
 import { createJobWorker } from "@/lib/create-job-worker";
-import { sendSMS, type sendSMSProps } from "@/providers/textbeeSMS";
+import { sendSMS, type sendSMSProps } from "@/providers/textBeeSMS";
 
 const { queue: smsQueue, worker: smsWorker } = createJobWorker({
 	queueName: "sms-queue",

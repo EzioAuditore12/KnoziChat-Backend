@@ -22,14 +22,18 @@ export const userProfile: AuthenticatedAppRouteHandler<GetUserDetails> = async (
 	if (!user)
 		return c.json({ message: "User doesn't exist" }, HTTPStatusCode.NOT_FOUND);
 
-	return c.json({
-		id: user.id,
-		firstName: user.firstName,
-		lastName: user.lastName,
-		email: user.email,
-		profilePicture: user.profilePicture,
-		message: "Finally done",
-	});
+	return c.json(
+		{
+			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			phoneNumber: user.phoneNumber,
+			profilePicture: user.profilePicture,
+			message: "finally send",
+		},
+		HTTPStatusCode.OK,
+	);
 };
 
 export const updateUserProfilePhoto: AuthenticatedAppRouteHandler<

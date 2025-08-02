@@ -30,17 +30,3 @@ export const loginUserResponseSchema = z.object({
 		refreshToken: z.string(),
 	}),
 });
-
-export const forgetPasswordRequestBody = z
-	.object({
-		phoneNumber: z
-			.string()
-			.max(20)
-			.refine(
-				(input) => {
-					return isMobilePhone(input);
-				},
-				{ message: "Entered phone number is not valid" },
-			),
-	})
-	.strict();

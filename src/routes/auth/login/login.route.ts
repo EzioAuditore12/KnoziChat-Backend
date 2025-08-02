@@ -9,12 +9,12 @@ import { rateLimiter } from "@/middlewares/rate-limiter";
 import {
 	changeUserPasswordRequestBody,
 	changeUserPasswordResponse,
+	forgetPasswordRequestBody,
 	forgetPasswordRequestResponse,
 	verifyChangePasswordRequestBody,
 	verifyChangePasswordResponse,
 } from "@/validations/auth/login/forgetPassword.validations";
 import {
-	forgetPasswordRequestBody,
 	loginUserRequestBodySchema,
 	loginUserResponseSchema,
 } from "@/validations/auth/login/loginUser.validation";

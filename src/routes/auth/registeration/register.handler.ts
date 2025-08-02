@@ -129,6 +129,7 @@ export const validateRegisterationOTP: AppRouteHandler<
 			email: usersTable.email,
 			firstName: usersTable.firstName,
 			lastName: usersTable.lastName,
+			bio: usersTable.bio,
 			profilePicture: usersTable.profilePicture,
 			phoneNumber: usersTable.phoneNumber,
 		});

@@ -15,6 +15,13 @@
       "when": 1753725862591,
       "tag": "0001_sticky_norman_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754140172597,
+      "tag": "0002_outstanding_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

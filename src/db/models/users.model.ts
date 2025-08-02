@@ -9,6 +9,7 @@ export const usersTable = pgTable("users", {
 	phoneNumber: varchar({ length: 20 }).unique().notNull(),
 	password: text().notNull(),
 	profilePicture: text(),
+	bio: varchar({ length: 300 }),
 	createdAt: timestamp().defaultNow(),
 	updatedAt: timestamp().$onUpdate(() => new Date()),
 });
