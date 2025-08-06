@@ -22,6 +22,20 @@
       "when": 1754140172597,
       "tag": "0002_outstanding_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754172668315,
+      "tag": "0003_famous_earthquake",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754476800601,
+      "tag": "0004_gray_virginia_dare",
+      "breakpoints": true
     }
   ]
 }

@@ -32,3 +32,7 @@ export const forbiddenRequestSchema = createMessageObjectSchema(
 export const notAcceptedRequestSchema = createMessageObjectSchema(
 	HTTPStatusPhrases.NOT_ACCEPTABLE,
 );
+
+export const badRequestSchema = createMessageObjectSchema(
+	HTTPStatusPhrases.BAD_REQUEST,
+);

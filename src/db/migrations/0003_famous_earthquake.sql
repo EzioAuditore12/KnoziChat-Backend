@@ -1,0 +1,1 @@
+ALTER TABLE "chat_members" ALTER COLUMN "joinedAt" SET NOT NULL;
