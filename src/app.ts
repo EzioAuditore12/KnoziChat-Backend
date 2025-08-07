@@ -4,10 +4,10 @@ import createApp from "@/lib/create-app";
 const app = createApp();
 
 import index from "@/routes/index.route";
-import authRoutes from "./routes/auth/auth.index";
-import chats from "./routes/chats/chats.index";
-import open from "./routes/open/open.index";
-import user from "./routes/user/user.index";
+import authRoutes from "./routes/auth";
+import chats from "./routes/chats";
+import open from "./routes/open";
+import user from "./routes/user";
 
 configureOpenApi(app);
 

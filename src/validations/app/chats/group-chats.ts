@@ -4,7 +4,12 @@ import { z } from "@hono/zod-openapi";
 export const createNewGroupChatValidationRequestBody = chatsInsertSchema
 	.extend({
 		groupChat: z.literal(true),
-		chatMembers: z.array(z.string().uuid()).min(3),
+		chatMembers: z
+			.array(z.string().uuid())
+			.min(2)
+			.refine((arr) => new Set(arr).size === arr.length, {
+				message: "chatMembers must contain unique UUIDs",
+			}),
 	})
 	.omit({ creatorId: true });
 
