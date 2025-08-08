@@ -1,16 +1,16 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid,jsonb } from "drizzle-orm/pg-core";
 import { chatsTable } from "./chats.model";
 import { usersTable } from "./users.model";
 
 export const messageTable = pgTable("message", {
 	id: uuid().primaryKey().defaultRandom().primaryKey().notNull(),
-	sender: uuid()
+	senderId: uuid()
 		.notNull()
 		.references(() => usersTable.id),
-	chat: uuid()
+	chatId: uuid()
 		.notNull()
 		.references(() => chatsTable.id),
-	content: text().notNull(),
-	attachements: text(),
+	content: text(),
+	attachements: jsonb(),
 	createdAt: timestamp().defaultNow(),
 });

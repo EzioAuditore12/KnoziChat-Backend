@@ -10,7 +10,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { usersTable } from "./users.model";
 
 export const chatsTable = pgTable("chats", {
-	id: uuid().primaryKey().defaultRandom().primaryKey().notNull(),
+	id: uuid().primaryKey().defaultRandom().notNull(),
 	name: varchar({ length: 50 }).notNull(),
 	avatar: text(),
 	creatorId: uuid()

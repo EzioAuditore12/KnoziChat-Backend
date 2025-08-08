@@ -6,7 +6,7 @@
     "start": "bun src/index.ts",
     "dev": "bun run --watch src/index.ts",
     "test": "test vitest",
-    "generate-fake:users":"bun src/seeders/fake-users.ts",
+    "generate-fake:users": "bun src/seeders/fake-users.ts",
     "docker:up": "docker compose up",
     "db:generate": "bun drizzle-kit generate --config=./src/configs/drizzle.config.ts",
     "db:migrate": "bun drizzle-kit migrate --config=./src/configs/drizzle.config.ts",
@@ -20,9 +20,11 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@hono-storage/node-disk": "^0.0.17",
     "@hono/zod-openapi": "0.19.8",
     "@scalar/hono-api-reference": "^0.9.9",
     "bullmq": "^5.56.5",
+    "busboy": "^1.6.0",
     "drizzle-orm": "^0.44.2",
     "drizzle-zod": "0.5.1",
     "hono": "^4.8.4",
@@ -42,6 +44,7 @@
     "@biomejs/biome": "1.9.4",
     "@faker-js/faker": "^9.9.0",
     "@types/bun": "^1.2.18",
+    "@types/busboy": "^1.5.4",
     "@types/node": "^24.0.15",
     "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.15.4",

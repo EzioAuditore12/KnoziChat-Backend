@@ -1,6 +1,7 @@
 import { addGroupMembers } from "./add-group-members";
 import { createNewGroupChat } from "./create-group-chat";
 import { getMyGroupChats } from "./get-my-group-chat";
+import { leaveGroup } from "./leave-group";
 import { removeGroupMembers } from "./remove-group-members";
 
 export const GroupChatHandlers = {
@@ -8,4 +9,5 @@ export const GroupChatHandlers = {
 	getMyGroupChats,
 	addGroupMembers,
 	removeGroupMembers,
+    leaveGroup
 };

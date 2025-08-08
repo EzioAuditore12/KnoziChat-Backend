@@ -17,4 +17,4 @@ app.route("/auth", authRoutes);
 app.route("/user", user);
 app.route("/chat", chats);
 
-export default app;
+export default app

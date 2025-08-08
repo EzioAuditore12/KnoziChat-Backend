@@ -5,13 +5,13 @@ import {
 } from "@/validations/app/chats/group-chats";
 import { createRoute, z } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-
 import {
 	HTTPStatusCode,
 	badRequestSchema,
 	notFoundSchema,
 } from "@/lib/constants";
 import { authMiddleware } from "@/middlewares/auth-middleware";
+import { IdUUIDParamsSchema } from "stoker/openapi/schemas";
 
 export const createNewGroupChat = createRoute({
 	tags: ["Chat"],
@@ -109,14 +109,48 @@ export const removeGroupMembers = createRoute({
 	},
 });
 
+export const leaveGroup = createRoute({
+	tags: ["Chat"],
+	method: "delete",
+	path: "/leave-group/{id}",
+	middleware: [authMiddleware],
+	request: {
+		params: IdUUIDParamsSchema,
+	},
+	responses: {
+		[HTTPStatusCode.OK]: jsonContent(
+			z.object({
+				groupId: z.string().uuid(),
+				message: z.string(),
+			}),
+			"Left group scuessfully",
+		),
+		[HTTPStatusCode.BAD_REQUEST]: jsonContent(
+			badRequestSchema,
+			"User is not associated with this group",
+		),
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(
+			notFoundSchema,
+			"Given group id does not exist",
+		),
+	},
+});
+
+// rename chat
+
+
+// delete chat
+
 export type CreateNewGroupChat = typeof createNewGroupChat;
 export type GetMyGroupChats = typeof getMyGroupChats;
 export type AddGroupMembers = typeof addGroupMembers;
 export type RemoveGroupMembers = typeof removeGroupMembers;
+export type LeaveGroup = typeof leaveGroup;
 
 export const GroupChatRoutes = {
 	createNewGroupChat,
 	getMyGroupChats,
 	addGroupMembers,
 	removeGroupMembers,
+	leaveGroup,
 };
