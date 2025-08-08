@@ -1,16 +1,17 @@
 import {
+	HTTPStatusCode,
+	badRequestSchema,
+	notFoundSchema,
+	unauthorizedRequestSchema,
+} from "@/lib/constants";
+import { authMiddleware } from "@/middlewares/auth-middleware";
+import {
 	createNewGroupChatResponse,
 	createNewGroupChatValidationRequestBody,
 	retreiveChatResponse,
 } from "@/validations/app/chats/group-chats";
 import { createRoute, z } from "@hono/zod-openapi";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import {
-	HTTPStatusCode,
-	badRequestSchema,
-	notFoundSchema,
-} from "@/lib/constants";
-import { authMiddleware } from "@/middlewares/auth-middleware";
 import { IdUUIDParamsSchema } from "stoker/openapi/schemas";
 
 export const createNewGroupChat = createRoute({
@@ -137,15 +138,79 @@ export const leaveGroup = createRoute({
 });
 
 // rename chat
-
+export const renameGroupName = createRoute({
+	tags: ["Chat"],
+	method: "put",
+	path: "/rename-group/{id}",
+	middleware: [authMiddleware],
+	request: {
+		params: IdUUIDParamsSchema,
+		body: jsonContent(
+			z.object({
+				newName: z.string(),
+			}),
+			"New Name for group chat",
+		),
+	},
+	responses: {
+		[HTTPStatusCode.OK]: jsonContent(
+			z.object({
+				groupId: z.string().uuid(),
+				message: z.string(),
+				newGroupName: z.string().nullable(),
+			}),
+			"Group Name edited successfully",
+		),
+		[HTTPStatusCode.BAD_REQUEST]: jsonContent(
+			badRequestSchema,
+			"User is not associated with this group or chat is not a group chat",
+		),
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(
+			notFoundSchema,
+			"Given group id does not exist",
+		),
+	},
+});
 
 // delete chat
+export const deleteGroupChat = createRoute({
+	tags: ["Chat"],
+	method: "delete",
+	path: "group/{id}",
+	middleware: [authMiddleware],
+	request: {
+		params: IdUUIDParamsSchema,
+	},
+	responses: {
+		[HTTPStatusCode.OK]: jsonContent(
+			z.object({
+				groupId: z.string().uuid(),
+				message: z.string(),
+			}),
+			"Group Name edited successfully",
+		),
+		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
+			unauthorizedRequestSchema,
+			"Only creator is allowed to delete the group",
+		),
+		[HTTPStatusCode.BAD_REQUEST]: jsonContent(
+			badRequestSchema,
+			"User is not associated with this group or chat is not a group chat",
+		),
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(
+			notFoundSchema,
+			"Given group id does not exist",
+		),
+	},
+});
 
 export type CreateNewGroupChat = typeof createNewGroupChat;
 export type GetMyGroupChats = typeof getMyGroupChats;
 export type AddGroupMembers = typeof addGroupMembers;
 export type RemoveGroupMembers = typeof removeGroupMembers;
 export type LeaveGroup = typeof leaveGroup;
+export type RenameGroupName = typeof renameGroupName;
+export type DeleteGroupChat = typeof deleteGroupChat;
 
 export const GroupChatRoutes = {
 	createNewGroupChat,
@@ -153,4 +218,6 @@ export const GroupChatRoutes = {
 	addGroupMembers,
 	removeGroupMembers,
 	leaveGroup,
+	renameGroupName,
+	deleteGroupChat,
 };

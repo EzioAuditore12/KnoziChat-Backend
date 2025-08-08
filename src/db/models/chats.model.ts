@@ -11,7 +11,7 @@ import { usersTable } from "./users.model";
 
 export const chatsTable = pgTable("chats", {
 	id: uuid().primaryKey().defaultRandom().notNull(),
-	name: varchar({ length: 50 }).notNull(),
+	name: varchar({ length: 50 }),
 	avatar: text(),
 	creatorId: uuid()
 		.notNull()

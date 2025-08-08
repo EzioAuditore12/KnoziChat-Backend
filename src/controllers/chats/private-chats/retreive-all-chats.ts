@@ -48,15 +48,36 @@ export const retreiveChats: AuthenticatedAppRouteHandler<
 	}
 
 	// Structure the response
-	const result = chatRows.map((row) => ({
-		id: row.chats.id,
-		name: row.chats.name,
-		avatar: row.chats.avatar,
-		creatorId: row.chats.creatorId,
-		groupChat: row.chats.groupChat,
-		createdAt: row.chats.createdAt,
-		members: membersByChat[row.chats.id] || [],
-	}));
+	const result = chatRows.map((row) => {
+		const chat = row.chats;
+		const members = membersByChat[chat.id] || [];
+
+		if (!chat.groupChat) {
+			// Private chat: Show the OTHER user's info (not current user)
+			const otherUser = members.find((member) => member.id !== userId);
+
+			return {
+				id: chat.id,
+				name: otherUser?.name || "Unknown User", // Show other user's name
+				avatar: otherUser?.profilePicture || "", // Show other user's avatar
+				creatorId: chat.creatorId,
+				groupChat: chat.groupChat,
+				createdAt: chat.createdAt,
+				members,
+			};
+		}
+
+		// Group chat: Show stored group info
+		return {
+			id: chat.id,
+			name: chat.name || "Group Chat", // Group name
+			avatar: chat.avatar || "", // Group avatar
+			creatorId: chat.creatorId,
+			groupChat: chat.groupChat,
+			createdAt: chat.createdAt,
+			members,
+		};
+	});
 
 	return c.json(
 		{

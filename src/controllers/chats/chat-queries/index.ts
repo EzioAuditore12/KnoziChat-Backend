@@ -1,5 +1,5 @@
-import {getChatDetails} from "./chat-details"
+import { getChatDetails } from "./chat-details";
 
-export const ChatQueryRequestsHandlers={
-    getChatDetails
-}
+export const ChatQueryRequestsHandlers = {
+	getChatDetails,
+};

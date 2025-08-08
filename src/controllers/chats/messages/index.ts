@@ -1,5 +1,5 @@
 import { sendAttachements } from "./send-attachements";
 
-export const AttachmentRequestsHandler={
-    sendAttachements
-}
+export const AttachmentRequestsHandler = {
+	sendAttachements,
+};

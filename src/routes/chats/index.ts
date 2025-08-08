@@ -23,10 +23,20 @@ const chats = createProtectedRouter()
 		GroupChatRoutes.removeGroupMembers,
 		GroupChatHandlers.removeGroupMembers,
 	)
-	.openapi(GroupChatRoutes.leaveGroup,GroupChatHandlers.leaveGroup)
+	.openapi(GroupChatRoutes.leaveGroup, GroupChatHandlers.leaveGroup)
+	.openapi(GroupChatRoutes.renameGroupName, GroupChatHandlers.renameGroupName)
 	.openapi(PrivateChatRoutes.retreiveChats, PrivateChatsHandlers.retreiveChats)
-	.openapi(AttachmentsRoutes.sendAttachements,AttachmentRequestsHandler.sendAttachements)
-	.openapi(ChatQueryRoutes.getChatDetails,ChatQueryRequestsHandlers.getChatDetails)
-	;
+	.openapi(
+		PrivateChatRoutes.createPrivateChat,
+		PrivateChatsHandlers.createPrivateChat,
+	)
+	.openapi(
+		AttachmentsRoutes.sendAttachements,
+		AttachmentRequestsHandler.sendAttachements,
+	)
+	.openapi(
+		ChatQueryRoutes.getChatDetails,
+		ChatQueryRequestsHandlers.getChatDetails,
+	);
 
 export default chats;
