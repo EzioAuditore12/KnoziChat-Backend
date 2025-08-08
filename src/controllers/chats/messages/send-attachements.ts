@@ -77,9 +77,9 @@ export const sendAttachements: AuthenticatedAppRouteHandler<
 		content: "",
 		uploadedAttachments,
 		sender: {
-			_id: member.id,
+			id: member.id,
 			name: member.name,
-			avatar: member.avatar,
+			profilePicture: member.avatar,
 		},
 		chat: chat.id,
 	};

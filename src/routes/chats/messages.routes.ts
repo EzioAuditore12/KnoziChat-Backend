@@ -6,6 +6,7 @@ import {
 import { authMiddleware } from "@/middlewares/auth-middleware";
 import { createRoute, z } from "@hono/zod-openapi";
 import { jsonContent } from "stoker/openapi/helpers";
+import { IdUUIDParamsSchema } from "stoker/openapi/schemas";
 
 const fileSizeLimit = 5 * 1024 * 1024;
 
@@ -31,9 +32,28 @@ const uploadedAttachmentSchema = z.object({
 });
 
 const senderSchema = z.object({
-	_id: z.string(),
+	id: z.string(),
 	name: z.string(),
-	avatar: z.string().nullable(),
+	profilePicture: z.string().nullable(),
+});
+
+const messageSchema = z.object({
+	id: z.string(),
+	content: z.string().nullable(),
+	senderId: z.string(),
+	chatId: z.string(),
+	createdAt: z.string(),
+	attachments: z.array(uploadedAttachmentSchema).nullable(),
+	sender: senderSchema,
+});
+
+const getMessagesResponseSchema = z.object({
+	status: z.boolean(),
+	message: z.string(),
+	messages: z.array(messageSchema),
+	total: z.number(),
+	page: z.number(),
+	limit: z.number(),
 });
 
 const messageResponseSchema = z.object({
@@ -43,6 +63,38 @@ const messageResponseSchema = z.object({
 		sender: senderSchema,
 		chat: z.string(),
 	}),
+});
+
+// Send text message
+export const sendMessage = createRoute({
+	tags: ["Chat"],
+	method: "post",
+	path: "/send-message",
+	middleware: [authMiddleware],
+	request: {
+		body: jsonContent(
+			z.object({
+				chatId: z.string().uuid(),
+				content: z.string().min(1).max(1000),
+			}),
+			"Send message request",
+		),
+	},
+	responses: {
+		[HTTPStatusCode.CREATED]: jsonContent(
+			z.object({
+				status: z.boolean(),
+				message: z.string(),
+				data: messageSchema,
+			}),
+			"Message sent successfully",
+		),
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, "Chat not found"),
+		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
+			unauthorizedRequestSchema,
+			"User is not a member of this chat",
+		),
+	},
 });
 
 export const sendAttachements = createRoute({
@@ -81,9 +133,37 @@ export const sendAttachements = createRoute({
 });
 
 // get messages
+export const getMessages = createRoute({
+	tags: ["Chat"],
+	method: "get",
+	path: "/messages/{id}",
+	middleware: [authMiddleware],
+	request: {
+		params: IdUUIDParamsSchema,
+		query: z.object({
+			page: z.coerce.number().int().min(1).default(1),
+			limit: z.coerce.number().int().min(1).max(100).default(10),
+		}),
+	},
+	responses: {
+		[HTTPStatusCode.OK]: jsonContent(
+			getMessagesResponseSchema,
+			"Messages retrieved successfully",
+		),
+		[HTTPStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, "Chat not found"),
+		[HTTPStatusCode.UNAUTHORIZED]: jsonContent(
+			unauthorizedRequestSchema,
+			"User is not a member of this chat",
+		),
+	},
+});
 
+export type SendMessage = typeof sendMessage;
 export type SendAttachements = typeof sendAttachements;
+export type GetMessages = typeof getMessages;
 
-export const AttachmentsRoutes = {
+export const MessageRoutes = {
+	sendMessage,
 	sendAttachements,
+	getMessages,
 };

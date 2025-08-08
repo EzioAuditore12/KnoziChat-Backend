@@ -6,8 +6,8 @@ import { GroupChatRoutes } from "./group-chats.route";
 import { PrivateChatsHandlers } from "@/controllers/chats/private-chats";
 import { PrivateChatRoutes } from "./private-chat.route";
 
-import { AttachmentRequestsHandler } from "@/controllers/chats/messages";
-import { AttachmentsRoutes } from "./messages.routes";
+import { MessageRequestsHandler } from "@/controllers/chats/messages";
+import { MessageRoutes } from "./messages.routes";
 
 import { ChatQueryRequestsHandlers } from "@/controllers/chats/chat-queries";
 import { ChatQueryRoutes } from "./chat-queries.route";
@@ -31,9 +31,11 @@ const chats = createProtectedRouter()
 		PrivateChatsHandlers.createPrivateChat,
 	)
 	.openapi(
-		AttachmentsRoutes.sendAttachements,
-		AttachmentRequestsHandler.sendAttachements,
+		MessageRoutes.sendAttachements,
+		MessageRequestsHandler.sendAttachements,
 	)
+	.openapi(MessageRoutes.sendMessage, MessageRequestsHandler.sendMessage)
+	.openapi(MessageRoutes.getMessages, MessageRequestsHandler.getMessages)
 	.openapi(
 		ChatQueryRoutes.getChatDetails,
 		ChatQueryRequestsHandlers.getChatDetails,

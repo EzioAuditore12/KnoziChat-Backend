@@ -10,13 +10,25 @@ export const retreiveChats: AuthenticatedAppRouteHandler<
 	RetreiveChats
 > = async (c) => {
 	const userId = c.get("userId");
+	const { limit, page } = c.req.valid("query");
+	const offset = (page - 1) * limit;
 
-	// Get all chats where the user is a member
-	const chatRows = await db
+	// Get total count for pagination
+	const totalChatsResult = await db
 		.select()
 		.from(chatsTable)
 		.innerJoin(chatMembersTable, eq(chatsTable.id, chatMembersTable.chatId))
 		.where(eq(chatMembersTable.userId, userId));
+	const totalChats = totalChatsResult.length;
+
+	// Get paginated chats where the user is a member
+	const chatRows = await db
+		.select()
+		.from(chatsTable)
+		.innerJoin(chatMembersTable, eq(chatsTable.id, chatMembersTable.chatId))
+		.where(eq(chatMembersTable.userId, userId))
+		.limit(limit)
+		.offset(offset);
 
 	const chatIds = chatRows.map((row) => row.chats.id);
 
@@ -84,6 +96,7 @@ export const retreiveChats: AuthenticatedAppRouteHandler<
 			status: true,
 			message: "Chats retreived successfully",
 			chats: result,
+			total: totalChats,
 		},
 		HTTPStatusCode.OK,
 	);

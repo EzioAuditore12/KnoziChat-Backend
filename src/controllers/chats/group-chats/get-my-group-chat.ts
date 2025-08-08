@@ -11,14 +11,29 @@ export const getMyGroupChats: AuthenticatedAppRouteHandler<
 > = async (c) => {
 	const userId = c.get("userId");
 
-	// Get all group chats where the user is a member
-	const chatRows = await db
+	const { limit, page } = c.req.valid("query");
+	const offset = (page - 1) * limit;
+
+	// Get total count for pagination
+	const totalChatsResult = await db
 		.select()
 		.from(chatsTable)
 		.innerJoin(chatMembersTable, eq(chatsTable.id, chatMembersTable.chatId))
 		.where(
 			and(eq(chatMembersTable.userId, userId), eq(chatsTable.groupChat, true)),
 		);
+	const totalChats = totalChatsResult.length;
+
+	// Get paginated group chats where the user is a member
+	const chatRows = await db
+		.select()
+		.from(chatsTable)
+		.innerJoin(chatMembersTable, eq(chatsTable.id, chatMembersTable.chatId))
+		.where(
+			and(eq(chatMembersTable.userId, userId), eq(chatsTable.groupChat, true)),
+		)
+		.limit(limit)
+		.offset(offset);
 
 	const chatIds = chatRows.map((row) => row.chats.id);
 
@@ -64,6 +79,7 @@ export const getMyGroupChats: AuthenticatedAppRouteHandler<
 			status: true,
 			message: "Group chats retrieved successfully",
 			chats: result,
+			total: totalChats,
 		},
 		HTTPStatusCode.OK,
 	);

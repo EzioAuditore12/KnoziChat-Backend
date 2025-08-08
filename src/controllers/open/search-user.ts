@@ -10,7 +10,14 @@ export const searchUser: AppRouteHandler<SearchUser> = async (c) => {
 	const offset = (page - 1) * limit;
 
 	const users = await db
-		.select()
+		.select({
+			id: usersTable.id,
+			firstName: usersTable.firstName,
+			lastName: usersTable.lastName,
+			email: usersTable.email,
+			phoneNumber: usersTable.phoneNumber,
+			profilePicture: usersTable.profilePicture,
+		})
 		.from(usersTable)
 		.where(ilike(usersTable.firstName, `%${name}%`))
 		.limit(limit)

@@ -42,6 +42,12 @@ export const getMyGroupChats = createRoute({
 	method: "get",
 	path: "/get-groups",
 	middleware: [authMiddleware],
+	request: {
+		query: z.object({
+			page: z.coerce.number().int().min(1).default(1),
+			limit: z.coerce.number().int().min(1).max(100).default(10),
+		}),
+	},
 	responses: {
 		[HTTPStatusCode.OK]: jsonContent(
 			retreiveChatResponse,
