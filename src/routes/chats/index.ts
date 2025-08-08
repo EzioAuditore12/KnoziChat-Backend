@@ -3,7 +3,7 @@ import { createProtectedRouter } from "@/lib/create-app";
 import { GroupChatHandlers } from "@/controllers/chats/group-chats";
 import { GroupChatRoutes } from "./group-chats.route";
 
-import { PrivateChatsHandlers } from "@/controllers/chats/private-chats";
+import { PrivateChatsHandlers } from "@/controllers/chats/private";
 import { PrivateChatRoutes } from "./private-chat.route";
 
 import { MessageRequestsHandler } from "@/controllers/chats/messages";
@@ -29,6 +29,22 @@ const chats = createProtectedRouter()
 	.openapi(
 		PrivateChatRoutes.createPrivateChat,
 		PrivateChatsHandlers.createPrivateChat,
+	)
+	.openapi(
+		PrivateChatRoutes.searchPrivateChats,
+		PrivateChatsHandlers.searchChats,
+	)
+	.openapi(
+		PrivateChatRoutes.sendFriendRequest,
+		PrivateChatsHandlers.sendFriendRequest,
+	)
+	.openapi(
+		PrivateChatRoutes.respondToRequest,
+		PrivateChatsHandlers.respondToRequest,
+	)
+	.openapi(
+		PrivateChatRoutes.getAllNotifications,
+		PrivateChatsHandlers.getAllNotifications,
 	)
 	.openapi(
 		MessageRoutes.sendAttachements,
