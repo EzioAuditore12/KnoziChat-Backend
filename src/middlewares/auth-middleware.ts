@@ -2,13 +2,13 @@ import { HTTPStatusCode } from "@/lib/constants";
 import { parseAccessToken } from "@/utils/jwt";
 import { z } from "@hono/zod-openapi";
 import { createMiddleware } from "hono/factory";
-import { isJWT } from "validator";
+import validator from "validator"
 
 const AuthroizationHeaderSchema = z.object({
 	Authorization: z.string().refine(
 		(val) => {
 			const [scheme, token] = val.split(" ");
-			return scheme === "Bearer" && isJWT(token);
+			return scheme === "Bearer" && validator.isJWT(token);
 		},
 		{
 			message:

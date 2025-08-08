@@ -1,24 +1,5 @@
 import env from "@/env";
-/**
- * Functions for generating hashed password and validating them
- * using bun's inbuilt hashing techniques which include
- * bcrypt,argon2d,argon2i,argon2id
- */
-function getPasswordHashOptions() {
-	const {
-		CRYPTO_PASSWORD_ALGORITHIM,
-		CRYPTO_PASSWORD_MEMORY_COST,
-		CRYPTO_PASSWORD_TIME_COST,
-	} = env;
-	if (CRYPTO_PASSWORD_ALGORITHIM === "bcrypt") {
-		return { algorithm: CRYPTO_PASSWORD_ALGORITHIM };
-	}
-	return {
-		algorithm: CRYPTO_PASSWORD_ALGORITHIM,
-		memoryCost: CRYPTO_PASSWORD_MEMORY_COST,
-		timeCost: CRYPTO_PASSWORD_TIME_COST,
-	};
-}
+import { compare, genSalt, hash } from "bcrypt";
 
 /**
  * Converts hash for the given input password
@@ -26,11 +7,8 @@ function getPasswordHashOptions() {
  * @returns - returns the generated hashed password
  */
 export async function generateHashedPassword(password: string) {
-	const hashedPassword = await Bun.password.hash(
-		password,
-		getPasswordHashOptions(),
-	);
-	return hashedPassword;
+	const salt = await genSalt();
+	return await hash(password, salt);
 }
 
 /**
@@ -40,12 +18,8 @@ export async function generateHashedPassword(password: string) {
  * @returns boolean
  */
 export async function validatePassword(
-	inputPassword: string,
-	storedHashedPassword: string,
-) {
-	const isMatch = await Bun.password.verify(
-		inputPassword,
-		storedHashedPassword,
-	);
-	return isMatch;
+	passwordInput: string,
+	passwordStored: string,
+): Promise<boolean> {
+	return await compare(passwordInput, passwordStored);
 }

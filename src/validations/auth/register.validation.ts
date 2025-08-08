@@ -1,7 +1,7 @@
 import { File } from "node:buffer";
 import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
-import { isMobilePhone, isStrongPassword } from "validator";
+import validator from "validator"
 
 //Form
 export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
@@ -10,7 +10,7 @@ export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
 		.max(64)
 		.refine(
 			(input) => {
-				return isStrongPassword(input, {
+				return validator.isStrongPassword(input, {
 					minLength: 8,
 					minLowercase: 1,
 					minUppercase: 1,
@@ -25,7 +25,7 @@ export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
 		),
 	phoneNumber: z.string().refine(
 		(input) => {
-			return isMobilePhone(input);
+			return validator.isMobilePhone(input);
 		},
 		{
 			message: "Entered field is not a mobile number",
@@ -58,7 +58,7 @@ export const validateRegisterUserOTPBodyValidation = z
 	.object({
 		phoneNumber: z.string().refine(
 			(input) => {
-				return isMobilePhone(input);
+				return validator.isMobilePhone(input);
 			},
 			{
 				message: "Entered field is not a mobile number",

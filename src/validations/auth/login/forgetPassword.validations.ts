@@ -1,6 +1,6 @@
 import { UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
-import { isMobilePhone, isStrongPassword } from "validator";
+import validator from "validator";
 
 export const forgetPasswordRequestBody = z.object({
 	phoneNumber: z
@@ -8,7 +8,7 @@ export const forgetPasswordRequestBody = z.object({
 		.max(20)
 		.refine(
 			(input) => {
-				return isMobilePhone(input);
+				return validator.isMobilePhone(input);
 			},
 			{ message: "Entered phone number is not valid" },
 		),
@@ -28,7 +28,7 @@ export const verifyChangePasswordRequestBody = z.object({
 		.max(20)
 		.refine(
 			(input) => {
-				return isMobilePhone(input);
+				return validator.isMobilePhone(input);
 			},
 			{ message: "Entered phone number is not valid" },
 		),
@@ -49,7 +49,7 @@ export const changeUserPasswordRequestBody = z.object({
 		.max(20)
 		.refine(
 			(input) => {
-				return isMobilePhone(input);
+				return validator.isMobilePhone(input);
 			},
 			{ message: "Entered phone number is not valid" },
 		),
@@ -58,7 +58,7 @@ export const changeUserPasswordRequestBody = z.object({
 		.max(64)
 		.refine(
 			(input) =>
-				isStrongPassword(input, {
+				validator.isStrongPassword(input, {
 					minLength: 8,
 					minLowercase: 1,
 					minNumbers: 1,

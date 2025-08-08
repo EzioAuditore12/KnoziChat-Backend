@@ -11,7 +11,7 @@
     },
     "typeRoots": ["./node_modules/@types"],
     "types": [
-      "bun"
+      "node"
     ],
     "strict": true,
     "outDir": "./dist",

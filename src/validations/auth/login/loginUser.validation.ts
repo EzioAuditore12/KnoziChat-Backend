@@ -1,6 +1,6 @@
 import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
-import { isMobilePhone } from "validator";
+import validator from "validator";
 
 export const loginUserRequestBodySchema = UsersInsertSchema.pick({
 	phoneNumber: true,
@@ -12,7 +12,7 @@ export const loginUserRequestBodySchema = UsersInsertSchema.pick({
 			.max(20)
 			.refine(
 				(input) => {
-					return isMobilePhone(input);
+					return validator.isMobilePhone(input);
 				},
 				{ message: "Entered phone number is not valid" },
 			),

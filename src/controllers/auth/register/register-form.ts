@@ -7,7 +7,7 @@ import type { AppRouteHandler } from "@/lib/types";
 import type { UploadedFile } from "@/middlewares/hono-multer";
 import type { RegisterUserForm } from "@/routes/auth/register.route";
 import { otpHelper } from "@/utils/otp-auth";
-import { randomUUIDv7 } from "bun";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 
 //TODO: Need to change middleware to run after if no errors found
@@ -28,7 +28,7 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 			HTTPStatusCode.CONFLICT,
 		);
 
-	const { profilePicture } = c.get("uploadedFiles") as Record<
+	const { profilePicture } = c.get("uploadedFiles") as unknown as Record<
 		string,
 		UploadedFile
 	>;
@@ -40,7 +40,7 @@ export const registerUserForm: AppRouteHandler<RegisterUserForm> = async (
 	const otp = Math.floor(100000 + Math.random() * 900000).toString();
 	const period = 300;
 
-	const registerationToken = randomUUIDv7();
+	const registerationToken = randomUUID();
 
 	// 10mins
 	await redisClient.setex(

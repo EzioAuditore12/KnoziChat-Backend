@@ -1,4 +1,7 @@
 import { z } from "@hono/zod-openapi";
+import { config } from "dotenv";
+
+config()
 
 const serverEnvSchema = z.object({
 	PORT: z.coerce.number().int().positive().default(3000),
@@ -30,31 +33,9 @@ const textBeeConfigSchema = z.object({
 
 const cryptoPasswordConfigSchema = z
 	.object({
-		CRYPTO_PASSWORD_ALGORITHIM: z.enum([
-			"argon2id",
-			"argon2d",
-			"argon2i",
-			"bcrypt",
-		]),
 		CRYPTO_PASSWORD_MEMORY_COST: z.coerce.number().int().positive().optional(),
 		CRYPTO_PASSWORD_TIME_COST: z.coerce.number().int().positive().optional(),
 	})
-	.refine(
-		(input) => {
-			const isBcrypt = input.CRYPTO_PASSWORD_ALGORITHIM === "bcrypt";
-			const hasMemoryCost = input.CRYPTO_PASSWORD_MEMORY_COST !== undefined;
-			const hasTimeCost = input.CRYPTO_PASSWORD_TIME_COST !== undefined;
-			if (isBcrypt) {
-				return !hasMemoryCost && !hasTimeCost;
-			}
-			return hasMemoryCost && hasTimeCost;
-		},
-		{
-			message:
-				"memoryCost and timeCost must only be set for Argon2 algorithms, not for bcrypt.",
-			path: ["CRYPTO_PASSWORD_MEMORY_COST", "CRYPTO_PASSWORD_TIME_COST"],
-		},
-	);
 
 const jwtConfigSchema = z.object({
 	ACCESS_SECRET_KEY: z.string(),

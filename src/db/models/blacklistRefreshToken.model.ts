@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { isJWT } from "validator";
+import validator from "validator";
 import { usersTable } from "./users.model";
 
 export const blackListedRefreshTokenTable = pgTable(
@@ -24,7 +24,7 @@ export const BlacklistRefreshTokenInsertionSchema = createInsertSchema(
 		id: true,
 	})
 	.extend({
-		token: z.string().refine((val) => isJWT(val), {
+		token: z.string().refine((val) => validator.isJWT(val), {
 			message: "Invalid jwt token",
 		}),
 	});

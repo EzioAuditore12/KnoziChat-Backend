@@ -1,13 +1,19 @@
 import app from "./app";
 import env from "./env";
+import { serve } from '@hono/node-server';
 
 //Workers
 import "@/jobs/sendEmail";
 import "@/jobs/sendSMS";
 
-const server = Bun.serve({
-	port: env.PORT,
-	fetch: app.fetch,
-});
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: env.PORT,
+  },
+  (info) => {
+    console.log(`Server is running: http://${info.address}:${info.port}`);
+  }
+);
 
-console.log("Server running", server.port);
+

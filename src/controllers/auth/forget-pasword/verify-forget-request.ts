@@ -2,7 +2,7 @@ import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
 import type { VerifyChangeUserPassword } from "@/routes/auth/forget-password.routes";
-import { randomUUIDv7 } from "bun";
+import { randomUUID } from "node:crypto";
 
 export const verifyChangeUserPasswordRequest: AppRouteHandler<
 	VerifyChangeUserPassword
@@ -44,7 +44,7 @@ export const verifyChangeUserPasswordRequest: AppRouteHandler<
 
 	await redisClient.del(`otp:forgot-password:${phoneNumber}`);
 
-	const verificationRequestToken = randomUUIDv7();
+	const verificationRequestToken = randomUUID();
 
 	await redisClient.setex(
 		`verifiedPasswordRequest:${phoneNumber}`,

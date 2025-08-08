@@ -1,6 +1,6 @@
 import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
-import { getConnInfo } from "hono/bun";
+import { getConnInfo } from "@hono/node-server/conninfo";
 import { createMiddleware } from "hono/factory";
 
 interface RateLimiterProps {
