@@ -1,8 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
 import type { VerifyChangeUserPassword } from "@/routes/auth/forget-password.routes";
-import { randomUUID } from "node:crypto";
 
 export const verifyChangeUserPasswordRequest: AppRouteHandler<
 	VerifyChangeUserPassword

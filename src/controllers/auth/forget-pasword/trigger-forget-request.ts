@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
 import { addSMSJob } from "@/jobs/sendSMS";
@@ -5,7 +6,6 @@ import { HTTPStatusCode } from "@/lib/constants";
 import { redisClient } from "@/lib/redis-client";
 import type { AppRouteHandler } from "@/lib/types";
 import type { ForgotPasswordTrigger } from "@/routes/auth/forget-password.routes";
-import {randomUUID} from "node:crypto"
 import { eq } from "drizzle-orm";
 
 export const forgotPasswordTrigger: AppRouteHandler<
@@ -27,7 +27,7 @@ export const forgotPasswordTrigger: AppRouteHandler<
 	const otp = Math.floor(100000 + Math.random() * 900000).toString();
 	const period = 600;
 
-	const requestToken =  randomUUID();
+	const requestToken = randomUUID();
 
 	await redisClient.setex(
 		`otp:forgot-password:${phoneNumber}`,

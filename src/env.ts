@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import { config } from "dotenv";
 
-config()
+config();
 
 const serverEnvSchema = z.object({
 	PORT: z.coerce.number().int().positive().default(3000),
@@ -31,11 +31,10 @@ const textBeeConfigSchema = z.object({
 	TEXTBEE_DEVICE_ID: z.string(),
 });
 
-const cryptoPasswordConfigSchema = z
-	.object({
-		CRYPTO_PASSWORD_MEMORY_COST: z.coerce.number().int().positive().optional(),
-		CRYPTO_PASSWORD_TIME_COST: z.coerce.number().int().positive().optional(),
-	})
+const cryptoPasswordConfigSchema = z.object({
+	CRYPTO_PASSWORD_MEMORY_COST: z.coerce.number().int().positive().optional(),
+	CRYPTO_PASSWORD_TIME_COST: z.coerce.number().int().positive().optional(),
+});
 
 const jwtConfigSchema = z.object({
 	ACCESS_SECRET_KEY: z.string(),

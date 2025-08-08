@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import { usersTable } from "@/db/models/users.model";
 import { addSMSJob } from "@/jobs/sendSMS";
@@ -7,7 +8,6 @@ import type { AppRouteHandler } from "@/lib/types";
 import type { UploadedFile } from "@/middlewares/hono-multer";
 import type { RegisterUserForm } from "@/routes/auth/register.route";
 import { otpHelper } from "@/utils/otp-auth";
-import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 
 //TODO: Need to change middleware to run after if no errors found

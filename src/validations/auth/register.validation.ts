@@ -1,7 +1,7 @@
 import { File } from "node:buffer";
 import { UsersInsertSchema, UsersSelectSchema } from "@/db/models/users.model";
 import { z } from "@hono/zod-openapi";
-import validator from "validator"
+import validator from "validator";
 
 //Form
 export const registerUserFormRequestBodySchema = UsersInsertSchema.extend({
