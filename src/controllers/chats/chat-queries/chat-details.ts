@@ -28,6 +28,7 @@ export const getChatDetails: AuthenticatedAppRouteHandler<
 			id: usersTable.id,
 			name: usersTable.firstName,
 			avatar: usersTable.profilePicture,
+			phoneNumber:usersTable.phoneNumber
 		})
 		.from(chatMembersTable)
 		.innerJoin(usersTable, eq(chatMembersTable.userId, usersTable.id))

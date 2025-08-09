@@ -11,7 +11,13 @@ import user from "./routes/user";
 
 configureOpenApi(app);
 
-app.route("/", index);
+//app.route("/", index);
+
+app.get('/', (c) => {
+    c.var.io.emit('hello', 'world');
+    return c.text('Hono!');
+});
+
 app.route("/open", open);
 app.route("/auth", authRoutes);
 app.route("/user", user);
