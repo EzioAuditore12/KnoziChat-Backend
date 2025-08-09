@@ -1,11 +1,4 @@
-To install dependencies:
-```sh
-bun install
-```
+For FrontEnd Repo Go to :-
 
-To run:
-```sh
-bun run dev
-```
+https://github.com/EzioAuditore12/Knozify.git
 
-open http://localhost:3000
