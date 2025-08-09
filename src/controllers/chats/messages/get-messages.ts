@@ -5,7 +5,7 @@ import { usersTable } from "@/db/models/users.model";
 import { HTTPStatusCode } from "@/lib/constants";
 import type { AuthenticatedAppRouteHandler } from "@/lib/types";
 import type { GetMessages } from "@/routes/chats/messages.routes";
-import { and, asc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm"; // Change asc to desc
 
 export const getMessages: AuthenticatedAppRouteHandler<GetMessages> = async (
 	c,
@@ -74,7 +74,7 @@ export const getMessages: AuthenticatedAppRouteHandler<GetMessages> = async (
 		.from(messageTable)
 		.innerJoin(usersTable, eq(messageTable.senderId, usersTable.id))
 		.where(eq(messageTable.chatId, chatId))
-		.orderBy(asc(messageTable.createdAt))
+		.orderBy(desc(messageTable.createdAt)) // Change to desc for newest first
 		.limit(limit)
 		.offset(offset);
 
