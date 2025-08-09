@@ -1,151 +1,148 @@
 import { randomUUID as uuid } from "node:crypto";
 import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "@/constants/events";
 import { db } from "@/db";
+import { chatsTable } from "@/db/models/chats.model"; // You'll need to import your chat model
+import { chatMembersTable } from "@/db/models/chats.model";
 import { messageTable } from "@/db/models/messages.model";
 import { parseAccessToken } from "@/utils/jwt";
 import type { ServerType } from "@hono/node-server";
-import { Server } from "socket.io";
 import { eq } from "drizzle-orm";
-import { chatsTable } from "@/db/models/chats.model"; // You'll need to import your chat model
-import { chatMembersTable } from "@/db/models/chats.model";
+import { Server } from "socket.io";
 
 const userSocketIDs = new Map<string, string>();
 
 export function initWebSocket(server: ServerType) {
-    const io = new Server(server, {
-        cors: {
-            origin: "*",
-        },
-    });
+	const io = new Server(server, {
+		cors: {
+			origin: "*",
+		},
+	});
 
-    // Authentication middleware for Socket.IO
-    io.use(async (socket, next) => {
-        try {
-            const token = socket.handshake.headers.authorization?.split(' ')[1];
-            
-            if (!token) {
-                return next(new Error('Authentication token is required'));
-            }
+	// Authentication middleware for Socket.IO
+	io.use(async (socket, next) => {
+		try {
+			const token = socket.handshake.headers.authorization?.split(" ")[1];
 
-            const decoded = await parseAccessToken(token);
-            if (!decoded) {
-                return next(new Error('TOKEN_EXPIRED'));
-            }
+			if (!token) {
+				return next(new Error("Authentication token is required"));
+			}
 
-            // Attach user info to socket
-            socket.data.user = {
-                _id: decoded.id,
-            };
-            
-            next();
-        } catch (error) {
-            next(new Error('Authentication failed'));
-        }
-    });
+			const decoded = await parseAccessToken(token);
+			if (!decoded) {
+				return next(new Error("TOKEN_EXPIRED"));
+			}
 
-    io.on("error", (err) => {
-        console.log(err);
-    });
+			// Attach user info to socket
+			socket.data.user = {
+				_id: decoded.id,
+			};
 
-    io.on("connection", (socket) => {
-        const user = socket.data.user;
-        // FIX: Use _id consistently
-        userSocketIDs.set(user._id, socket.id);
-        console.log(`User ${user._id} connected with socket ${socket.id}`);
+			next();
+		} catch (error) {
+			next(new Error("Authentication failed"));
+		}
+	});
 
-        // Handle disconnect
-        socket.on("disconnect", () => {
-            userSocketIDs.delete(user._id);
-            console.log(`User ${user._id} disconnected`);
-        });
+	io.on("error", (err) => {
+		console.log(err);
+	});
 
-        socket.on(
-            NEW_MESSAGE,
-            async ({
-                chatId,
-                message,
-            }: { chatId: string; message: string }) => { // Remove members requirement
-                try {
-                    // Fetch chat members from database
-                    const chatData = await db
-                        .select()
-                        .from(chatsTable)
-                        .where(eq(chatsTable.id, chatId))
-                        .limit(1);
+	io.on("connection", (socket) => {
+		const user = socket.data.user;
+		// FIX: Use _id consistently
+		userSocketIDs.set(user._id, socket.id);
+		console.log(`User ${user._id} connected with socket ${socket.id}`);
 
-                    if (!chatData.length) {
-                        console.error("Chat not found:", chatId);
-                        return;
-                    }
+		// Handle disconnect
+		socket.on("disconnect", () => {
+			userSocketIDs.delete(user._id);
+			console.log(`User ${user._id} disconnected`);
+		});
 
-                    // Extract members from chat data
-                    // Fetch members from a separate table or relation
-                    // Example: Assuming you have a chatMembersTable with chatId and userId fields
-                    const chatMembers = await db
-                        .select()
-                        .from(chatMembersTable)
-                        .where(eq(chatMembersTable.chatId, chatId));
-                    const members = chatMembers.map((cm) => cm.userId);
-                    
-                    // Create message for real-time broadcast
-                    const messageForRealTime = {
-                        id: uuid(), // Change _id to id to match frontend
-                        content: message,
-                        sender: {
-                            id: user._id, // Change _id to id to match frontend
-                        },
-                        chatId: chatId, // Change chat to chatId to match frontend
-                        createdAt: new Date().toISOString(),
-                    };
+		socket.on(
+			NEW_MESSAGE,
+			async ({ chatId, message }: { chatId: string; message: string }) => {
+				// Remove members requirement
+				try {
+					// Fetch chat members from database
+					const chatData = await db
+						.select()
+						.from(chatsTable)
+						.where(eq(chatsTable.id, chatId))
+						.limit(1);
 
-                    // Get socket IDs for all members in the chat
-                    const membersSockets = getSockets(members);
-                    
-                    // Broadcast to all members
-                    io.to(membersSockets).emit(NEW_MESSAGE, {
-                        chatId,
-                        message: messageForRealTime,
-                    });
-                    io.to(membersSockets).emit(NEW_MESSAGE_ALERT, { chatId });
+					if (!chatData.length) {
+						console.error("Chat not found:", chatId);
+						return;
+					}
 
-                    // Save to database
-                    await db.insert(messageTable).values({
-                        chatId: chatId,
-                        senderId: user._id,
-                        content: message,
-                    });
+					// Extract members from chat data
+					// Fetch members from a separate table or relation
+					// Example: Assuming you have a chatMembersTable with chatId and userId fields
+					const chatMembers = await db
+						.select()
+						.from(chatMembersTable)
+						.where(eq(chatMembersTable.chatId, chatId));
+					const members = chatMembers.map((cm) => cm.userId);
 
-                    console.log("New Message sent:", messageForRealTime);
-                    console.log("Sent to sockets:", membersSockets);
+					// Create message for real-time broadcast
+					const messageForRealTime = {
+						id: uuid(), // Change _id to id to match frontend
+						content: message,
+						sender: {
+							id: user._id, // Change _id to id to match frontend
+						},
+						chatId: chatId, // Change chat to chatId to match frontend
+						createdAt: new Date().toISOString(),
+					};
 
-                } catch (error) {
-                    console.error("Error handling message:", error);
-                    socket.emit("error", { message: "Failed to send message" });
-                }
-            },
-        );
-    });
+					// Get socket IDs for all members in the chat
+					const membersSockets = getSockets(members);
 
-    return io;
+					// Broadcast to all members
+					io.to(membersSockets).emit(NEW_MESSAGE, {
+						chatId,
+						message: messageForRealTime,
+					});
+					io.to(membersSockets).emit(NEW_MESSAGE_ALERT, { chatId });
+
+					// Save to database
+					await db.insert(messageTable).values({
+						chatId: chatId,
+						senderId: user._id,
+						content: message,
+					});
+
+					console.log("New Message sent:", messageForRealTime);
+					console.log("Sent to sockets:", membersSockets);
+				} catch (error) {
+					console.error("Error handling message:", error);
+					socket.emit("error", { message: "Failed to send message" });
+				}
+			},
+		);
+	});
+
+	return io;
 }
 
 // Function to get socket IDs for an array of user IDs
 export const getSockets = (users: string[]) => {
-    const sockets = users
-        .map((user) => userSocketIDs.get(user.toString()))
-        .filter(Boolean);
-    return sockets as string[];
+	const sockets = users
+		.map((user) => userSocketIDs.get(user.toString()))
+		.filter(Boolean);
+	return sockets as string[];
 };
 
 // Additional helper functions
 export function getSocketId(userId: string): string | undefined {
-    return userSocketIDs.get(userId);
+	return userSocketIDs.get(userId);
 }
 
 export function getAllOnlineUsers(): string[] {
-    return Array.from(userSocketIDs.keys());
+	return Array.from(userSocketIDs.keys());
 }
 
 export function isUserOnline(userId: string): boolean {
-    return userSocketIDs.has(userId);
+	return userSocketIDs.has(userId);
 }

@@ -3,7 +3,7 @@ import { chatMembersTable, chatsTable } from "../../../db/models/chats.model.js"
 import { messageTable } from "../../../db/models/messages.model.js";
 import { usersTable } from "../../../db/models/users.model.js";
 import { HTTPStatusCode } from "../../../lib/constants.js";
-import { and, asc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm"; // Change asc to desc
 export const getMessages = async (c) => {
     const userId = c.get("userId");
     const { id: chatId } = c.req.valid("param");
@@ -52,7 +52,7 @@ export const getMessages = async (c) => {
         .from(messageTable)
         .innerJoin(usersTable, eq(messageTable.senderId, usersTable.id))
         .where(eq(messageTable.chatId, chatId))
-        .orderBy(asc(messageTable.createdAt))
+        .orderBy(desc(messageTable.createdAt)) // Change to desc for newest first
         .limit(limit)
         .offset(offset);
     // Format the response
