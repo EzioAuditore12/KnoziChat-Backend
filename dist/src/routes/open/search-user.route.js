@@ -24,11 +24,11 @@ export const getUserDetails = createRoute({
     method: "get",
     path: "/user/{id}",
     request: {
-        params: IdUUIDParamsSchema
+        params: IdUUIDParamsSchema,
     },
     responses: {
         [HTTPStatusCode.OK]: jsonContent(UsersSelectSchema.extend({
-            joinedAt: z.date().nullable()
+            joinedAt: z.date().nullable(),
         }), "Given users details sent successfully"),
         [HTTPStatusCode.NOT_FOUND]: jsonContent(notFoundSchema, "Given id of user does not exist"),
     },

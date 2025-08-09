@@ -7,9 +7,9 @@ import open from "./routes/open/index.js";
 import user from "./routes/user/index.js";
 configureOpenApi(app);
 //app.route("/", index);
-app.get('/', (c) => {
-    c.var.io.emit('hello', 'world');
-    return c.text('Hono!');
+app.get("/", (c) => {
+    c.var.io.emit("hello", "world");
+    return c.text("Hono!");
 });
 app.route("/open", open);
 app.route("/auth", authRoutes);

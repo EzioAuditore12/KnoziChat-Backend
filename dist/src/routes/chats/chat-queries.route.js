@@ -7,7 +7,7 @@ const memberSelectSchema = z.object({
     id: z.string().uuid(),
     name: z.string(),
     avatar: z.string().nullable(),
-    phoneNumber: z.string()
+    phoneNumber: z.string(),
 });
 export const getChatDetails = createRoute({
     tags: ["Chat"],
