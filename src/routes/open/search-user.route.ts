@@ -32,12 +32,12 @@ export const getUserDetails = createRoute({
 	method: "get",
 	path: "/user/{id}",
 	request: {
-		params:IdUUIDParamsSchema
+		params: IdUUIDParamsSchema,
 	},
 	responses: {
 		[HTTPStatusCode.OK]: jsonContent(
 			UsersSelectSchema.extend({
-				joinedAt:z.date().nullable()
+				joinedAt: z.date().nullable(),
 			}),
 			"Given users details sent successfully",
 		),
@@ -49,4 +49,4 @@ export const getUserDetails = createRoute({
 });
 
 export type SearchUser = typeof searchUserRoute;
-export type GetUserDetails = typeof getUserDetails
+export type GetUserDetails = typeof getUserDetails;

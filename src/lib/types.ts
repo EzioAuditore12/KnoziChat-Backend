@@ -3,11 +3,11 @@ import type { UploadedFile } from "@/middlewares/hono-multer";
 import type { PinoLogger } from "@/middlewares/pino-logger";
 import type { OpenAPIHono, RouteConfig, RouteHandler } from "@hono/zod-openapi";
 import type { Schema } from "hono";
-import type { Server } from 'socket.io';
+import type { Server } from "socket.io";
 
 export interface AppBindings {
 	Variables: {
-		io:Server
+		io: Server;
 		logger: PinoLogger;
 		uploadedFiles?: Record<string, UploadedFile>;
 		uploadedFields?: Record<string, string>;

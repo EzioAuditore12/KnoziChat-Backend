@@ -18,6 +18,6 @@ const server = serve(
 	},
 );
 
-initWebSocket(server)
+initWebSocket(server);
 
-app.use(ioMiddleware)
+app.use(ioMiddleware);
