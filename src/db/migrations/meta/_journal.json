@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1752998208207,
-      "tag": "0000_huge_omega_sentinel",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1753725862591,
-      "tag": "0001_sticky_norman_osborn",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1754140172597,
-      "tag": "0002_outstanding_wind_dancer",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1754172668315,
-      "tag": "0003_famous_earthquake",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1754476800601,
-      "tag": "0004_gray_virginia_dare",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1754570472258,
-      "tag": "0005_acoustic_psylocke",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1754570832614,
-      "tag": "0006_wise_blacklash",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1754620613898,
-      "tag": "0007_military_alice",
+      "when": 1757469733451,
+      "tag": "0000_warm_leopardon",
       "breakpoints": true
     }
   ]

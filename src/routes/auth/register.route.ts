@@ -20,6 +20,7 @@ export const registerUserForm = createRoute({
 	tags: ["Authentication"],
 	path: "/register",
 	method: "post",
+	summary: "Register User Form",
 	middleware: [
 		rateLimiter({ limit: 5, windowTime: 15 * 60 }),
 		honoMulter({
@@ -55,6 +56,7 @@ export const validateRegisterOTP = createRoute({
 	tags: ["Authentication"],
 	path: "/verify-otp-register",
 	method: "post",
+	summary: "Verify Registeration User Form",
 	request: {
 		body: jsonContentRequired(
 			validateRegisterUserOTPBodyValidation,

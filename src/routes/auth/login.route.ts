@@ -15,6 +15,7 @@ export const loginUser = createRoute({
 	tags: ["Authentication"],
 	path: "/login",
 	method: "post",
+	summary: "Login User Form",
 	request: {
 		body: jsonContentRequired(
 			loginUserRequestBodySchema,

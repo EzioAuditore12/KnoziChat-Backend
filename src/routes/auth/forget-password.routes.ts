@@ -21,6 +21,7 @@ export const forgetPasswordTrigger = createRoute({
 	tags: ["Authentication"],
 	method: "post",
 	path: "/forget-password-trigger",
+	summary: "Trigger Forget Password Request",
 	request: {
 		body: jsonContentRequired(
 			forgetPasswordRequestBody,
@@ -43,6 +44,7 @@ export const verifychangeUserPasswordRequest = createRoute({
 	tags: ["Authentication"],
 	path: "/verify-change-password-request",
 	method: "post",
+	summary: "Verify Change Password Request",
 	request: {
 		body: jsonContentRequired(
 			verifyChangePasswordRequestBody,
@@ -69,6 +71,7 @@ export const changeUserPasswordWithLogin = createRoute({
 	tags: ["Authentication"],
 	method: "post",
 	path: "/change-user-password",
+	summary: "Change User Password Request",
 	request: {
 		body: jsonContentRequired(
 			changeUserPasswordRequestBody,

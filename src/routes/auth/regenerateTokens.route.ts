@@ -14,6 +14,7 @@ export const RegenerateTokens = createRoute({
 	tags: ["Authentication"],
 	path: "/regenerate-tokens",
 	method: "post",
+	summary: "Regenerate Tokens",
 	request: {
 		body: jsonContentRequired(
 			regenerateRefreshTokenRequestBodySchema,
