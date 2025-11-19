@@ -1,6 +1,18 @@
 services:
-  redis:
-    image: redis
-    container_name: knozichat-redis-container
+  mongodb:
+    image: mongo:latest
+    container_name: knozichat-mongodb
     ports:
-      - '6379:6379'
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ./data/mongo:/data/db
+
+  redis:
+    image: redis:latest
+    container_name: knozichat-redis
+    ports:
+      - "6379:6379"
+
