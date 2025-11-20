@@ -4,10 +4,10 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Paginate, type PaginateQuery } from 'nestjs-paginate';
 import { ApiTags } from '@nestjs/swagger';
 
 import { UserService } from './user.service';
@@ -17,7 +17,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/user.dto';
-import { SearchUserDto } from './dto/search-user.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -25,8 +24,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll(@Query() searchUserDto: SearchUserDto) {
-    return this.userService.findAll(searchUserDto);
+  findAll(@Paginate() paginateQuery: PaginateQuery) {
+    return this.userService.findAll(paginateQuery);
   }
 
   @Get(':id')
