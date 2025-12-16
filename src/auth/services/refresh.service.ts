@@ -48,7 +48,7 @@ export class RefreshService {
     createdAt: Date;
     expiredAt: Date;
   }) {
-    // Example: blacklist old token and issue new tokens
+ 
     await this.insertBlackListedRefreshToken({
       refreshToken,
       issuedAt: createdAt,

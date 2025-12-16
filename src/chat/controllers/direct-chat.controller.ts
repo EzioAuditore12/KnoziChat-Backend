@@ -10,12 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
+import { plainToInstance } from 'class-transformer';
 
 import { DirectChatService } from '../services/direct-chat.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateDirectChatDto } from '../dto/direct-chat/create-direct-chat.dto';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
-import { plainToInstance } from 'class-transformer';
 import { DirectMessageDto } from '../dto/direct-message.dto';
 
 @Controller('chat/direct')
@@ -31,6 +31,8 @@ export class DirectChatController {
     @Res() reply: FastifyReply,
   ) {
     const senderId = req.user.id;
+
+    console.log(senderId)
 
     const initializedChat = await this.directChatService.create(
       senderId,

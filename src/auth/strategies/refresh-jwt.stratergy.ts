@@ -36,6 +36,8 @@ export class RefreshJwtStrategy extends PassportStrategy(
     const userId = payload.sub;
     const refreshToken = body['refreshToken'] as string;
 
+    console.log("User id inside refresh token is",)
+
     const isBlackListedRefreshToken =
       await this.refreshService.findBlackListedRefreshToken(refreshToken);
 
@@ -43,7 +45,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
       throw new UnauthorizedException('Given refresh token is blacklisted');
 
     return {
-      userId,
+      id: userId,
       refreshToken,
       issuedAt: new Date(payload.iat * 1000),
       expiredAt: new Date(payload.exp * 1000),
