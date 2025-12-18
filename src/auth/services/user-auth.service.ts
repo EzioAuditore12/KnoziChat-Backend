@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { minutes } from '@nestjs/throttler';
 import type { Cache } from 'cache-manager';
 
 import { SendMessageService } from 'src/common/services/send-sms.service';
@@ -16,6 +17,8 @@ import { RegisterUserDto } from '../dto/register/register-user.dto';
 import { VerifyRegisterUserDto } from '../dto/register/verify-register-user.dto';
 
 import { LoginUserDto } from '../dto/login/login-user.dto';
+import { RegisterUserResponseDto } from '../dto/register/register-user.response.dto';
+import { ResponseStatus } from 'src/common/enums/response-status.enum';
 
 const regiseration_cache_key = 'register';
 
@@ -25,13 +28,17 @@ function generateOtp(): string {
 
 @Injectable()
 export class UserAuthService {
+  private readonly cacheTime: number = minutes(5);
+
   constructor(
     private readonly userService: UserService,
     private readonly sendMessageService: SendMessageService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  async registerUser(registerUserDto: RegisterUserDto) {
+  async registerUser(
+    registerUserDto: RegisterUserDto,
+  ): Promise<RegisterUserResponseDto> {
     const user = await this.userService.findByPhoneNumber(
       registerUserDto.phoneNumber,
     );
@@ -41,15 +48,24 @@ export class UserAuthService {
 
     const otp = generateOtp();
 
+    // Set OTP with 5 minutes (300 seconds) TTL
     await this.cacheManager.set(
       `${regiseration_cache_key}:${registerUserDto.phoneNumber}`,
       { ...registerUserDto, otp },
+      this.cacheTime, // 5 minutes in seconds
     );
 
     await this.sendMessageService.sendMessage({
       recipient: registerUserDto.phoneNumber,
       message: `Your KnoziChat OTP is: ${otp}`,
     });
+
+    return {
+      status: ResponseStatus.SUCCESS,
+      message: 'Otp Sent for verification',
+      duration: this.cacheTime,
+      phoneNumber: registerUserDto.phoneNumber,
+    };
   }
 
   async verifyUser(verifyRegisterUserDto: VerifyRegisterUserDto) {

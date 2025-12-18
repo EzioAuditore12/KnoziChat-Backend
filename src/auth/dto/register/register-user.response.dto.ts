@@ -8,4 +8,11 @@ export class RegisterUserResponseDto extends BaseResponseDto {
 
   @ApiProperty({ example: '+91XXXXXXXXXX' })
   phoneNumber: string;
+
+  @ApiProperty({
+    type: 'number',
+    example: 60000,
+    description: 'Number in milliseconds',
+  })
+  duration: number;
 }

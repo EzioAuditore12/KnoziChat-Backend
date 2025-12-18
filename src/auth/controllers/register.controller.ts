@@ -37,13 +37,10 @@ export class RegisterController {
     @Body() registerUserDto: RegisterUserDto,
     @Res() reply: FastifyReply,
   ) {
-    await this.userAuthService.registerUser(registerUserDto);
+    const userSentForRegisteration =
+      await this.userAuthService.registerUser(registerUserDto);
 
-    return reply.status(HttpStatus.CREATED).send({
-      status: 'success',
-      message: 'Otp Sent For Verification',
-      phoneNumber: registerUserDto.phoneNumber,
-    });
+    return reply.status(HttpStatus.CREATED).send(userSentForRegisteration);
   }
 
   @Post('verify-register')
