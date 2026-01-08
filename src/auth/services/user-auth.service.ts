@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
   Inject,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { verify } from '@node-rs/argon2';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { minutes } from '@nestjs/throttler';
 import type { Cache } from 'cache-manager';
@@ -102,10 +102,7 @@ export class UserAuthService {
 
     const { password: userPassword, ...userDetails } = user;
 
-    const isPasswordValid = await bcrypt.compare(
-      loginUserDto.password,
-      userPassword,
-    );
+    const isPasswordValid = await verify(userPassword, loginUserDto.password);
 
     if (!isPasswordValid)
       throw new UnauthorizedException(

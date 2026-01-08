@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   BeforeInsert,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { hash } from '@node-rs/argon2';
 
 @Entity()
 export class User {
@@ -42,6 +42,6 @@ export class User {
 
   @BeforeInsert()
   async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await hash(this.password);
   }
 }
