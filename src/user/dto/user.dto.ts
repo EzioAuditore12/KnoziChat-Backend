@@ -32,6 +32,14 @@ export class UserDto {
   @ApiProperty({ example: 'https://example.com/avatar.jpg' })
   avatar?: string;
 
+  @Exclude()
+  @ApiProperty({
+    example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+    nullable: true,
+    required: false,
+  })
+  expoPushToken?: string;
+
   @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
   createdAt: Date;
 

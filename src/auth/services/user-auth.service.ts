@@ -84,8 +84,11 @@ export class UserAuthService {
     if (cachedOtp !== verifyRegisterUserDto.otp)
       throw new UnauthorizedException('Invalid OTP');
 
-    const { password, ...userDetails } =
+    const { password, expoPushToken, ...userDetails } =
       await this.userService.create(registerationDetails);
+
+    if (expoPushToken !== undefined && expoPushToken !== null)
+      await this.userService.updateExpoPushToken(userDetails.id, expoPushToken);
 
     await this.cacheManager.del(cacheKey);
 
@@ -93,21 +96,24 @@ export class UserAuthService {
   }
 
   async validateUser(loginUserDto: LoginUserDto) {
-    const user = await this.userService.findByPhoneNumber(
-      loginUserDto.phoneNumber,
-    );
+    const { phoneNumber, password, expoPushToken } = loginUserDto;
+
+    const user = await this.userService.findByPhoneNumber(phoneNumber);
 
     if (!user)
       throw new NotFoundException('User with this phone number does not exist');
 
     const { password: userPassword, ...userDetails } = user;
 
-    const isPasswordValid = await verify(userPassword, loginUserDto.password);
+    const isPasswordValid = await verify(userPassword, password);
 
     if (!isPasswordValid)
       throw new UnauthorizedException(
         'Either entered email is wrong or password',
       );
+
+    if (expoPushToken !== undefined && expoPushToken !== null)
+      await this.userService.updateExpoPushToken(user.id, expoPushToken);
 
     return userDetails;
   }

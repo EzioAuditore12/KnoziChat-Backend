@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginateQuery, PaginationType, paginate } from 'nestjs-paginate';
+import { Expo } from 'expo-server-sdk';
 
 import { User } from './entities/user.entity';
 
@@ -45,6 +46,13 @@ export class UserService {
       maxLimit: 30,
       paginationType: PaginationType.LIMIT_AND_OFFSET,
     });
+  }
+
+  async updateExpoPushToken(userId: string, expoPushToken: string | undefined) {
+    if (!Expo.isExpoPushToken(expoPushToken))
+      throw new BadRequestException('Given token is invalid');
+
+    await this.userRepository.update(userId, { expoPushToken });
   }
 
   async findByPhoneNumber(phoneNumber: string) {

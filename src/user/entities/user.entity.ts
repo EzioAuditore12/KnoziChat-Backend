@@ -40,6 +40,9 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Column({ type: 'text', nullable: true })
+  expoPushToken?: string;
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await hash(this.password);

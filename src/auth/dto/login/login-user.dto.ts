@@ -1,4 +1,9 @@
-import { IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import {
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginUserDto {
@@ -10,4 +15,12 @@ export class LoginUserDto {
   @ApiProperty({ maxLength: 16, example: 'Example@123' })
   @IsString()
   password: string;
+
+  @ApiProperty({
+    example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+    nullable: true,
+    required: false,
+  })
+  @IsOptional()
+  expoPushToken?: string;
 }

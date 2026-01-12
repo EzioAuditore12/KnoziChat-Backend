@@ -50,4 +50,12 @@ export class CreateUserDto {
   })
   @MaxLength(16)
   password: string;
+
+  @ApiProperty({
+    example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+    nullable: true,
+    required: false,
+  })
+  @IsOptional()
+  expoPushToken?: string;
 }

@@ -47,7 +47,7 @@ export class WsJwtGuard implements CanActivate {
     const jwtService = new JwtService();
 
     const payload: AuthJwtPayload = jwtService.verify(token, {
-      secret:  process.env.JWT_SECRET!
+      secret: process.env.JWT_SECRET!,
     });
 
     return payload;

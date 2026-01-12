@@ -48,7 +48,6 @@ export class RefreshService {
     createdAt: Date;
     expiredAt: Date;
   }) {
- 
     await this.insertBlackListedRefreshToken({
       refreshToken,
       issuedAt: createdAt,

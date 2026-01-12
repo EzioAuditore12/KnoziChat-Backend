@@ -22,8 +22,8 @@ export class ChatGateway {
   server: Server<any, ServerToClientEvents>;
 
   afterInit(client: Server) {
-    client.use(socketAuthStratergy())
-    Logger.log('afterInit')
+    client.use(socketAuthStratergy());
+    Logger.log('afterInit');
   }
 
   @SubscribeMessage('message')
@@ -32,7 +32,7 @@ export class ChatGateway {
   }
 
   handleConnection(client: Socket) {
-    client.handshake.headers.authorization
+    client.handshake.headers.authorization;
   }
 
   sendMessage(message: DirectMessageDto) {

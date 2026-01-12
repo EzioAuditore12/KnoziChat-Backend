@@ -32,7 +32,7 @@ export class DirectChatController {
   ) {
     const senderId = req.user.id;
 
-    console.log(senderId)
+    console.log(senderId);
 
     const initializedChat = await this.directChatService.create(
       senderId,

@@ -6,6 +6,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD } from '@nestjs/core';
+import Expo from 'expo-server-sdk';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -44,6 +45,7 @@ import { ChatModule } from './chat/chat.module';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    Expo,
   ],
 })
 export class AppModule {}
