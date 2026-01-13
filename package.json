@@ -40,7 +40,7 @@
     "@nestjs/websockets": "^11.1.11",
     "@node-rs/argon2": "^2.0.2",
     "@scalar/nestjs-api-reference": "^1.0.15",
-    "bullmq": "^5.66.4",
+    "bullmq": "^5.66.5",
     "cache-manager": "^7.2.8",
     "cacheable": "^2.3.1",
     "class-transformer": "^0.5.1",
@@ -58,7 +58,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.3",
-    "type-fest": "^5.3.1",
+    "type-fest": "^5.4.0",
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
@@ -86,7 +86,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.52.0"
+    "typescript-eslint": "^8.53.0"
   },
   "jest": {
     "moduleFileExtensions": [

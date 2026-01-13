@@ -2,9 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 @Expose()
-export class DirectMessageDto {
+export class ChatDto {
   @Expose()
-  @ApiProperty({ example: '123e4567-e89b-12d3-XXX4-426614174000' })
+  @ApiProperty({
+    example: '64b7f8c2e4b0f5a1d2c3e4f5',
+    description: 'MongoDB ObjectId',
+  })
   _id: string;
 
   @Expose()

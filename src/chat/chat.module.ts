@@ -1,32 +1,36 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import Expo from 'expo-server-sdk';
+import { BullModule } from '@nestjs/bullmq';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import {
-  GroupChatSchema,
-  GroupChat,
-} from './entities/group-chat/group-chat.entity';
-import {
-  DirectMessage,
-  DirectMessageSchema,
-} from './entities/direct-message.entity';
-import {
-  GroupMessage,
-  GroupMessageSchema,
-} from './entities/group-chat/group-message.entity';
-
-import { ChatGateway } from './chat.gateway';
 import { DirectChatService } from './services/direct-chat.service';
 import { DirectChatController } from './controllers/direct-chat.controller';
 
+import { DirectChat, DirectChatSchema } from './entities/direct-chat.entity';
+import {
+  Conversation,
+  ConversationSchema,
+} from './entities/conversation.entity';
+
+import {
+  SEND_PUSH_NOTIFICATION_QUEUE_NAME,
+  SendPushNotificationQueue,
+} from './workers/send-push-notification.worker';
+
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
+
 @Module({
-  controllers: [DirectChatController],
   imports: [
     MongooseModule.forFeature([
-      { name: DirectMessage.name, schema: DirectMessageSchema },
-      { name: GroupChat.name, schema: GroupChatSchema },
-      { name: GroupMessage.name, schema: GroupMessageSchema },
+      { name: DirectChat.name, schema: DirectChatSchema },
+      { name: Conversation.name, schema: ConversationSchema },
     ]),
+    TypeOrmModule.forFeature([User]),
+    BullModule.registerQueue({ name: SEND_PUSH_NOTIFICATION_QUEUE_NAME }),
   ],
-  providers: [ChatGateway, DirectChatService],
+  controllers: [DirectChatController],
+  providers: [UserService, DirectChatService, Expo, SendPushNotificationQueue],
 })
 export class ChatModule {}
