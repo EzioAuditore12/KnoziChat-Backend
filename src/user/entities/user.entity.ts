@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import { pgTable, uuid, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { createZodDto } from 'nestjs-zod';
-import {z} from 'zod';
+import { z } from 'zod';
 
 export const userEntity = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
