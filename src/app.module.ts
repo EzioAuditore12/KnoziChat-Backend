@@ -1,53 +1,32 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { BullModule } from '@nestjs/bullmq';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { MongooseModule } from '@nestjs/mongoose';
-import { APP_GUARD } from '@nestjs/core';
-import Expo from 'expo-server-sdk';
+import { ZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
+import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ZodHttpExceptionFilter } from './common/filters/zod-http-excpetion-filter';
+import { ConfigModule } from '@nestjs/config';
 
-import { throttlerConfig } from './configs/throttler.config';
-import { typeOrmConfig } from './configs/db/typeorm.config';
-import { mongooseConfig } from './configs/db/monoose.config';
-import { bullMQConfig } from './configs/bull-mq.config';
-import { createCacheOptions } from './configs/cache.config';
-
+import { DbModule } from './db/db.module';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { CommonModule } from './common/common.module';
-import { ChatModule } from './chat/chat.module';
-import { SyncModule } from './sync/sync.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    CacheModule.registerAsync({
-      useFactory: createCacheOptions,
-      isGlobal: true,
-    }),
-    ThrottlerModule.forRoot(throttlerConfig),
-    BullModule.forRoot(bullMQConfig),
-    TypeOrmModule.forRoot(typeOrmConfig),
-    MongooseModule.forRoot(mongooseConfig.uri!),
-    CommonModule,
-    UserModule,
-    AuthModule,
-    ChatModule,
-    SyncModule,
-  ],
+  imports: [ConfigModule.forRoot(), DbModule, UserModule],
   controllers: [AppController],
   providers: [
     AppService,
     {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
     },
-    Expo,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ZodHttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

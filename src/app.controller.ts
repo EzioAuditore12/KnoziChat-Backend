@@ -1,10 +1,8 @@
-import { Body, Controller, Get, HttpStatus, Post, Res } from '@nestjs/common';
-import type { FastifyReply } from 'fastify';
-import { ApiBody } from '@nestjs/swagger';
-
+import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-
-import { PushNotificationDto } from './common/dto/push-notification.dto';
+import { CreateItemDto } from './common/dto/create-item.dto'; 
+import { ItemResponseDto } from './common/dto/item-response.dto'; 
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
@@ -16,13 +14,8 @@ export class AppController {
   }
 
   @Post()
-  @ApiBody({ type: PushNotificationDto })
-  async pushNotification(
-    @Body() pushNotificationDto: PushNotificationDto,
-    @Res() reply: FastifyReply,
-  ) {
-    const tickets = await this.appService.pushNotification(pushNotificationDto);
-
-    return reply.status(HttpStatus.OK).send(tickets);
+  @ApiResponse({ type: ItemResponseDto })
+  create(@Body() createItemDto: CreateItemDto): ItemResponseDto {
+    return createItemDto;
   }
 }
