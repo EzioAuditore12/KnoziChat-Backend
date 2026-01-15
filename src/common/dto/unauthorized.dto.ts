@@ -1,12 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class UnauthorizedDto {
-  @ApiProperty({ example: 'Unauthorized Request' })
-  message: string = 'Unauthorized Request';
+export const unauthorizedSchema = z.object({
+  message: z.string().default('Unauthorized Request'),
+  error: z.string().default('Unauthorized'),
+  statusCode: z.number().default(401),
+});
 
-  @ApiProperty({ example: 'Unauthorized' })
-  error: string = 'Unauthorized';
-
-  @ApiProperty({ type: 'number', example: 401 })
-  statusCode: number = 401;
-}
+export class UnauthorizedDto extends createZodDto(unauthorizedSchema) {}

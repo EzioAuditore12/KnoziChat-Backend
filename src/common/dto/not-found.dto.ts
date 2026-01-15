@@ -1,12 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class NotFoundDto {
-  @ApiProperty({ example: 'Not Found Request' })
-  message: string = 'Not Found Request';
+export const notFoundSchema = z.object({
+  message: z.string().default('Not Found Request'),
+  error: z.string().default('Not Found'),
+  statusCode: z.number().default(404),
+});
 
-  @ApiProperty({ example: 'Not Found' })
-  error: string = 'Not Found';
-
-  @ApiProperty({ type: 'number', example: 404 })
-  statusCode: number = 404;
-}
+export class NotFoundDto extends createZodDto(notFoundSchema) {}

@@ -1,33 +1,32 @@
-import { IsOptional, IsInt, Min, Max } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { z } from 'zod';
 
-export class PaginationDto {
-  @ApiPropertyOptional({
-    description: 'Page number (starts from 1)',
-    example: 1,
-    minimum: 1,
-    default: 1,
-    type: Number,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page: number = 1;
+export const paginationSchema = z.object({
+  limit: z.string().regex(/^\d+$/).transform(Number).optional(),
+  offset: z.string().regex(/^\d+$/).transform(Number).optional(),
+  page: z.string().regex(/^\d+$/).transform(Number).optional(),
+  sortBy: z.string().optional(),
+  search: z.string().optional(),
+});
 
-  @ApiPropertyOptional({
-    description: 'Items per page (max 20)',
-    example: 10,
-    minimum: 1,
-    maximum: 20,
-    default: 10,
-    type: Number,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(20)
-  limit: number = 10;
-}
+export const metaPaginatedSchema = z.object({
+  itemsPerPage: z.number(),
+  totalItems: z.number().optional(),
+  currentPage: z.number().optional(),
+  totalPages: z.number().optional(),
+  sortBy: z.array(z.tuple([z.string(), z.string()])),
+  searchBy: z.array(z.string()),
+  search: z.string().optional(),
+  select: z.array(z.string()).optional(),
+  filter: z
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
+    .optional(),
+  cursor: z.string().optional(),
+});
+
+export const linkPaginatedSchema = z.object({
+  first: z.string().optional(),
+  previous: z.string().optional(),
+  current: z.string(),
+  next: z.string().optional(),
+  last: z.string().optional(),
+});

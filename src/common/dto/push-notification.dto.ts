@@ -1,23 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MaxLength, IsOptional, IsObject } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class PushNotificationDto {
-  @ApiProperty()
-  @IsString()
-  expoPushToken: string;
+export const pushNotificationSchema = z.object({
+  expoPushToken: z.string(),
+  title: z.string().max(50),
+  body: z.string().max(100),
+  metadata: z.object(z.any()).optional(),
+});
 
-  @ApiProperty({ maxLength: 50 })
-  @IsString()
-  @MaxLength(50)
-  title: string;
-
-  @ApiProperty({ maxLength: 100 })
-  @IsString()
-  @MaxLength(100)
-  body: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsObject()
-  metadata?: Record<string, any>;
-}
+export class PushNotificationDto extends createZodDto(pushNotificationSchema) {}
