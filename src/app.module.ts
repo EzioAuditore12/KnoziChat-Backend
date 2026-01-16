@@ -20,6 +20,7 @@ import { bullMQConfig } from './configs/bull-mq.config';
 import { ChatModule } from './chat/chat.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseConfig } from './configs/db/monoose.config';
+import { SyncModule } from './sync/sync.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { mongooseConfig } from './configs/db/monoose.config';
     UserModule,
     AuthModule,
     ChatModule,
+    SyncModule,
   ],
   controllers: [AppController],
   providers: [
