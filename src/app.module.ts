@@ -17,6 +17,9 @@ import { AuthModule } from './auth/auth.module';
 import { createCacheOptions } from './configs/cache.config';
 import { throttlerConfig } from './configs/throttler.config';
 import { bullMQConfig } from './configs/bull-mq.config';
+import { ChatModule } from './chat/chat.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { mongooseConfig } from './configs/db/monoose.config';
 
 @Module({
   imports: [
@@ -28,8 +31,10 @@ import { bullMQConfig } from './configs/bull-mq.config';
     ThrottlerModule.forRoot(throttlerConfig),
     BullModule.forRoot(bullMQConfig),
     TypeOrmModule.forRoot(typeOrmConfig),
+    MongooseModule.forRoot(mongooseConfig.uri!),
     UserModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

@@ -6,7 +6,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiHeader, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Paginate, type PaginateQuery } from 'nestjs-paginate';
 
 import { UserService } from './user.service';
@@ -42,6 +42,12 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer JWT token',
+    required: true,
+    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
   @ApiResponse({ type: PublicUserDto })
   async getProfile(@Req() req: AuthRequest) {
     const user = await this.userService.findOne(req.user.id);

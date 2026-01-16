@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthJwtPayload } from '../types/auth-jwt-payload';
 
 import refreshJwtConfig from '../configs/refresh-jwt.config';
+import { TokensDto } from '../dto/tokens.dto';
 
 @Injectable()
 export class TokenService {
@@ -14,7 +15,7 @@ export class TokenService {
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  generateTokens(userId: string) {
+  async generateTokens(userId: string): Promise<TokensDto> {
     const payload: Pick<AuthJwtPayload, 'sub'> = { sub: userId };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);

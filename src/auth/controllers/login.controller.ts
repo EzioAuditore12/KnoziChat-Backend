@@ -2,7 +2,6 @@ import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import {
   ApiAcceptedResponse,
-  ApiBody,
   ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
