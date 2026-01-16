@@ -1,6 +1,6 @@
 import { BullRootModuleOptions } from '@nestjs/bullmq';
 
-process.loadEnvFile()
+process.loadEnvFile();
 
 export const bullMQConfig: BullRootModuleOptions = {
   connection: {
