@@ -1,12 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class ConflictDto {
-  @ApiProperty({ example: 'Conflict Request' })
-  message: string = 'Conflict Request';
+export const conflictSchema = z.object({
+  message: z.string().default('Conflict Request'),
+  error: z.string().default('Conflict'),
+  statusCode: z.number().default(409),
+});
 
-  @ApiProperty({ example: 'Conflict' })
-  error: string = 'Conflict';
-
-  @ApiProperty({ type: 'number', example: 409 })
-  statusCode: number = 409;
-}
+export class ConflictDto extends createZodDto(conflictSchema) {}

@@ -9,8 +9,9 @@ import { verify } from '@node-rs/argon2';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { minutes } from '@nestjs/throttler';
 import type { Cache } from 'cache-manager';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
-import { SendMessageService } from 'src/common/services/send-sms.service';
 import { UserService } from 'src/user/user.service';
 
 import { RegisterUserDto } from '../dto/register/register-user.dto';
@@ -18,7 +19,11 @@ import { VerifyRegisterUserDto } from '../dto/register/verify-register-user.dto'
 
 import { LoginUserDto } from '../dto/login/login-user.dto';
 import { RegisterUserResponseDto } from '../dto/register/register-user.response.dto';
-import { ResponseStatus } from 'src/common/enums/response-status.enum';
+import {
+  SEND_SMS_QUEUE_NAME,
+  SendMessageJobData,
+} from '../workers/send-sms.worker';
+import { PublicUserDto, publicUserSchema } from 'src/user/dto/public-user.dto';
 
 const regiseration_cache_key = 'register';
 
@@ -32,7 +37,7 @@ export class UserAuthService {
 
   constructor(
     private readonly userService: UserService,
-    private readonly sendMessageService: SendMessageService,
+    @InjectQueue(SEND_SMS_QUEUE_NAME) private readonly sendMessageQueue: Queue,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
@@ -55,20 +60,29 @@ export class UserAuthService {
       this.cacheTime, // 5 minutes in seconds
     );
 
-    await this.sendMessageService.sendMessage({
+    await this.sendMessage({
       recipient: registerUserDto.phoneNumber,
       message: `Your KnoziChat OTP is: ${otp}`,
     });
 
     return {
-      status: ResponseStatus.SUCCESS,
+      status: 'success',
       message: 'Otp Sent for verification',
       duration: this.cacheTime,
       phoneNumber: registerUserDto.phoneNumber,
     };
   }
 
-  async verifyUser(verifyRegisterUserDto: VerifyRegisterUserDto) {
+  async sendMessage({ message, recipient }: SendMessageJobData) {
+    await this.sendMessageQueue.add('process', {
+      message,
+      recipient,
+    });
+  }
+
+  async verifyUser(
+    verifyRegisterUserDto: VerifyRegisterUserDto,
+  ): Promise<PublicUserDto> {
     const cacheKey = `${regiseration_cache_key}:${verifyRegisterUserDto.phoneNumber}`;
     const cachedData = await this.cacheManager.get<
       { otp: string } & RegisterUserDto
@@ -81,21 +95,26 @@ export class UserAuthService {
 
     const { otp: cachedOtp, ...registerationDetails } = cachedData;
 
-    if (cachedOtp !== verifyRegisterUserDto.otp)
+    if (Number(cachedOtp) !== verifyRegisterUserDto.otp)
       throw new UnauthorizedException('Invalid OTP');
 
-    const { password, expoPushToken, ...userDetails } =
-      await this.userService.create(registerationDetails);
+    const userDetails = await this.userService.create(registerationDetails);
 
-    if (expoPushToken !== undefined && expoPushToken !== null)
-      await this.userService.updateExpoPushToken(userDetails.id, expoPushToken);
+    if (
+      userDetails.expoPushToken !== undefined &&
+      userDetails.expoPushToken !== null
+    )
+      await this.userService.updateExpoPushToken(
+        userDetails.id,
+        userDetails.expoPushToken,
+      );
 
     await this.cacheManager.del(cacheKey);
 
-    return userDetails;
+    return publicUserSchema.strip().parse(userDetails);
   }
 
-  async validateUser(loginUserDto: LoginUserDto) {
+  async validateUser(loginUserDto: LoginUserDto): Promise<PublicUserDto> {
     const { phoneNumber, password, expoPushToken } = loginUserDto;
 
     const user = await this.userService.findByPhoneNumber(phoneNumber);
@@ -103,9 +122,7 @@ export class UserAuthService {
     if (!user)
       throw new NotFoundException('User with this phone number does not exist');
 
-    const { password: userPassword, ...userDetails } = user;
-
-    const isPasswordValid = await verify(userPassword, password);
+    const isPasswordValid = await verify(user.password, password);
 
     if (!isPasswordValid)
       throw new UnauthorizedException(
@@ -115,6 +132,6 @@ export class UserAuthService {
     if (expoPushToken !== undefined && expoPushToken !== null)
       await this.userService.updateExpoPushToken(user.id, expoPushToken);
 
-    return userDetails;
+    return publicUserSchema.strip().parse(user);
   }
 }

@@ -1,15 +1,11 @@
-import { IsNumber, IsString, IsUUID } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class ConversationSyncDto {
-  @IsString()
-  id: string;
+export const conversationSyncSchema = z.object({
+  id: z.string(),
+  user_id: z.uuid(),
+  created_at: z.number(),
+  updated_at: z.number(),
+});
 
-  @IsUUID()
-  user_id: string;
-
-  @IsNumber()
-  created_at: number;
-
-  @IsNumber()
-  updated_at: number;
-}
+export class ConversationSyncDto extends createZodDto(conversationSyncSchema) {}

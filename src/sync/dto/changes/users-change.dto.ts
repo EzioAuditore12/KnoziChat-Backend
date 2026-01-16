@@ -1,19 +1,12 @@
-import { IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { z } from 'zod';
 
-import { UserSyncDto } from '../user-sync.dto';
+import { userSyncSchema } from '../user-sync.dto';
+import { createZodDto } from 'nestjs-zod';
 
-export class UsersChangeDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => UserSyncDto)
-  created: UserSyncDto[];
+export const usersChangeSchema = z.object({
+  created: z.array(userSyncSchema),
+  updated: z.array(userSyncSchema),
+  deleted: z.array(z.string()),
+});
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => UserSyncDto)
-  updated: UserSyncDto[];
-
-  @IsArray()
-  deleted: string[];
-}
+export class UsersChangeDto extends createZodDto(usersChangeSchema) {}

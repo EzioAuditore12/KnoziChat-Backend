@@ -1,15 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
 
-import { IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import { userSchema } from 'src/user/dto/user.dto';
+import { createZodDto } from 'nestjs-zod';
 
-export class VerifyRegisterUserDto {
-  @ApiProperty({ example: '+91XXXXXXXXXX' })
-  @IsPhoneNumber()
-  @MaxLength(20)
-  phoneNumber: string;
+const verifyRegisterUserSchema = userSchema.pick({ phoneNumber: true }).extend({
+  otp: z.coerce.number().max(999999),
+});
 
-  @ApiProperty({ example: '123456' })
-  @IsString()
-  @MaxLength(6)
-  otp: string;
-}
+export class VerifyRegisterUserDto extends createZodDto(
+  verifyRegisterUserSchema,
+) {}

@@ -17,7 +17,7 @@ export class User {
   firstName: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  middleName?: string;
+  middleName?: string | null;
 
   @Column({ type: 'varchar', length: 50 })
   lastName: string;
@@ -26,22 +26,22 @@ export class User {
   phoneNumber: string;
 
   @Column({ type: 'varchar', length: 254, unique: true, nullable: true })
-  email?: string;
+  email?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  avatar?: string;
+  avatar?: string | null;
 
   @Column({ type: 'text' })
   password: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   @Column({ type: 'text', nullable: true })
-  expoPushToken?: string;
+  expoPushToken?: string | null;
 
   @BeforeInsert()
   async hashPassword() {

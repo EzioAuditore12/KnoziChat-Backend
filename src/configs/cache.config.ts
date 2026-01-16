@@ -1,8 +1,8 @@
-import 'dotenv/config';
-
 import { Keyv } from 'keyv';
 import KeyvRedis from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
+
+process.loadEnvFile();
 
 export const createCacheOptions = () => ({
   stores: [

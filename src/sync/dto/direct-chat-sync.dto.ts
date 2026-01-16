@@ -1,34 +1,15 @@
-import {
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class DirectChatSyncDto {
-  @IsString()
-  id: string;
+export const directChatSyncSchema = z.object({
+  id: z.string(),
+  conversation_id: z.string(),
+  text: z.string().min(1).max(1000),
+  mode: z.enum(['SENT', 'RECEIVED']),
+  is_delivered: z.boolean(),
+  is_seen: z.boolean(),
+  created_at: z.number(),
+  updated_at: z.number(),
+});
 
-  @IsString()
-  conversation_id: string;
-
-  @IsString()
-  @MaxLength(1000)
-  text: string;
-
-  @IsEnum(['SENT', 'RECEIVED'])
-  mode: 'SENT' | 'RECEIVED';
-
-  @IsBoolean()
-  is_delivered: boolean;
-
-  @IsBoolean()
-  is_seen: boolean;
-
-  @IsNumber()
-  created_at: number;
-
-  @IsNumber()
-  updated_at: number;
-}
+export class DirectChatSyncDto extends createZodDto(directChatSyncSchema) {}

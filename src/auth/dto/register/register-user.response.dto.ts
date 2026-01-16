@@ -1,18 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-import { BaseResponseDto } from 'src/common/dto/base-respose.dto';
+import { baseResponseSchema } from 'src/common/dto/base-respose.dto';
+import { userSchema } from 'src/user/dto/user.dto';
 
-export class RegisterUserResponseDto extends BaseResponseDto {
-  @ApiProperty({ example: 'Verification Otp Send Successfully' })
-  declare message: string;
-
-  @ApiProperty({ example: '+91XXXXXXXXXX' })
-  phoneNumber: string;
-
-  @ApiProperty({
-    type: 'number',
-    example: 60000,
-    description: 'Number in milliseconds',
+export const registerUserResponseSchema = userSchema
+  .pick({
+    phoneNumber: true,
   })
-  duration: number;
-}
+  .extend({
+    duration: z.number(),
+  })
+  .extend(baseResponseSchema.shape);
+
+export class RegisterUserResponseDto extends createZodDto(
+  registerUserResponseSchema,
+) {}

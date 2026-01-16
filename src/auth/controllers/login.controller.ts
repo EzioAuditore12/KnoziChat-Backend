@@ -2,7 +2,6 @@ import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import {
   ApiAcceptedResponse,
-  ApiBody,
   ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
@@ -28,7 +27,6 @@ export class LoginController {
 
   @Post('login')
   @ApiOperation({ summary: 'Login User' })
-  @ApiBody({ type: LoginUserDto })
   @ApiAcceptedResponse({ type: LoginUserResponseDto })
   @ApiNotFoundResponse({ type: NotFoundDto })
   @ApiUnauthorizedResponse({ type: UnauthorizedDto })

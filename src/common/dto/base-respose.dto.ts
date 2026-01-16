@@ -1,11 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-import { ResponseStatus } from '../enums/response-status.enum';
+export const baseResponseSchema = z.object({
+  status: z.enum(['success', 'faliure']),
+  message: z.string(),
+});
 
-export class BaseResponseDto {
-  @ApiProperty({ enum: ResponseStatus, example: ResponseStatus.SUCCESS })
-  status: ResponseStatus;
-
-  @ApiProperty({ example: 'Operation completed successfully.' })
-  message: string;
-}
+export class BaseResponseDto extends createZodDto(baseResponseSchema) {}

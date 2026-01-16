@@ -1,26 +1,16 @@
-import {
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-  MaxLength,
-} from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class LoginUserDto {
-  @ApiProperty({ maxLength: 20, example: '+917823132423' })
-  @IsPhoneNumber()
-  @MaxLength(20)
-  phoneNumber: string;
+import { userSchema } from 'src/user/dto/user.dto';
 
-  @ApiProperty({ maxLength: 16, example: 'Example@123' })
-  @IsString()
-  password: string;
-
-  @ApiProperty({
-    example: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
-    nullable: true,
-    required: false,
+const loginUserSchema = userSchema
+  .pick({
+    phoneNumber: true,
+    password: true,
+    expoPushToken: true,
   })
-  @IsOptional()
-  expoPushToken?: string;
-}
+  .extend({
+    password: z.string().min(1).max(16),
+  });
+
+export class LoginUserDto extends createZodDto(loginUserSchema) {}

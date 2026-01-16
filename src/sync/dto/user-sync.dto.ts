@@ -1,44 +1,18 @@
-import {
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-  IsUrl,
-  MaxLength,
-} from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class UserSyncDto {
-  @IsString()
-  id: string;
+export const userSyncSchema = z.object({
+  id: z.string(),
+  first_name: z.string().min(1).max(50),
+  middle_name: z.string().min(1).max(50).nullable(),
+  last_name: z.string().min(1).max(50),
+  phone_number: z.regex(/^\+91\d{10}$/, {
+    message: 'Phone number must start with +91 followed by 10 digits',
+  }),
+  email: z.email().nullable(),
+  avatar: z.url().nullable(),
+  created_at: z.number(),
+  updated_at: z.number(),
+});
 
-  @IsString()
-  @MaxLength(50)
-  first_name: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  middle_name: string;
-
-  @IsString()
-  @MaxLength(50)
-  last_name: string;
-
-  @IsPhoneNumber()
-  phone_number: string;
-
-  @IsOptional()
-  @IsEmail()
-  email: string | null;
-
-  @IsOptional()
-  @IsUrl()
-  avatar: string | null;
-
-  @IsNumber()
-  created_at: number;
-
-  @IsNumber()
-  updated_at: number;
-}
+export class UserSyncDto extends createZodDto(userSyncSchema) {}

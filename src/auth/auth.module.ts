@@ -1,28 +1,27 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
+import { BullModule } from '@nestjs/bullmq';
 
-import { BlackListedRefreshToken } from './entities/blacklist-refresh-token.entity';
-
-import { RegisterController } from './controllers/register.controller';
-import { LoginController } from './controllers/login.controller';
-import { RefreshController } from './controllers/refresh.controller';
-
+import { SEND_SMS_QUEUE_NAME } from './workers/send-sms.worker';
 import { UserAuthService } from './services/user-auth.service';
 import { TokenService } from './services/tokens.service';
 import { RefreshService } from './services/refresh.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { RefreshJwtStrategy } from './strategies/refresh-jwt.stratergy';
-import { UserService } from 'src/user/user.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BlackListedRefreshToken } from './entities/blacklist-refresh-token.entity';
+import { User } from 'src/user/entities/user.entity';
 import jwtConfig from './configs/jwt.config';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import refreshJwtConfig from './configs/refresh-jwt.config';
-import { User } from 'src/user/entities/user.entity';
-import { CommonModule } from 'src/common/common.module';
+import { RegisterController } from './controllers/register.controller';
+import { LoginController } from './controllers/login.controller';
+import { RefreshController } from './controllers/refresh.controller';
+import { UserService } from 'src/user/user.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { RefreshJwtStrategy } from './strategies/refresh-jwt.stratergy';
 
 @Module({
   imports: [
-    CommonModule,
+    BullModule.registerQueue({ name: SEND_SMS_QUEUE_NAME }),
     TypeOrmModule.forFeature([BlackListedRefreshToken, User]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),

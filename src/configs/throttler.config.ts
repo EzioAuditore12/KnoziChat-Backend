@@ -1,6 +1,7 @@
-import 'dotenv/config';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { ThrottlerModuleOptions, seconds } from '@nestjs/throttler';
+
+process.loadEnvFile();
 
 export const throttlerConfig: ThrottlerModuleOptions = {
   throttlers: [

@@ -1,5 +1,5 @@
 import { Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { RefreshJwtAuthGuard } from '../guards/refresh-auth.guard';
 
@@ -8,6 +8,7 @@ import { RefreshTokensDto } from '../dto/refresh-token.dto';
 import type { RefreshTokenStratergyReqParameters } from '../types/auth-jwt-payload';
 
 import { RefreshService } from '../services/refresh.service';
+import { TokensDto } from '../dto/tokens.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -21,7 +22,7 @@ export class RefreshController {
     description:
       'Here After sending authenticated refresh token in body, bot access and refesh token will be generated',
   })
-  @ApiBody({ type: RefreshTokensDto })
+  @ApiResponse({ type: TokensDto })
   refreshTokens(@Req() req: RefreshTokenStratergyReqParameters) {
     return this.refreshService.refreshToken({
       userId: req.user.id,

@@ -15,8 +15,8 @@ import { DirectChat, DirectChatDocument } from '../entities/direct-chat.entity';
 
 import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from '../workers/send-push-notification.worker';
 
-import { CreateDirectChatDto } from '../dto/create-direct-chat.dto';
-import { InsertChatDto } from '../dto/insert-direct-chat.dto';
+import { CreateDirectChatDto } from '../dto/direct-chat/create-direct-chat.dto';
+import { InsertChatDto } from '../dto/direct-chat/direct-chat.dto';
 
 @Injectable()
 export class DirectChatService {
@@ -60,7 +60,6 @@ export class DirectChatService {
         expoPushToken: existingUser.expoPushToken,
         title: 'Message Request',
         body: text,
-        metadata: {},
       };
       await this.sendPushNotificationQueue.add('process', ticket);
     }

@@ -6,7 +6,7 @@ export interface SendMessageJobData {
   message: string;
 }
 
-export const sendSmsQueueName = 'send-message';
+export const SEND_SMS_QUEUE_NAME = 'send-message';
 
 type TextBeeApiResponses =
   | {
@@ -23,7 +23,7 @@ type TextBeeApiResponses =
       };
     };
 
-@Processor(sendSmsQueueName)
+@Processor(SEND_SMS_QUEUE_NAME)
 export class SendMessage extends WorkerHost {
   async sendSMS(recipient: string, message: string): Promise<boolean> {
     try {

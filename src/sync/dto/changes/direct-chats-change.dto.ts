@@ -1,19 +1,14 @@
-import { IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-import { DirectChatSyncDto } from '../direct-chat-sync.dto';
+import { directChatSyncSchema } from '../direct-chat-sync.dto';
 
-export class DirectChatsChangeDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => DirectChatSyncDto)
-  created: DirectChatSyncDto[];
+export const directChatsChangeSchema = z.object({
+  created: z.array(directChatSyncSchema),
+  updated: z.array(directChatSyncSchema),
+  deleted: z.array(z.string()),
+});
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => DirectChatSyncDto)
-  updated: DirectChatSyncDto[];
-
-  @IsArray()
-  deleted: string[];
-}
+export class DirectChatsChangeDto extends createZodDto(
+  directChatsChangeSchema,
+) {}

@@ -1,7 +1,6 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import {
-  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOperation,
@@ -30,7 +29,6 @@ export class RegisterController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register User Form' })
-  @ApiBody({ type: RegisterUserDto })
   @ApiCreatedResponse({ type: RegisterUserResponseDto })
   @ApiConflictResponse({ type: ConflictDto })
   async register(
@@ -45,7 +43,6 @@ export class RegisterController {
 
   @Post('verify-register')
   @ApiOperation({ summary: 'Verify User Registeration' })
-  @ApiBody({ type: VerifyRegisterUserDto })
   @ApiCreatedResponse({ type: VerifyRegisterUserResponseDto })
   @ApiConflictResponse({ type: NotFoundDto })
   async verifyRegisteration(

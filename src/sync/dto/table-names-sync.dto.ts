@@ -1,3 +1,7 @@
-export const TableNamesSyncDto = ['conversations', 'direct_chats', 'users'];
+import { z } from 'zod';
 
-export type TableNamesSync = 'conversations' | 'direct_chats' | 'users';
+export const tableNamesSyncSchema = z.enum([
+  'conversations',
+  'direct_chats',
+  'users',
+]);
