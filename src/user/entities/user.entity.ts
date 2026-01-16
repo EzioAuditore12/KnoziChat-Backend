@@ -34,11 +34,11 @@ export class User {
   @Column({ type: 'text' })
   password: string;
 
-  @CreateDateColumn()
-  createdAt: string;
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: string;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 
   @Column({ type: 'text', nullable: true })
   expoPushToken?: string | null;

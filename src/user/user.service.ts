@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginateQuery, PaginationType, paginate } from 'nestjs-paginate';
@@ -25,6 +25,7 @@ export class UserService {
 
   async findOne(id: string): Promise<UserDto | null> {
     const user = await this.userRepository.findOne({ where: { id } });
+
     return user;
   }
 

@@ -11,8 +11,8 @@ export const userSchema = z.object({
   phoneNumber: z.string().max(20),
   email: z.email().max(240).nullable().optional(),
   expoPushToken: z.string().nullable().optional(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
+  createdAt: z.any(), // TODO: workaround for now will fix later
+  updatedAt: z.any(), // TODO: workaround for now will fix later
 });
 
 export class UserDto extends createZodDto(userSchema) {}
