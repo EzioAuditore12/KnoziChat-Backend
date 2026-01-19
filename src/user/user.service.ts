@@ -1,15 +1,15 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import { PaginateQuery, PaginationType, paginate } from 'nestjs-paginate';
 import { Expo } from 'expo-server-sdk';
 
 import { User } from './entities/user.entity';
 
 import { CreateUserDto } from './dto/create-user.dto';
-import { PublicUserDto } from './dto/public-user.dto';
 import { UserDto } from './dto/user.dto';
 import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
+import { PublicUserDto, publicUserSchema } from './dto/public-user.dto';
 
 @Injectable()
 export class UserService {
@@ -52,18 +52,48 @@ export class UserService {
     });
   }
 
-  async updateExpoPushToken(userId: string, expoPushToken: string | undefined) {
+  async updateExpoPushToken(
+    userId: string,
+    expoPushToken: string | undefined,
+  ): Promise<void> {
     if (!Expo.isExpoPushToken(expoPushToken))
       throw new BadRequestException('Given token is invalid');
 
     await this.userRepository.update(userId, { expoPushToken });
   }
 
-  async findByPhoneNumber(phoneNumber: string) {
+  async findByPhoneNumber(phoneNumber: string): Promise<UserDto | null> {
     return await this.userRepository.findOne({ where: { phoneNumber } });
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<UserDto | null> {
     return await this.userRepository.findOne({ where: { email } });
+  }
+
+  async findUsersWithChanges(
+    ids: string[],
+    since: Date,
+  ): Promise<PublicUserDto[] | []> {
+    if (ids.length === 0) return [];
+
+    const users = await this.userRepository.find({
+      where: {
+        id: In(ids),
+        updatedAt: MoreThan(since),
+      },
+      select: [
+        'id',
+        'avatar',
+        'firstName',
+        'middleName',
+        'lastName',
+        'phoneNumber',
+        'email',
+        'createdAt',
+        'updatedAt',
+      ],
+    });
+
+    return users;
   }
 }

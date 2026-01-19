@@ -16,7 +16,10 @@ import { DirectChat, DirectChatDocument } from '../entities/direct-chat.entity';
 import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from '../workers/send-push-notification.worker';
 
 import { CreateDirectChatDto } from '../dto/direct-chat/create-direct-chat.dto';
-import { InsertChatDto } from '../dto/direct-chat/direct-chat.dto';
+
+import { ConversationDto } from '../dto/conversation.dto';
+import { InsertChatDto } from '../dto/direct-chat/insert-direct-chat.dto';
+import { DirectChatDto } from '../dto/direct-chat/direct-chat.dto';
 
 @Injectable()
 export class DirectChatService {
@@ -108,5 +111,97 @@ export class DirectChatService {
     });
 
     return conversation ? conversation._id : null;
+  }
+
+  async findConversationsContainingUser(
+    userId: string,
+    timestamp: Date,
+  ): Promise<ConversationDto[]> {
+    return await this.conversationModel.find({
+      participants: userId,
+      updatedAt: { $gt: timestamp },
+    });
+  }
+
+  async findAllUsersInConversationsWithUser(userId: string): Promise<string[]> {
+    const allUserConversations = await this.conversationModel
+      .find({ participants: userId })
+      .select('_id participants');
+
+    const contactIds = new Set<string>();
+
+    allUserConversations.forEach((c) => {
+      c.participants.forEach((p) => {
+        const participantId = p.toString();
+        // Only add if it's not the current user
+        if (participantId !== userId) {
+          contactIds.add(participantId);
+        }
+      });
+    });
+
+    return Array.from(contactIds);
+  }
+
+  async findChatsByConversationId(
+    conversationId: string,
+  ): Promise<ConversationDto[]> {
+    return await this.directChatModel.find({ conversationId });
+  }
+
+  async findUsersInConversation(conversationId: string) {
+    const conversation = await this.conversationModel
+      .findById(conversationId)
+      .select('participants');
+    return conversation ? conversation.participants : [];
+  }
+
+  async findChatsSince(
+    conversationId: string,
+    timestamp: Date,
+  ): Promise<DirectChatDto[]> {
+    return await this.directChatModel.find({
+      conversationId,
+      createdAt: { $gt: timestamp },
+    });
+  }
+
+  async findAllUserConversationsAndContacts(
+    userId: string,
+  ): Promise<{ conversationIds: string[]; contactIds: string[] }> {
+    const allUserConversations = await this.conversationModel
+      .find({ participants: userId })
+      .select('_id participants');
+
+    const contactIds = new Set<string>();
+    const conversationIds: string[] = [];
+
+    allUserConversations.forEach((c) => {
+      conversationIds.push(c._id.toString());
+      c.participants.forEach((p) => {
+        const participantId = p.toString();
+        if (participantId !== userId) {
+          contactIds.add(participantId);
+        }
+      });
+    });
+
+    return {
+      conversationIds,
+      contactIds: Array.from(contactIds),
+    };
+  }
+
+  async findChatsSinceForConversations(
+    conversationIds: string[],
+    timestamp: Date,
+  ): Promise<DirectChatDto[]> {
+    if (!conversationIds.length) return [];
+    return await this.directChatModel.find({
+      conversationId: {
+        $in: conversationIds.map((val) => new Types.ObjectId(val)),
+      },
+      createdAt: { $gt: timestamp },
+    });
   }
 }
