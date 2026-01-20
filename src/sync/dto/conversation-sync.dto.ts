@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const conversationSyncSchema = z.object({
   id: z.string(),
-  user_id: z.uuid(),
+  user_id: z.string(),
   created_at: z.number(),
   updated_at: z.number(),
 });

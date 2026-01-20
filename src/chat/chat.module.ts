@@ -13,6 +13,7 @@ import Expo from 'expo-server-sdk';
 import { DirectChatService } from './services/direct-chat.service';
 import { BullModule } from '@nestjs/bullmq';
 import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from './workers/send-push-notification.worker';
+import { ConversationService } from './services/conversation.service';
 
 @Module({
   imports: [
@@ -24,6 +25,6 @@ import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from './workers/send-push-notificat
     BullModule.registerQueue({ name: SEND_PUSH_NOTIFICATION_QUEUE_NAME }),
   ],
   controllers: [ChatController],
-  providers: [UserService, Expo, DirectChatService],
+  providers: [ConversationService, DirectChatService, UserService, Expo],
 })
 export class ChatModule {}

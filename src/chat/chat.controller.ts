@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { DirectChatService } from './services/direct-chat.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation } from '@nestjs/swagger';
 import { CreateDirectChatDto } from './dto/direct-chat/create-direct-chat.dto';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 
@@ -11,6 +11,12 @@ export class ChatController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/direct')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer JWT token',
+    required: true,
+    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
   @ApiOperation({ summary: 'Start a chat' })
   async create(
     @Body() createDirectChatDto: CreateDirectChatDto,

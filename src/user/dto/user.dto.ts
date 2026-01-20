@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { ApiParam, ApiProperty } from '@nestjs/swagger';
 
 export const userSchema = z.object({
   id: z.uuid(),
@@ -15,4 +16,10 @@ export const userSchema = z.object({
   updatedAt: z.any(), // TODO: workaround for now will fix later
 });
 
-export class UserDto extends createZodDto(userSchema) {}
+export class UserDto extends createZodDto(userSchema) {
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
+  createdAt: Date;
+
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
+  updatedAt: Date;
+}

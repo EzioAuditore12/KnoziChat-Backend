@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { ApiProperty } from '@nestjs/swagger';
 
 export const conversationSchema = z.object({
   _id: z.string(),
@@ -10,4 +11,10 @@ export const conversationSchema = z.object({
   __v: z.number(),
 });
 
-export class ConversationDto extends createZodDto(conversationSchema) {}
+export class ConversationDto extends createZodDto(conversationSchema) {
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
+  createdAt: Date;
+
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
+  updatedAt: Date;
+}

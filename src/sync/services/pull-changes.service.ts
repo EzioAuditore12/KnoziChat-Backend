@@ -1,22 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { UsersChangeDto } from './dto/changes/users-change.dto';
-import { ConversationsChangeDto } from './dto/changes/conversations-change.dto';
-import { DirectChatsChangeDto } from './dto/changes/direct-chats-change.dto';
-import { PullChangesResponseDto } from './dto/pull-changes/pull-changes-response.dto';
-import { PullChangesRequestDto } from './dto/pull-changes/pull-changes-request.dto';
+import { UsersChangeDto } from '../dto/changes/users-change.dto';
+import { ConversationsChangeDto } from '../dto/changes/conversations-change.dto';
+import { DirectChatsChangeDto } from '../dto/changes/direct-chats-change.dto';
+import { PullChangesResponseDto } from '../dto/pull-changes/pull-changes-response.dto';
+import { PullChangesRequestDto } from '../dto/pull-changes/pull-changes-request.dto';
 import { DirectChatService } from 'src/chat/services/direct-chat.service';
 import { PublicUserDto } from 'src/user/dto/public-user.dto';
-import { UserSyncDto } from './dto/user-sync.dto';
+import { UserSyncDto } from '../dto/user-sync.dto';
 import { ConversationDto } from 'src/chat/dto/conversation.dto';
-import { ConversationSyncDto } from './dto/conversation-sync.dto';
+import { ConversationSyncDto } from '../dto/conversation-sync.dto';
 import { DirectChatDto } from 'src/chat/dto/direct-chat/direct-chat.dto';
-import { DirectChatSyncDto } from './dto/direct-chat-sync.dto';
+import { DirectChatSyncDto } from '../dto/direct-chat-sync.dto';
+import { ConversationService } from 'src/chat/services/conversation.service';
 
 @Injectable()
-export class SyncService {
+export class PullChangeService {
   constructor(
     private readonly userService: UserService,
+    private readonly conversationService: ConversationService,
     private readonly directChatService: DirectChatService,
   ) {}
 
@@ -28,16 +30,12 @@ export class SyncService {
 
     const timestamp = new Date(lastSyncAt);
 
-    console.log('Timestamp is ', timestamp);
-
     const { contactIds, conversationIds } =
-      await this.directChatService.findAllUserConversationsAndContacts(userId);
-
-    console.log(contactIds, conversationIds);
+      await this.conversationService.findAllUserConversationsAndContacts(
+        userId,
+      );
 
     const userChanges = await this.pullUserChanges(contactIds, timestamp);
-
-    console.log(userChanges);
 
     const conversationChanges = await this.pullConversationChanges(
       userId,
@@ -89,7 +87,7 @@ export class SyncService {
     timestamp: Date,
   ): Promise<ConversationsChangeDto> {
     const conversations =
-      await this.directChatService.findConversationsContainingUser(
+      await this.conversationService.findConversationsContainingUser(
         userId,
         timestamp,
       );
@@ -148,8 +146,8 @@ export class SyncService {
       last_name: user.lastName,
       avatar: user.avatar ?? null,
       email: user.email ?? null,
-      created_at: (user.createdAt as Date).getTime(),
-      updated_at: (user.updatedAt as Date).getTime(),
+      created_at: user.createdAt.getTime(),
+      updated_at: user.updatedAt.getTime(),
     };
   }
 
@@ -162,8 +160,8 @@ export class SyncService {
       user_id: conversation.participants.find(
         (p: string) => p !== userId,
       ) as string,
-      created_at: (conversation.createdAt as Date).getTime(),
-      updated_at: (conversation.updatedAt as Date).getTime(),
+      created_at: conversation.createdAt.getTime(),
+      updated_at: conversation.updatedAt.getTime(),
     };
   }
 
@@ -178,8 +176,8 @@ export class SyncService {
       text: directChat.text,
       is_delivered: directChat.delivered,
       is_seen: directChat.seen,
-      created_at: (directChat.createdAt as Date).getTime(),
-      updated_at: (directChat.updatedAt as Date).getTime(),
+      created_at: directChat.createdAt.getTime(),
+      updated_at: directChat.updatedAt.getTime(),
     };
   }
 }
