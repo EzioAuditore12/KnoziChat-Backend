@@ -32,7 +32,12 @@ export class DirectChatService {
     const { receiverId, text } = createDirectChatDto;
 
     const { conversation, receiverPushToken } =
-      await this.conversationService.create(senderId, receiverId);
+      await this.conversationService.create(
+        senderId,
+        receiverId,
+        undefined,
+        new Date(),
+      );
 
     const createdMessage = await this.directChatModel.create({
       senderId,

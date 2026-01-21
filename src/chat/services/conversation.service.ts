@@ -38,6 +38,9 @@ export class ConversationService {
       receiverId,
     );
 
+    if (conversation && updatedAt)
+      this.updateConversationTime(conversation._id.toHexString(), updatedAt);
+
     if (!conversation)
       conversation = await this.createConversationBetweenTwoParticipants(
         senderId,
@@ -49,6 +52,12 @@ export class ConversationService {
     return { conversation, receiverPushToken: existingUser.expoPushToken };
   }
 
+  async updateConversationTime(conversationId: string, updatedAt: Date) {
+    await this.conversationModel.updateOne(
+      { _id: conversationId },
+      { $set: { updatedAt } },
+    );
+  }
   async findConversationBetweenSenderAndReceiver(
     senderId: string,
     receiverId: string,
