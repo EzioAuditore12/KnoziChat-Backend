@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { UserService } from 'src/user/user.service';
 import { UsersChangeDto } from '../dto/changes/users-change.dto';
 import { ConversationsChangeDto } from '../dto/changes/conversations-change.dto';
@@ -156,7 +157,7 @@ export class PullChangeService {
     conversation: ConversationDto,
   ): ConversationSyncDto {
     return {
-      id: conversation._id,
+      id: conversation._id.toHexString(),
       user_id: conversation.participants.find(
         (p: string) => p !== userId,
       ) as string,
@@ -170,8 +171,8 @@ export class PullChangeService {
     directChat: DirectChatDto,
   ): DirectChatSyncDto {
     return {
-      id: directChat._id,
-      conversation_id: directChat.conversationId,
+      id: directChat._id.toHexString(),
+      conversation_id: directChat.conversationId.toHexString(),
       mode: directChat.senderId === userId ? 'SENT' : 'RECEIVED',
       text: directChat.text,
       is_delivered: directChat.delivered,

@@ -13,7 +13,7 @@ import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from '../workers/send-push-notifica
 import { CreateDirectChatDto } from '../dto/direct-chat/create-direct-chat.dto';
 
 import { ConversationDto } from '../dto/conversation.dto';
-import { InsertChatDto } from '../dto/direct-chat/insert-direct-chat.dto';
+import { InsertDirectChatDto } from '../dto/direct-chat/insert-direct-chat.dto';
 import { DirectChatDto } from '../dto/direct-chat/direct-chat.dto';
 
 import { ConversationService } from './conversation.service';
@@ -52,22 +52,33 @@ export class DirectChatService {
     return createdMessage;
   }
 
-  async insertChat(senderId: string, insertChatDto: InsertChatDto) {
-    const { conversationId, text, _id, createdAt } = insertChatDto;
+  async insertChat(insertDirectChatDto: InsertDirectChatDto) {
+    const {
+      conversationId,
+      text,
+      createdAt,
+      updatedAt,
+      senderId,
+      seen,
+      delivered,
+    } = insertDirectChatDto;
 
     // 1. Lightweight check (Optional if you trust the client)
-    const exists =
-      await this.conversationService.isConversationExisting(conversationId);
+    const exists = await this.conversationService.isConversationExisting(
+      conversationId.toHexString(),
+    );
     if (!exists) throw new NotFoundException('No such conversation found');
 
     // 2. Run Create and Update in parallel
     const [insertedMessage] = await Promise.all([
       this.directChatModel.create({
-        _id,
         senderId,
         text,
         conversationId: new Types.ObjectId(conversationId),
-        createdAt,
+        seen,
+        delivered,
+        createdAt: createdAt ?? new Date(),
+        updatedAt: updatedAt ?? new Date(),
       }),
     ]);
 

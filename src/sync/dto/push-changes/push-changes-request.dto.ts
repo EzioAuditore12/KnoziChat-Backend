@@ -13,34 +13,25 @@ const changeSchema = z.object({
 
 export const conversationPushRequestChangeSchema = z
   .object({
+    tableName: z.enum(['conversations']),
     data: conversationSyncSchema,
   })
   .extend(changeSchema.shape);
 
 export const directChatPushRequestChangeSchema = z
   .object({
+    tableName: z.enum(['direct_chats']),
     data: directChatSyncSchema,
   })
   .extend(changeSchema.shape);
 
-export const universalChangeSchema = z
-  .object({
-    data: z.union([
-      conversationSyncSchema,
-      directChatSyncSchema,
-      userSyncSchema,
-    ]),
-  })
-  .extend(changeSchema.shape);
-
-export const changeRequestSchema = z
-  .object({
-    tableName: tableNamesSyncSchema,
-  })
-  .extend(universalChangeSchema.shape);
+export const universalChangeSchema = z.union([
+  conversationPushRequestChangeSchema,
+  directChatPushRequestChangeSchema,
+]);
 
 export const pushChangesRequestSchema = z.object({
-  changes: changeRequestSchema.array(),
+  changes: universalChangeSchema.array(),
 });
 
 export class ConversationPushRequestChangeDto extends createZodDto(
@@ -50,8 +41,6 @@ export class ConversationPushRequestChangeDto extends createZodDto(
 export class DirectChatPushRequestChangeDto extends createZodDto(
   directChatPushRequestChangeSchema,
 ) {}
-
-export class ChangeRequestSchemaDto extends createZodDto(changeRequestSchema) {}
 
 export class PushChangesRequestDto extends createZodDto(
   pushChangesRequestSchema,

@@ -19,7 +19,15 @@ export class ConversationService {
     private readonly userService: UserService,
   ) {}
 
-  async create(senderId: string, receiverId: string) {
+  async create(
+    senderId: string,
+    receiverId: string,
+    createdAt?: Date,
+    updatedAt?: Date,
+  ): Promise<{
+    conversation: ConversationDto;
+    receiverPushToken: string | undefined | null;
+  }> {
     const existingUser = await this.userService.findOne(receiverId);
 
     if (!existingUser)
@@ -34,6 +42,8 @@ export class ConversationService {
       conversation = await this.createConversationBetweenTwoParticipants(
         senderId,
         receiverId,
+        createdAt,
+        updatedAt,
       );
 
     return { conversation, receiverPushToken: existingUser.expoPushToken };
@@ -53,9 +63,13 @@ export class ConversationService {
   async createConversationBetweenTwoParticipants(
     senderId: string,
     receiverId: string,
+    createdAt?: Date,
+    updatedAt?: Date,
   ) {
     return await this.conversationModel.create({
       participants: [senderId, receiverId],
+      createdAt: createdAt ?? new Date(),
+      updatedAt: updatedAt ?? new Date(),
     });
   }
 

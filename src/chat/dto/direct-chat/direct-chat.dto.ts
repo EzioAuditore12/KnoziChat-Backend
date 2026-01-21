@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { objectIdSchema } from 'src/common/schemas/object-id.schema';
 
 export const directChatSchema = z.object({
-  _id: z.any(),
-  conversationId: z.any(),
+  _id: objectIdSchema,
+  conversationId: objectIdSchema,
   senderId: z.string(),
   text: z.string().nonempty().max(1000),
   delivered: z.boolean(),
