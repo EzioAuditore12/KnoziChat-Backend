@@ -14,6 +14,12 @@ import { DirectChatService } from './services/direct-chat.service';
 import { BullModule } from '@nestjs/bullmq';
 import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from './workers/send-push-notification.worker';
 import { ConversationService } from './services/conversation.service';
+import { ChatGateway } from './chat.gateway';
+import { WSAuthMiddleware } from 'src/auth/middlewares/ws-auth.middleware';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
+import { ConfigModule } from '@nestjs/config';
+import jwtConfig from 'src/auth/configs/jwt.config';
 
 @Module({
   imports: [
@@ -23,8 +29,16 @@ import { ConversationService } from './services/conversation.service';
     ]),
     TypeOrmModule.forFeature([User]),
     BullModule.registerQueue({ name: SEND_PUSH_NOTIFICATION_QUEUE_NAME }),
+    ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [ChatController],
-  providers: [ConversationService, DirectChatService, UserService, Expo],
+  providers: [
+    ConversationService,
+    DirectChatService,
+    ChatGateway,
+    UserService,
+    Expo,
+  ],
 })
 export class ChatModule {}

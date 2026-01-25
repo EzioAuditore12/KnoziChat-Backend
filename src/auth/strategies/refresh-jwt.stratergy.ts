@@ -36,8 +36,6 @@ export class RefreshJwtStrategy extends PassportStrategy(
     const userId = payload.sub;
     const refreshToken = body['refreshToken'] as string;
 
-    console.log('User id inside refresh token is');
-
     const isBlackListedRefreshToken =
       await this.refreshService.findBlackListedRefreshToken(refreshToken);
 
