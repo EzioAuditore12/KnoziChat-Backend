@@ -17,9 +17,9 @@ export const userSchema = z.object({
 });
 
 export class UserDto extends createZodDto(userSchema) {
-  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z', format: 'date-time' })
   createdAt: Date;
 
-  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z', format: 'date-time' })
   updatedAt: Date;
 }

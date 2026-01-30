@@ -15,7 +15,7 @@ export function openApiDocsInit(app: NestFastifyApplication) {
     '/api',
     apiReference({
       content: document,
-      theme: 'elysiajs',
+      theme: 'fastify',
       withFastify: true,
     }),
   );

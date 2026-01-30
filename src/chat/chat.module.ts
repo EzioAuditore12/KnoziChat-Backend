@@ -20,6 +20,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from 'src/auth/configs/jwt.config';
+import { ChatService } from './services/chat.service';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import jwtConfig from 'src/auth/configs/jwt.config';
   ],
   controllers: [ChatController],
   providers: [
+    ChatService,
     ConversationService,
     DirectChatService,
     ChatGateway,

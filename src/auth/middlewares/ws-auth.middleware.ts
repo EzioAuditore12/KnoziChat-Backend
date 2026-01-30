@@ -4,7 +4,6 @@ import type {
   AuthJwtPayload,
   SocketError,
 } from '../types/auth-jwt-payload';
-import { Logger } from '@nestjs/common';
 
 export const WSAuthMiddleware = (jwtService: JwtService) => {
   return (socket: AuthenticatedSocket, next: (err?: any) => void) => {
@@ -18,8 +17,6 @@ export const WSAuthMiddleware = (jwtService: JwtService) => {
 
     try {
       const payload: AuthJwtPayload = jwtService.verify(token);
-
-      Logger.log(token);
 
       socket.handshake.user = { id: payload.sub };
       next();

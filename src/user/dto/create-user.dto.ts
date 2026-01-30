@@ -9,10 +9,4 @@ export const createUserSchema = userSchema.omit({
   updatedAt: true,
 });
 
-export class CreateUserDto extends createZodDto(createUserSchema) {
-  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
-  createdAt: Date;
-
-  @ApiProperty({ example: '2025-09-14T12:34:56.789Z' })
-  updatedAt: Date;
-}
+export class CreateUserDto extends createZodDto(createUserSchema) {}
