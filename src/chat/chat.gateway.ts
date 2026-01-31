@@ -91,7 +91,8 @@ export class ChatGateway
       sendMessageDto,
     );
 
-    this.server
+    // Use broadcast to send to everyone EXCEPT the sender
+    client.broadcast
       .to(`conversation:${sendMessageDto.conversationId}`)
       .emit('message:receive', savedMessage);
   }

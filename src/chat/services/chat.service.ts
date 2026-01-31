@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Server } from 'socket.io';
+import { Types } from 'mongoose';
 
 import { WSAuthMiddleware } from 'src/auth/middlewares/ws-auth.middleware';
 import type { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
+
 import { DirectChatService } from './direct-chat.service';
 import { SendMessageDto } from '../dto/message/send-message.dto';
 
@@ -39,10 +41,11 @@ export class ChatService {
   ) {
     const userId = client.handshake.user.id;
 
-    const { conversationId, text, createdAt, updatedAt } = sendMessageDto;
+    const { _id, conversationId, text, createdAt, updatedAt } = sendMessageDto;
 
     const sentMessage = await this.directChatService.insertChat({
-      conversationId,
+      _id,
+      conversationId: new Types.ObjectId(conversationId),
       senderId: userId,
       delivered: true,
       seen: false,

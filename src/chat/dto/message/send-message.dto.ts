@@ -5,7 +5,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { objectIdSchema } from 'src/common/schemas/object-id.schema';
 
 export const sendMessageSchema = z.object({
-  conversationId: objectIdSchema,
+  _id: z.string(),
+  conversationId: z.string(),
   text: z.string().max(1000),
   createdAt: z.any(),
   updatedAt: z.any(),

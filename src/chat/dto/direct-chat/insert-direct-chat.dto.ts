@@ -7,6 +7,7 @@ import { directChatSchema } from './direct-chat.dto';
 export const insertDirectChatSchema = directChatSchema
   .omit({ _id: true, __v: true })
   .extend({
+    _id: z.string().optional(),
     createdAt: z.any().optional(),
     updatedAt: z.any().optional(),
   });

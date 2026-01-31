@@ -52,7 +52,10 @@ export class ConversationService {
     return { conversation, receiverPushToken: existingUser.expoPushToken };
   }
 
-  async updateConversationTime(conversationId: string, updatedAt: Date) {
+  async updateConversationTime(
+    conversationId: string | Types.ObjectId,
+    updatedAt: Date,
+  ) {
     await this.conversationModel.updateOne(
       { _id: conversationId },
       { $set: { updatedAt } },

@@ -59,6 +59,7 @@ export class DirectChatService {
 
   async insertChat(insertDirectChatDto: InsertDirectChatDto) {
     const {
+      _id,
       conversationId,
       text,
       createdAt,
@@ -77,6 +78,7 @@ export class DirectChatService {
     // 2. Run Create and Update in parallel
     const [insertedMessage] = await Promise.all([
       this.directChatModel.create({
+        _id: new Types.ObjectId(_id) ?? new Types.ObjectId(),
         senderId,
         text,
         conversationId: new Types.ObjectId(conversationId),
@@ -86,6 +88,11 @@ export class DirectChatService {
         updatedAt: updatedAt ?? new Date(),
       }),
     ]);
+
+    await this.conversationService.updateConversationTime(
+      conversationId,
+      updatedAt ?? new Date(),
+    );
 
     return insertedMessage;
   }
