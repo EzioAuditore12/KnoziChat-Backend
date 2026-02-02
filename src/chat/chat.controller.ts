@@ -5,6 +5,7 @@ import { ApiHeader, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateDirectChatDto } from './dto/direct-chat/create-direct-chat.dto';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 import { ConversationDto } from './dto/conversation.dto';
+import { directChatSchema } from './dto/direct-chat/direct-chat.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -23,10 +24,12 @@ export class ChatController {
   async create(
     @Body() createDirectChatDto: CreateDirectChatDto,
     @Req() req: AuthRequest,
-  ) {
-    return await this.directChatService.create(
+  ): Promise<any> {
+    const chat = await this.directChatService.create(
       req.user.id,
       createDirectChatDto,
     );
+
+    return { ...chat, receiverId: createDirectChatDto.receiverId };
   }
 }

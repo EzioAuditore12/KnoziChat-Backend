@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Types } from 'mongoose';
 
 export const objectIdSchema = z
-  .string()
+  .any()
   .refine((val) => Types.ObjectId.isValid(val), { message: 'Invalid ObjectId' })
   .transform((val) => new Types.ObjectId(val));
 

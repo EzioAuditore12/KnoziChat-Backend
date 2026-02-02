@@ -14,7 +14,10 @@ import { CreateDirectChatDto } from '../dto/direct-chat/create-direct-chat.dto';
 
 import { ConversationDto } from '../dto/conversation.dto';
 import { InsertDirectChatDto } from '../dto/direct-chat/insert-direct-chat.dto';
-import { DirectChatDto } from '../dto/direct-chat/direct-chat.dto';
+import {
+  DirectChatDto,
+  directChatSchema,
+} from '../dto/direct-chat/direct-chat.dto';
 
 import { ConversationService } from './conversation.service';
 
@@ -54,7 +57,7 @@ export class DirectChatService {
       await this.sendPushNotificationQueue.add('process', ticket);
     }
 
-    return createdMessage;
+    return directChatSchema.strip().parse(createdMessage);
   }
 
   async insertChat(insertDirectChatDto: InsertDirectChatDto) {
