@@ -36,12 +36,41 @@ export class PullChangeService {
         userId,
       );
 
-    const userChanges = await this.pullUserChanges(contactIds, timestamp);
-
     const conversationChanges = await this.pullConversationChanges(
       userId,
       timestamp,
     );
+
+    // 1. Collect all user IDs involved in the changed conversations
+    const involvedUserIds = new Set<string>();
+    const collectUserIds = (c: ConversationSyncDto) => {
+      if (c.user_id) involvedUserIds.add(c.user_id);
+    };
+    conversationChanges.created.forEach(collectUserIds);
+    conversationChanges.updated.forEach(collectUserIds);
+
+    // 2. Pull standard user changes for known contacts
+    const userChanges = await this.pullUserChanges(contactIds, timestamp);
+
+    // 3. Identify users involved in conversations who are NOT in the synced user changes
+    const syncedUserIds = new Set<string>([
+      ...userChanges.created.map((u) => u.id),
+      ...userChanges.updated.map((u) => u.id),
+    ]);
+
+    const missingUserIds = Array.from(involvedUserIds).filter(
+      (id) => !syncedUserIds.has(id),
+    );
+
+    // 4. If there are missing users, fetch them treating them as 'created' (new to context)
+    // We use a timestamp of 0 to ensure the filter (created_at > timestamp) includes them
+    if (missingUserIds.length > 0) {
+      const missingUsersDto = await this.pullUserChanges(
+        missingUserIds,
+        new Date(0),
+      );
+      userChanges.created.push(...missingUsersDto.created);
+    }
 
     const directChatChanges = await this.pullDirectChatChanges(
       userId,
