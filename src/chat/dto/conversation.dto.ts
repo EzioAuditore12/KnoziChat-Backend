@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+
 import { objectIdSchema } from 'src/common/schemas/object-id.schema';
-import { ObjectId, Types } from 'mongoose';
 
 export const conversationSchema = z.object({
   _id: objectIdSchema,

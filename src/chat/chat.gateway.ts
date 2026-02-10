@@ -95,5 +95,10 @@ export class ChatGateway
     client.broadcast
       .to(`conversation:${sendMessageDto.conversationId}`)
       .emit('message:receive', savedMessage);
+
+    this.server
+      .to(`user:${sendMessageDto.receiverId}`)
+      .except(`conversation:${sendMessageDto.conversationId}`)
+      .emit('message:receive', savedMessage);
   }
 }

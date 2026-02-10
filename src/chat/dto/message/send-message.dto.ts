@@ -7,6 +7,7 @@ import { objectIdSchema } from 'src/common/schemas/object-id.schema';
 export const sendMessageSchema = z.object({
   _id: z.string(),
   conversationId: z.string(),
+  receiverId: z.string(),
   text: z.string().max(1000),
   createdAt: z.any(),
   updatedAt: z.any(),
