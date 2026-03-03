@@ -8,7 +8,7 @@ import {
   ConversationOneToOneSyncChangeDto,
   ConversationOneToOneSyncDto,
 } from './dto/conversation-one-to-one-sync.dto';
-import { UserSyncChangeDto, UserSyncDto } from './dto/user-sync.dto';
+import { UserSyncChangeDto } from './dto/user-sync.dto';
 import {
   ChatsOneToOneSyncChangeDto,
   ChatsOneToOneSyncDto,
