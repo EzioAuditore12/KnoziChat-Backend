@@ -1,16 +1,19 @@
-import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export const userSyncSchema = z.object({
-  id: z.string(),
-  first_name: z.string().min(1).max(50),
-  middle_name: z.string().min(1).max(50).nullable(),
-  last_name: z.string().min(1).max(50),
-  phone_number: z.string(),
-  email: z.email().nullable(),
-  avatar: z.url().nullable(),
-  created_at: z.number(),
-  updated_at: z.number(),
+import { publicUserSchema } from 'src/user/dto/public-user.dto';
+
+export const userSyncSchema = publicUserSchema.extend({
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export const userSyncChangeSchema = z.object({
+  created: z.array(userSyncSchema),
+  updated: z.array(userSyncSchema),
+  deleted: z.array(z.uuid()),
 });
 
 export class UserSyncDto extends createZodDto(userSyncSchema) {}
+
+export class UserSyncChangeDto extends createZodDto(userSyncChangeSchema) {}

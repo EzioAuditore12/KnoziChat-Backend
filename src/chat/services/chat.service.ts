@@ -1,30 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
-import { Types } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
 
+import { ChatsOneToOneService } from './one-to-one/chats-one-to-one.service';
 import { WSAuthMiddleware } from 'src/auth/middlewares/ws-auth.middleware';
-import type { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
-
-import { DirectChatService } from './direct-chat.service';
-import { SendMessageDto } from '../dto/message/send-message.dto';
+import { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
+import { InsertOneToOneChatDto } from '../dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
+import { ChatsOneToOneDto } from '../dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
 
 @Injectable()
 export class ChatService {
   constructor(
+    private readonly chatsOneToOneService: ChatsOneToOneService,
     private readonly jwtService: JwtService,
-    private readonly directChatService: DirectChatService,
   ) {}
 
-  init(server: Server): void {
+  public afterInit(server: Server): void {
     const wsAuthMiddleware = WSAuthMiddleware(this.jwtService);
 
     server.use(wsAuthMiddleware);
   }
 
-  handleConnect(
+  public handleConnect(
     client: AuthenticatedSocket,
-  ): { userId: string; socketId: string } | undefined {
+    server: Server,
+    onlineUsers: Map<string, string>,
+  ): void {
     const userId = client.handshake.user.id;
 
     if (!userId) {
@@ -32,28 +33,62 @@ export class ChatService {
       return;
     }
 
-    return { userId, socketId: client.id };
+    Logger.log('User connected', userId);
+
+    onlineUsers.set(userId, client.id);
+
+    client.join(`user:${userId}`);
+
+    server.emit('online:users', Array.from(onlineUsers.keys()));
   }
 
-  async sendMessage(
+  public handleDisconnect(
     client: AuthenticatedSocket,
-    sendMessageDto: SendMessageDto,
+    server: Server,
+    onlineUsers: Map<string, string>,
   ) {
     const userId = client.handshake.user.id;
 
-    const { _id, conversationId, text, createdAt, updatedAt } = sendMessageDto;
+    const newSocketId = client.id;
 
-    const sentMessage = await this.directChatService.insertChat({
-      _id,
-      conversationId: new Types.ObjectId(conversationId),
-      senderId: userId,
-      delivered: true,
-      seen: false,
-      text,
-      createdAt,
-      updatedAt,
-    });
+    if (userId && onlineUsers.get(userId) === newSocketId) {
+      onlineUsers.delete(userId);
 
-    return sentMessage;
+      server.emit('online:users', Array.from(onlineUsers.keys()));
+
+      Logger.log('Disconnected', userId);
+
+      client.disconnect();
+
+      return;
+    }
+  }
+
+  public async joinConversation(
+    client: AuthenticatedSocket,
+    conversationId: string,
+  ) {
+    const userId = client.handshake.user.id;
+
+    Logger.log(`${userId} joining the room ${conversationId}`);
+
+    await client.join(`conversation:${conversationId}`);
+  }
+
+  public async leaveConversation(
+    client: AuthenticatedSocket,
+    conversationId: string,
+  ) {
+    const userId = client.handshake.user.id;
+
+    Logger.log(`${userId} leaving the room ${conversationId}`);
+
+    await client.leave(`conversation:${conversationId}`);
+  }
+
+  public async saveMessage(
+    insertOneToOneChatDto: InsertOneToOneChatDto,
+  ): Promise<ChatsOneToOneDto> {
+    return await this.chatsOneToOneService.insert(insertOneToOneChatDto);
   }
 }

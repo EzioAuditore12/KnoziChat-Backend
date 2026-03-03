@@ -1,44 +1,54 @@
 import { Module } from '@nestjs/common';
-import { ChatController } from './chat.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { DirectChat, DirectChatSchema } from './entities/direct-chat.entity';
+import { ChatGateway } from './chat.gateway';
+
 import {
-  Conversation,
-  ConversationSchema,
-} from './entities/conversation.entity';
+  ConversationOneToOne,
+  ConversationOneToOneSchema,
+} from './entities/one-to-one/conversation-one-to-one.entity';
+import {
+  ChatsOneToOne,
+  ChatsOneToOneSchema,
+} from './entities/one-to-one/chats-one-to-one.entity';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ChatController } from './chat.controller';
+import { UserService } from 'src/user/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
-import { UserService } from 'src/user/user.service';
-import Expo from 'expo-server-sdk';
-import { DirectChatService } from './services/direct-chat.service';
-import { BullModule } from '@nestjs/bullmq';
-import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from './workers/send-push-notification.worker';
-import { ConversationService } from './services/conversation.service';
-import { ChatGateway } from './chat.gateway';
-import { JwtModule } from '@nestjs/jwt';
+import { ChatsOneToOneService } from './services/one-to-one/chats-one-to-one.service';
+import { ConversationOneToOneService } from './services/one-to-one/conversation-one-to-one.service';
+import { ChatService } from './services/chat.service';
 import { ConfigModule } from '@nestjs/config';
 import jwtConfig from 'src/auth/configs/jwt.config';
-import { ChatService } from './services/chat.service';
+import { JwtModule } from '@nestjs/jwt';
+import {
+  ConversationGroup,
+  ConversationGroupSchema,
+} from './entities/group/conversation-group.entity';
+import { ChatsGroup, ChatsGroupSchema } from './entities/group/chats-group';
+import { ConversationGroupService } from './services/group/conversation-group.service';
+import { ChatsGroupService } from './services/group/chats-group.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: DirectChat.name, schema: DirectChatSchema },
-      { name: Conversation.name, schema: ConversationSchema },
-    ]),
     TypeOrmModule.forFeature([User]),
-    BullModule.registerQueue({ name: SEND_PUSH_NOTIFICATION_QUEUE_NAME }),
+    MongooseModule.forFeature([
+      { name: ConversationOneToOne.name, schema: ConversationOneToOneSchema },
+      { name: ChatsOneToOne.name, schema: ChatsOneToOneSchema },
+      { name: ConversationGroup.name, schema: ConversationGroupSchema },
+      { name: ChatsGroup.name, schema: ChatsGroupSchema },
+    ]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [ChatController],
   providers: [
-    ChatService,
-    ConversationService,
-    DirectChatService,
     ChatGateway,
+    ChatService,
+    ChatsOneToOneService,
+    ConversationOneToOneService,
+    ConversationGroupService,
+    ChatsGroupService,
     UserService,
-    Expo,
   ],
 })
 export class ChatModule {}

@@ -1,11 +1,10 @@
 import { z } from 'zod';
+import { tableNamesSchema } from '../table-names-sync.dto';
 import { createZodDto } from 'nestjs-zod';
 
-import { tableNamesSyncSchema } from '../table-names-sync.dto';
-
 export const pullChangesRequestSchema = z.object({
-  lastSyncAt: z.number().optional().default(0),
-  tables: tableNamesSyncSchema.array(),
+  lastSyncedAt: z.number().default(0),
+  tableNames: tableNamesSchema,
 });
 
 export class PullChangesRequestDto extends createZodDto(
