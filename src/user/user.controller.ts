@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
   Param,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +18,7 @@ import { SearchUserDto } from './dto/search-user/search-user.dto';
 import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
+import { MultipleUuidDto } from 'src/common/dto/multiple-uuid.dto';
 
 @Controller('user')
 export class UserController {
@@ -53,5 +56,15 @@ export class UserController {
     const user = await this.userService.findOne(req.user.id);
 
     return publicUserSchema.strip().parse(user);
+  }
+
+  @Post('multiple')
+  @ApiResponse({ type: [PublicUserDto] })
+  async findMutilple(@Body() multipleUuidDto: MultipleUuidDto) {
+    const users = await this.userService.findMultipleById(
+      multipleUuidDto.participants,
+    );
+
+    return users;
   }
 }

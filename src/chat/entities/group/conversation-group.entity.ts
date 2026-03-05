@@ -22,8 +22,8 @@ export class ConversationGroup {
   })
   admins: string[];
 
-  @Prop({ required: false })
-  avatar?: string;
+  @Prop({ type: String, required: false, default: null })
+  avatar: string | null;
 
   @Prop({
     type: [String],
