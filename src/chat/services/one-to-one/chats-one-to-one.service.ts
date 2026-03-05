@@ -25,7 +25,7 @@ export class ChatsOneToOneService {
     private readonly chatsOneToOneRepository: Model<ChatsOneToOneDocument>,
   ) {}
 
-  async startNewConversation(
+  public async startNewConversation(
     senderId: string,
     startNewConversationDto: StartNewConversationDto,
   ): Promise<StartNewConversationResponseDto> {
@@ -53,13 +53,13 @@ export class ChatsOneToOneService {
     };
   }
 
-  async insert(
+  public async insert(
     insertOneToOneChatDto: InsertOneToOneChatDto,
   ): Promise<ChatsOneToOneDto> {
     const { id, conversationId, senderId, status, text, createdAt, updatedAt } =
       insertOneToOneChatDto;
 
-    const insertedChat = await this.chatsOneToOneRepository.create({
+    const insertedChat = await this.chatsOneToOneRepository.insertOne({
       _id: id ? BigInt(id) : new SnowFlakeId(1).generate(),
       conversationId: BigInt(conversationId),
       senderId,
@@ -77,15 +77,15 @@ export class ChatsOneToOneService {
     return convertChatsOneToOneFromMongoose.parse(insertedChat);
   }
 
-  async findChatsByConversationId(
+  public async findChatsByConversationId(
     conversationId: bigint,
   ): Promise<ChatsOneToOneDto[]> {
     const chats = await this.chatsOneToOneRepository.find({ conversationId });
 
-    return chatsOneToOneSchema.array().parse(chats);
+    return convertChatsOneToOneFromMongoose.array().parse(chats);
   }
 
-  async findChatsSince(
+  public async findChatsSince(
     conversationId: bigint,
     timestamp: Date,
   ): Promise<ChatsOneToOneDto[]> {
@@ -94,10 +94,10 @@ export class ChatsOneToOneService {
       createdAt: { $gt: timestamp },
     });
 
-    return chatsOneToOneSchema.array().parse(chats);
+    return convertChatsOneToOneFromMongoose.array().parse(chats);
   }
 
-  async findChatsSinceForConversations(
+  public async findChatsSinceForConversations(
     conversationIds: string[],
     timestamp: Date,
   ): Promise<ChatsOneToOneDto[]> {
@@ -109,6 +109,6 @@ export class ChatsOneToOneService {
       createdAt: { $gt: timestamp },
     });
 
-    return chatsOneToOneSchema.array().parse(chats);
+    return convertChatsOneToOneFromMongoose.array().parse(chats);
   }
 }

@@ -46,4 +46,57 @@ export class ConversationGroupService {
 
     return convertConversationGroupSchemaFromMongoose.parse(conversation);
   }
+
+  public async isExistingConversation(id: bigint): Promise<boolean> {
+    const exists = await this.conversationsGroupModel.exists({ _id: id });
+    return !!exists;
+  }
+
+  public async updateTime(id: bigint, time?: Date) {
+    await this.conversationsGroupModel.updateOne(
+      { _id: id },
+      { $max: { updatedAt: time ?? new Date() } },
+    );
+  }
+
+  public async findAllUserConversationsAndContacts(
+    userId: string,
+  ): Promise<{ conversationIds: string[]; contactIds: string[] }> {
+    const allUserConversations = await this.conversationsGroupModel
+      .find({
+        participants: userId,
+      })
+      .select('_id participants');
+    const contactIds = new Set<string>();
+    const conversationIds: string[] = [];
+
+    allUserConversations.forEach((c) => {
+      conversationIds.push(c._id.toString());
+      c.participants.forEach((p) => {
+        const participantId = p.toString();
+        if (participantId !== userId) {
+          contactIds.add(participantId);
+        }
+      });
+    });
+
+    return {
+      conversationIds,
+      contactIds: Array.from(contactIds),
+    };
+  }
+
+  public async findConversationsContainingUser(
+    userId: string,
+    timestamp: Date,
+  ): Promise<ConversationGroupDto[]> {
+    const conversations = await this.conversationsGroupModel.find({
+      participants: userId,
+      updatedAt: { $gt: timestamp },
+    });
+
+    return convertConversationGroupSchemaFromMongoose
+      .array()
+      .parse(conversations);
+  }
 }

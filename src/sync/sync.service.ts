@@ -13,6 +13,16 @@ import {
   ChatsOneToOneSyncChangeDto,
   ChatsOneToOneSyncDto,
 } from './dto/chats-one-to-one-sync.dto';
+import { ConversationGroupService } from 'src/chat/services/group/conversation-group.service';
+import { ChatsGroupService } from 'src/chat/services/group/chats-group.service';
+import {
+  ChatsGroupSyncChangeDto,
+  ChatsGroupSyncDto,
+} from './dto/chats-group-sync.dto';
+import {
+  ConversationGroupSyncChangeDto,
+  ConversationGroupSyncDto,
+} from './dto/conversation-group-sync.shema';
 
 @Injectable()
 export class SyncService {
@@ -20,6 +30,8 @@ export class SyncService {
     private readonly userService: UserService,
     private readonly conversationOneToOneService: ConversationOneToOneService,
     private readonly chatsOneToOneService: ChatsOneToOneService,
+    private readonly conversationGroupService: ConversationGroupService,
+    private readonly chatsGroupService: ChatsGroupService,
   ) {}
 
   public async pullChanges(
@@ -35,14 +47,36 @@ export class SyncService {
         userId,
       );
 
+    const {
+      contactIds: groupParticipantIds,
+      conversationIds: groupConversationIds,
+    } =
+      await this.conversationGroupService.findAllUserConversationsAndContacts(
+        userId,
+      );
+
     const conversationOneToOneChanges =
       await this.pullOneToOneConversationChanges(userId, timestamp);
 
-    const involvedUserIds = this.findAllInvolvedUserIds(
-      conversationOneToOneChanges,
+    const conversationGroupChanges = await this.pullGroupConversationChanges(
+      userId,
+      timestamp,
     );
 
-    const userChanges = await this.pullUserChanges(contactIds, timestamp);
+    const involvedUserIds = this.findAllInvolvedUserIds(
+      conversationOneToOneChanges,
+      conversationGroupChanges,
+    );
+
+    // Combine 1-to-1 contacts and group participants
+    const allKnownContactIds = Array.from(
+      new Set([...contactIds, ...groupParticipantIds]),
+    );
+
+    const userChanges = await this.pullUserChanges(
+      allKnownContactIds,
+      timestamp,
+    );
 
     await this.addMissingUserDetails(userChanges, involvedUserIds);
 
@@ -52,12 +86,19 @@ export class SyncService {
       timestamp,
     );
 
+    const chatsGroupChanges = await this.pullGroupChatsChanges(
+      groupConversationIds,
+      timestamp,
+    );
+
     return {
       timestamp: Date.now(),
       changes: {
         user: userChanges,
         conversationOneToOne: conversationOneToOneChanges,
+        conversationGroup: conversationGroupChanges,
         chatsOneToOne: chatsOneToOneChanges,
+        chatsGroup: chatsGroupChanges,
       },
     };
   }
@@ -72,15 +113,52 @@ export class SyncService {
         timestamp,
       );
 
-    const mappedConversations = conversations.map((c) => {
-      const { participants, ...rest } = c;
-      return {
-        ...rest,
-        userId: participants.find((id) => id !== userId) as string,
-        createdAt: c.createdAt.getTime(),
-        updatedAt: c.updatedAt.getTime(),
-      };
-    });
+    const mappedConversations: ConversationOneToOneSyncDto[] =
+      conversations.map((c) => {
+        const { participants, ...rest } = c;
+        return {
+          ...rest,
+          userId: participants.find((id) => id !== userId) as string,
+          createdAt: c.createdAt.getTime(),
+          updatedAt: c.updatedAt.getTime(),
+        };
+      });
+
+    return {
+      created: mappedConversations.filter(
+        (c) => c.createdAt > timestamp.getTime(),
+      ),
+      updated: mappedConversations.filter(
+        (c) =>
+          c.createdAt <= timestamp.getTime() &&
+          c.updatedAt > timestamp.getTime(),
+      ),
+      deleted: [],
+    };
+  }
+
+  private async pullGroupConversationChanges(
+    userId: string,
+    timestamp: Date,
+  ): Promise<ConversationGroupSyncChangeDto> {
+    const conversations =
+      await this.conversationGroupService.findConversationsContainingUser(
+        userId,
+        timestamp,
+      );
+
+    const mappedConversations: ConversationGroupSyncDto[] = conversations.map(
+      (c) => {
+        const { createdAt, updatedAt, participants, admins, ...rest } = c;
+        return {
+          ...rest,
+          participantIds: participants,
+          adminIds: admins,
+          createdAt: createdAt.getTime(),
+          updatedAt: updatedAt.getTime(),
+        };
+      },
+    );
 
     return {
       created: mappedConversations.filter(
@@ -176,16 +254,56 @@ export class SyncService {
     };
   }
 
+  private async pullGroupChatsChanges(
+    conversationIds: string[],
+    timestamp: Date,
+  ): Promise<ChatsGroupSyncChangeDto> {
+    const chats = await this.chatsGroupService.findChatsSinceForConversations(
+      conversationIds,
+      timestamp,
+    );
+
+    const mappedChats: ChatsGroupSyncDto[] = chats.map((c) => {
+      const { createdAt, updatedAt, ...rest } = c;
+
+      return {
+        ...rest,
+        createdAt: createdAt.getTime(),
+        updatedAt: updatedAt.getTime(),
+      };
+    });
+
+    return {
+      created: mappedChats.filter((d) => d.createdAt > timestamp.getTime()),
+      updated: mappedChats.filter(
+        (d) =>
+          d.createdAt <= timestamp.getTime() &&
+          d.updatedAt > timestamp.getTime(),
+      ),
+      deleted: [],
+    };
+  }
+
   private findAllInvolvedUserIds(
-    conversationChanges: ConversationOneToOneSyncChangeDto,
+    conversationOneToOneChanges: ConversationOneToOneSyncChangeDto,
+    conversationGroupChanges: ConversationGroupSyncChangeDto,
   ): Set<string> {
     const involvedUserIds = new Set<string>();
-    const collectUserIds = (c: ConversationOneToOneSyncDto) => {
+
+    const collectOneToOneUserIds = (c: ConversationOneToOneSyncDto) => {
       if (c.userId) involvedUserIds.add(c.userId);
     };
 
-    conversationChanges.created.forEach(collectUserIds);
-    conversationChanges.updated.forEach(collectUserIds);
+    const collectGroupUserIds = (c: ConversationGroupSyncDto) => {
+      c.participantIds?.forEach((id) => involvedUserIds.add(id));
+      c.adminIds?.forEach((id) => involvedUserIds.add(id));
+    };
+
+    conversationOneToOneChanges.created.forEach(collectOneToOneUserIds);
+    conversationOneToOneChanges.updated.forEach(collectOneToOneUserIds);
+
+    conversationGroupChanges.created.forEach(collectGroupUserIds);
+    conversationGroupChanges.updated.forEach(collectGroupUserIds);
 
     return involvedUserIds;
   }
