@@ -29,6 +29,21 @@ export class UserService {
     return user;
   }
 
+  public async areExistingUsers(ids: string[]): Promise<boolean> {
+    const count = await this.userRepository.count({
+      where: { id: In(ids) },
+    });
+    return count === ids.length;
+  }
+
+  public async findMultipleById(ids: string[]): Promise<PublicUserDto[]> {
+    const users = await this.userRepository.find({
+      where: { id: In(ids) },
+    });
+
+    return publicUserSchema.strip().array().parse(users);
+  }
+
   async findAll(query: PaginateQuery): Promise<SerachUserResponseDto> {
     return paginate(query, this.userRepository, {
       sortableColumns: ['firstName', 'middleName', 'lastName'],

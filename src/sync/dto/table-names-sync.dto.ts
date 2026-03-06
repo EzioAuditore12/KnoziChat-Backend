@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
-export const tableNamesSyncSchema = z.enum([
-  'conversations',
-  'direct_chats',
-  'users',
-]);
+export const tableNamesSchema = z
+  .enum([
+    'CONVERSATION-ONE-TO-ONE',
+    'CHAT-ONE-TO-ONE',
+    'USER',
+    'CONVERSATION-GROUP',
+    'CHAT-GROUP',
+  ])
+  .array();

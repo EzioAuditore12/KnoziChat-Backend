@@ -1,41 +1,50 @@
 import { Module } from '@nestjs/common';
 
-import { SyncController } from './sync.controller';
+import {
+  ConversationOneToOne,
+  ConversationOneToOneSchema,
+} from 'src/chat/entities/one-to-one/conversation-one-to-one.entity';
+import {
+  ChatsOneToOne,
+  ChatsOneToOneSchema,
+} from 'src/chat/entities/one-to-one/chats-one-to-one.entity';
+import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from 'src/user/user.service';
-import { DirectChatService } from 'src/chat/services/direct-chat.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ChatsOneToOneService } from 'src/chat/services/one-to-one/chats-one-to-one.service';
+import { ConversationOneToOneService } from 'src/chat/services/one-to-one/conversation-one-to-one.service';
+import { SyncController } from './sync.controller';
+import { SyncService } from './sync.service';
 import {
-  DirectChat,
-  DirectChatSchema,
-} from 'src/chat/entities/direct-chat.entity';
+  ConversationGroup,
+  ConversationGroupSchema,
+} from 'src/chat/entities/group/conversation-group.entity';
 import {
-  Conversation,
-  ConversationSchema,
-} from 'src/chat/entities/conversation.entity';
-import { BullModule } from '@nestjs/bullmq';
-import { SEND_PUSH_NOTIFICATION_QUEUE_NAME } from 'src/chat/workers/send-push-notification.worker';
-import { PullChangeService } from './services/pull-changes.service';
-import { PushChangesService } from './services/push-changes.service';
-import { ConversationService } from 'src/chat/services/conversation.service';
+  ChatsGroup,
+  ChatsGroupSchema,
+} from 'src/chat/entities/group/chats-group';
+import { ConversationGroupService } from 'src/chat/services/group/conversation-group.service';
+import { ChatsGroupService } from 'src/chat/services/group/chats-group.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: DirectChat.name, schema: DirectChatSchema },
-      { name: Conversation.name, schema: ConversationSchema },
-    ]),
     TypeOrmModule.forFeature([User]),
-    BullModule.registerQueue({ name: SEND_PUSH_NOTIFICATION_QUEUE_NAME }),
+    MongooseModule.forFeature([
+      { name: ConversationOneToOne.name, schema: ConversationOneToOneSchema },
+      { name: ChatsOneToOne.name, schema: ChatsOneToOneSchema },
+      { name: ConversationGroup.name, schema: ConversationGroupSchema },
+      { name: ChatsGroup.name, schema: ChatsGroupSchema },
+    ]),
   ],
   controllers: [SyncController],
   providers: [
-    PullChangeService,
-    PushChangesService,
+    SyncService,
+    ChatsOneToOneService,
+    ConversationOneToOneService,
+    ConversationGroupService,
+    ChatsGroupService,
     UserService,
-    ConversationService,
-    DirectChatService,
   ],
 })
 export class SyncModule {}
