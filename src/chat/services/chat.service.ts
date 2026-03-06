@@ -7,11 +7,17 @@ import { WSAuthMiddleware } from 'src/auth/middlewares/ws-auth.middleware';
 import { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
 import { InsertOneToOneChatDto } from '../dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
 import { ChatsOneToOneDto } from '../dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
+import { ChatsGroupService } from './group/chats-group.service';
+import { InsertGroupChatDto } from '../dto/group/chats-group/insert-group-chat.dto';
+import { ChatsGroupDto } from '../dto/group/chats-group/chats-group.dto';
+import { ConversationGroupService } from './group/conversation-group.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly chatsOneToOneService: ChatsOneToOneService,
+    private readonly chatsGroupService: ChatsGroupService,
+    private readonly conversationGroupService: ConversationGroupService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -90,5 +96,39 @@ export class ChatService {
     insertOneToOneChatDto: InsertOneToOneChatDto,
   ): Promise<ChatsOneToOneDto> {
     return await this.chatsOneToOneService.insert(insertOneToOneChatDto);
+  }
+
+  public async joinGroupConversation(
+    client: AuthenticatedSocket,
+    conversationId: string,
+  ) {
+    const userId = client.handshake.user.id;
+
+    Logger.log(`${userId} joining the group room ${conversationId}`);
+
+    await client.join(`conversation-group:${conversationId}`);
+  }
+
+  public async leaveGroupConversation(
+    client: AuthenticatedSocket,
+    conversationId: string,
+  ) {
+    const userId = client.handshake.user.id;
+
+    Logger.log(`${userId} leaving the room ${conversationId}`);
+
+    await client.leave(`conversation-group:${conversationId}`);
+  }
+
+  public async saveGroupMessage(
+    insertGroupChatDto: InsertGroupChatDto,
+  ): Promise<ChatsGroupDto> {
+    return await this.chatsGroupService.insert(insertGroupChatDto);
+  }
+
+  public async getGroupParticipantIds(groupId: string): Promise<string[]> {
+    return await this.conversationGroupService.getParticipantIds(
+      BigInt(groupId),
+    );
   }
 }

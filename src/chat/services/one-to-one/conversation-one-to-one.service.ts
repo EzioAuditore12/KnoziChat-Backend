@@ -58,6 +58,7 @@ export class ConversationOneToOneService {
     await this.conversationsOneToOneModel.updateOne(
       { _id: id },
       { $max: { updatedAt: time ?? new Date() } },
+      { timestamps: false },
     );
   }
 

@@ -56,6 +56,7 @@ export class ConversationGroupService {
     await this.conversationsGroupModel.updateOne(
       { _id: id },
       { $max: { updatedAt: time ?? new Date() } },
+      { timestamps: false },
     );
   }
 
@@ -84,6 +85,14 @@ export class ConversationGroupService {
       conversationIds,
       contactIds: Array.from(contactIds),
     };
+  }
+
+  public async getParticipantIds(conversationId: bigint): Promise<string[]> {
+    const conversation = await this.conversationsGroupModel
+      .findOne({ _id: conversationId })
+      .select('participants');
+
+    return conversation?.participants.map((p) => p.toString()) || [];
   }
 
   public async findConversationsContainingUser(
