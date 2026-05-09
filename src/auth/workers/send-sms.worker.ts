@@ -1,6 +1,10 @@
 import { WorkerHost, Processor, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 
+import Zavu from '@zavudev/sdk';
+
+process.loadEnvFile();
+
 export interface SendMessageJobData {
   recipient: string;
   message: string;
@@ -8,51 +12,24 @@ export interface SendMessageJobData {
 
 export const SEND_SMS_QUEUE_NAME = 'send-message';
 
-type TextBeeApiResponses =
-  | {
-      data: {
-        success: true;
-        message: string;
-        smsBatchId: string;
-        recipientCount: number;
-      };
-    }
-  | {
-      data: {
-        error: string;
-      };
-    };
-
 @Processor(SEND_SMS_QUEUE_NAME)
 export class SendMessage extends WorkerHost {
-  async sendSMS(recipient: string, message: string): Promise<boolean> {
+  private readonly zavu = new Zavu({ apiKey: process.env.ZAVU_API_KEY });
+
+  public async sendEmail(recipient: string, message: string): Promise<boolean> {
     try {
-      const res = await fetch(
-        `${process.env.TEXTBEE_BASE_URL}/gateway/devices/${process.env.TEXTBEE_DEVICE_ID}/send-sms`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.TEXTBEE_API_KEY!,
-          },
-          body: JSON.stringify({
-            recipients: [recipient],
-            message,
-          }),
-        },
-      );
+      const response = await this.zavu.messages.send({
+        to: recipient,
+        subject: 'Otp for KnoziChat',
+        text: message,
+        channel: 'email',
+      });
 
-      const json = (await res.json()) as TextBeeApiResponses;
+      console.log(response);
 
-      console.log(json);
-
-      if ('data' in json && 'success' in json.data && json.data.success) {
-        return true;
-      }
-      console.error('TextBee error response:', json);
-      return false;
+      return true;
     } catch (err) {
-      console.error('TextBee request failed:', err);
+      console.error('Zavu failed:', err);
       return false;
     }
   }
@@ -72,7 +49,7 @@ export class SendMessage extends WorkerHost {
 
     await job.updateProgress(25);
 
-    const ok = await this.sendSMS(recipient, message);
+    const ok = await this.sendEmail(recipient, message);
 
     await job.updateProgress(ok ? 100 : 90);
 

@@ -24,6 +24,9 @@ import {
   SendMessageJobData,
 } from '../workers/send-sms.worker';
 import { PublicUserDto, publicUserSchema } from 'src/user/dto/public-user.dto';
+import Zavudev from '@zavudev/sdk';
+
+process.loadEnvFile();
 
 const regiseration_cache_key = 'register';
 
@@ -34,6 +37,7 @@ function generateOtp(): string {
 @Injectable()
 export class UserAuthService {
   private readonly cacheTime: number = minutes(5);
+  private readonly zavu = new Zavudev({ apiKey: process.env.ZAVU_API_KEY });
 
   constructor(
     private readonly userService: UserService,
@@ -41,28 +45,30 @@ export class UserAuthService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  async registerUser(
+  public async registerUser(
     registerUserDto: RegisterUserDto,
   ): Promise<RegisterUserResponseDto> {
-    const user = await this.userService.findByPhoneNumber(
-      registerUserDto.phoneNumber,
-    );
+    const { email } = registerUserDto;
+
+    const user = await this.userService.findByEmail(email);
 
     if (user)
-      throw new ConflictException('User with this phone number already exists');
+      throw new ConflictException('User with this email already exists');
 
     const otp = generateOtp();
 
     // Set OTP with 5 minutes (300 seconds) TTL
     await this.cacheManager.set(
-      `${regiseration_cache_key}:${registerUserDto.phoneNumber}`,
+      `${regiseration_cache_key}:${registerUserDto.email}`,
       { ...registerUserDto, otp },
       this.cacheTime, // 5 minutes in seconds
     );
 
-    await this.sendMessage({
-      recipient: registerUserDto.phoneNumber,
-      message: `Your KnoziChat OTP is: ${otp}`,
+    await this.zavu.messages.send({
+      to: email,
+      channel: 'email',
+      subject: 'Otp for KnoziChat',
+      text: `This is your otp ${otp}`,
     });
 
     return {
@@ -73,17 +79,10 @@ export class UserAuthService {
     };
   }
 
-  async sendMessage({ message, recipient }: SendMessageJobData) {
-    await this.sendMessageQueue.add('process', {
-      message,
-      recipient,
-    });
-  }
-
-  async verifyUser(
+  public async verifyUser(
     verifyRegisterUserDto: VerifyRegisterUserDto,
   ): Promise<PublicUserDto> {
-    const cacheKey = `${regiseration_cache_key}:${verifyRegisterUserDto.phoneNumber}`;
+    const cacheKey = `${regiseration_cache_key}:${verifyRegisterUserDto.email}`;
     const cachedData = await this.cacheManager.get<
       { otp: string } & RegisterUserDto
     >(cacheKey);
@@ -114,13 +113,15 @@ export class UserAuthService {
     return publicUserSchema.strip().parse(userDetails);
   }
 
-  async validateUser(loginUserDto: LoginUserDto): Promise<PublicUserDto> {
-    const { phoneNumber, password, expoPushToken } = loginUserDto;
+  public async validateUser(
+    loginUserDto: LoginUserDto,
+  ): Promise<PublicUserDto> {
+    const { email, password, expoPushToken } = loginUserDto;
 
-    const user = await this.userService.findByPhoneNumber(phoneNumber);
+    const user = await this.userService.findByEmail(email);
 
     if (!user)
-      throw new NotFoundException('User with this phone number does not exist');
+      throw new NotFoundException('User with this email does not exist');
 
     const isPasswordValid = await verify(user.password, password);
 
@@ -133,5 +134,12 @@ export class UserAuthService {
       await this.userService.updateExpoPushToken(user.id, expoPushToken);
 
     return publicUserSchema.strip().parse(user);
+  }
+
+  private async sendMessage({ message, recipient }: SendMessageJobData) {
+    await this.sendMessageQueue.add('process', {
+      message,
+      recipient,
+    });
   }
 }

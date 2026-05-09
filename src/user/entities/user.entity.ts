@@ -22,11 +22,11 @@ export class User {
   @Column({ type: 'varchar', length: 50 })
   lastName: string;
 
-  @Column({ type: 'varchar', length: 20, unique: true })
-  phoneNumber: string;
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  phoneNumber?: string | null;
 
-  @Column({ type: 'varchar', length: 254, unique: true, nullable: true })
-  email?: string | null;
+  @Column({ type: 'varchar', length: 254, unique: true })
+  email: string;
 
   @Column({ type: 'text', nullable: true })
   avatar?: string | null;

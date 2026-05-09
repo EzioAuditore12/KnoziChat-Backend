@@ -9,8 +9,8 @@ export const userSchema = z.object({
   lastName: z.string().nonempty().max(50),
   avatar: z.url().nullable().optional(),
   password: z.string().max(16),
-  phoneNumber: z.string().max(20),
-  email: z.email().max(240).nullable().optional(),
+  phoneNumber: z.string().max(20).nullable().optional(),
+  email: z.email().toLowerCase().max(240),
   expoPushToken: z.string().nullable().optional(),
   createdAt: z.any(), // TODO: workaround for now will fix later
   updatedAt: z.any(), // TODO: workaround for now will fix later

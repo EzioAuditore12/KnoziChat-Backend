@@ -5,7 +5,7 @@ import { userSchema } from 'src/user/dto/user.dto';
 
 const loginUserSchema = userSchema
   .pick({
-    phoneNumber: true,
+    email: true,
     password: true,
     expoPushToken: true,
   })
