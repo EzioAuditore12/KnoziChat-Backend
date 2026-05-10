@@ -75,7 +75,7 @@ export class UserAuthService {
       status: 'success',
       message: 'Otp Sent for verification',
       duration: this.cacheTime,
-      phoneNumber: registerUserDto.phoneNumber,
+      email: registerUserDto.email,
     };
   }
 

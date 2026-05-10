@@ -6,7 +6,7 @@ import { userSchema } from 'src/user/dto/user.dto';
 
 export const registerUserResponseSchema = userSchema
   .pick({
-    phoneNumber: true,
+    email: true,
   })
   .extend({
     duration: z.number(),
