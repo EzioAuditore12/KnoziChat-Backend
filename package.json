@@ -40,7 +40,7 @@
     "@node-rs/argon2": "^2.0.2",
     "@scalar/nestjs-api-reference": "^1.1.14",
     "@zavudev/sdk": "^0.38.0",
-    "bullmq": "^5.76.6",
+    "bullmq": "^5.76.8",
     "cache-manager": "^7.2.8",
     "cacheable": "^2.3.5",
     "expo-server-sdk": "^4.0.0",
@@ -68,7 +68,7 @@
     "@nestjs/testing": "^11.1.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22.19.18",
+    "@types/node": "^22.19.19",
     "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.20.0",
@@ -87,7 +87,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.59.2"
+    "typescript-eslint": "^8.59.3"
   },
   "jest": {
     "moduleFileExtensions": [

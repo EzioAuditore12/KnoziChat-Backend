@@ -17,12 +17,15 @@ import { StartNewConversationResponseDto } from './dto/one-to-one/start-new-conv
 import { ConversationGroupDto } from './dto/group/conversation-group/conversation-group.dto';
 import { CreateConversationGroupDto } from './dto/group/conversation-group/create-conversation.dto';
 import { ConversationGroupService } from './services/group/conversation-group.service';
+import { ChatGateway } from './chat.gateway';
+import { ChatService } from './services/chat.service';
 
 @Controller('chat')
 export class ChatController {
   constructor(
     private readonly chatsOneToOneService: ChatsOneToOneService,
     private readonly conversationGroupService: ConversationGroupService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -45,6 +48,17 @@ export class ChatController {
       userId,
       startNewConversationDto,
     );
+
+    const { receiverId, ...inserChatDto } = result;
+
+    this.chatGateway.server
+      .to(`conversation:${result.conversationId}`)
+      .emit('message:receive', inserChatDto);
+
+    this.chatGateway.server
+      .to(`user:${receiverId}`)
+      .except(`conversation:${result.conversationId}`)
+      .emit('message:receive', inserChatDto);
 
     return reply.status(HttpStatus.CREATED).send(result);
   }
