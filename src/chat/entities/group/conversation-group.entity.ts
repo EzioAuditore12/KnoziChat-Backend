@@ -3,7 +3,9 @@ import { HydratedDocument } from 'mongoose';
 
 import { SnowFlakeId } from 'src/common/utils/snowflake';
 
-@Schema({ timestamps: true })
+export const CONVERSATION_GROUP_TABLE_NAME = 'conversation_group';
+
+@Schema({ timestamps: true, collection: CONVERSATION_GROUP_TABLE_NAME })
 export class ConversationGroup {
   @Prop({
     type: BigInt,

@@ -9,8 +9,10 @@ export const chatsGroupSchema = z.object({
   text: z.string().max(1000),
   deliveredTo: z.array(z.uuid()),
   seenBy: z.array(z.uuid()),
+  deletedBy: z.uuid().nullable().optional(),
   createdAt: z.any(),
   updatedAt: z.any(),
+  deletedAt: z.any().nullable().optional(),
 });
 
 export const convertChatsGroupFromMongoose = chatsGroupSchema
@@ -41,4 +43,11 @@ export class ChatsGroupDto extends createZodDto(chatsGroupSchema) {
 
   @ApiProperty({ example: '2025-09-14T12:34:56.789Z', format: 'date-time' })
   updatedAt: Date;
+
+  @ApiProperty({
+    example: '2025-09-14T12:34:56.789Z',
+    format: 'date-time',
+    nullable: true,
+  })
+  deletedAt?: Date | null;
 }

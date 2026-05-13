@@ -11,7 +11,6 @@ import {
 import { Model } from 'mongoose';
 import {
   ChatsOneToOneDto,
-  chatsOneToOneSchema,
   convertChatsOneToOneFromMongoose,
 } from 'src/chat/dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
 import { SnowFlakeId } from 'src/common/utils/snowflake';

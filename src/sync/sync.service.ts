@@ -233,11 +233,12 @@ export class SyncService {
       );
 
     const mappedChats: ChatsOneToOneSyncDto[] = chats.map((c) => {
-      const { createdAt, updatedAt, senderId, ...rest } = c;
+      const { createdAt, updatedAt, senderId, deletedAt, ...rest } = c;
 
       return {
         ...rest,
         mode: senderId === userId ? 'SENT' : 'RECEIVED',
+        deletedAt: deletedAt ? deletedAt.getTime() : null,
         createdAt: createdAt.getTime(),
         updatedAt: updatedAt.getTime(),
       };
@@ -264,10 +265,11 @@ export class SyncService {
     );
 
     const mappedChats: ChatsGroupSyncDto[] = chats.map((c) => {
-      const { createdAt, updatedAt, ...rest } = c;
+      const { createdAt, updatedAt, deletedAt, ...rest } = c;
 
       return {
         ...rest,
+        deletedAt: deletedAt ? deletedAt.getTime() : null,
         createdAt: createdAt.getTime(),
         updatedAt: updatedAt.getTime(),
       };

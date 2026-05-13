@@ -2,8 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 import { SnowFlakeId } from 'src/common/utils/snowflake';
+import { ConversationOneToOne } from './conversation-one-to-one.entity';
 
-@Schema({ timestamps: true })
+export const CHAT_DIRECT_TABLE_NAME = 'chat_direct';
+
+@Schema({ timestamps: true, collection: CHAT_DIRECT_TABLE_NAME })
 export class ChatsOneToOne {
   @Prop({
     type: BigInt,
@@ -14,7 +17,7 @@ export class ChatsOneToOne {
 
   @Prop({
     type: BigInt,
-    ref: 'ConversationOneToOne',
+    ref: ConversationOneToOne.name,
     required: true,
     index: true,
   })
@@ -32,6 +35,13 @@ export class ChatsOneToOne {
     default: 'SENT',
   })
   status: 'SENT' | 'DELIVERED' | 'SEEN';
+
+  @Prop({
+    type: Date,
+    default: null,
+    index: true,
+  })
+  deletedAt?: Date | null;
 
   createdAt: Date;
 

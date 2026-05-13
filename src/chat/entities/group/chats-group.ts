@@ -2,8 +2,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 import { SnowFlakeId } from 'src/common/utils/snowflake';
+import { ConversationGroup } from './conversation-group.entity';
 
-@Schema({ timestamps: true })
+export const CHAT_GROUP_TABLE_NAME = 'chat_group';
+
+@Schema({ timestamps: true, collection: CHAT_GROUP_TABLE_NAME })
 export class ChatsGroup {
   @Prop({
     type: BigInt,
@@ -14,7 +17,7 @@ export class ChatsGroup {
 
   @Prop({
     type: BigInt,
-    ref: 'ConversationGroup',
+    ref: ConversationGroup.name,
     required: true,
     index: true,
   })
@@ -39,6 +42,20 @@ export class ChatsGroup {
     description: 'User IDs who have seen the message',
   })
   seenBy: string[];
+
+  @Prop({
+    type: String,
+    default: null,
+    description: 'ID of the user who deleted the message (sender or admin)',
+  })
+  deletedBy?: string | null;
+
+  @Prop({
+    type: Date,
+    default: null,
+    index: true,
+  })
+  deletedAt?: Date | null;
 
   createdAt: Date;
 

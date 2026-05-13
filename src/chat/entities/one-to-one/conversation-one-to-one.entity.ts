@@ -3,7 +3,9 @@ import { HydratedDocument } from 'mongoose';
 
 import { SnowFlakeId } from 'src/common/utils/snowflake';
 
-@Schema({ timestamps: true })
+export const CONVERSATION_DIRECT_TABLE_NAME = 'conversation_direct';
+
+@Schema({ timestamps: true, collection: CONVERSATION_DIRECT_TABLE_NAME })
 export class ConversationOneToOne {
   @Prop({
     type: BigInt,
