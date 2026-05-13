@@ -47,6 +47,12 @@ export class ConversationGroupService {
     return convertConversationGroupSchemaFromMongoose.parse(conversation);
   }
 
+  public async get(id: bigint): Promise<ConversationGroupDto> {
+    const conversation = await this.conversationsGroupModel.findById(id);
+
+    return convertConversationGroupSchemaFromMongoose.parse(conversation);
+  }
+
   public async isExistingConversation(id: bigint): Promise<boolean> {
     const exists = await this.conversationsGroupModel.exists({ _id: id });
     return !!exists;

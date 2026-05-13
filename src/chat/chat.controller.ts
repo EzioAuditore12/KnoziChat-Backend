@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -9,7 +11,12 @@ import {
 } from '@nestjs/common';
 import { StartNewConversationDto } from './dto/one-to-one/start-new-conversation/start-new-conversation.dto';
 import { ChatsOneToOneService } from './services/one-to-one/chats-one-to-one.service';
-import { ApiCreatedResponse, ApiHeader, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiAcceptedResponse,
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiResponse,
+} from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
@@ -18,7 +25,6 @@ import { ConversationGroupDto } from './dto/group/conversation-group/conversatio
 import { CreateConversationGroupDto } from './dto/group/conversation-group/create-conversation.dto';
 import { ConversationGroupService } from './services/group/conversation-group.service';
 import { ChatGateway } from './chat.gateway';
-import { ChatService } from './services/chat.service';
 
 @Controller('chat')
 export class ChatController {
@@ -84,6 +90,23 @@ export class ChatController {
       createConversationGroupDto,
     );
 
+    const participants = result.participants.filter((id) => id !== userId);
+    const participantRooms = participants.map((id) => `user:${id}`);
+
+    if (participantRooms.length > 0) {
+      this.chatGateway.server
+        .to(participantRooms)
+        .emit('conversation-group:created', result);
+    }
+
     return reply.status(HttpStatus.CREATED).send(result);
+  }
+
+  @Get('group/:id')
+  @ApiAcceptedResponse({ type: ConversationGroupDto })
+  public async getGroup(@Param('id') id: string, @Res() reply: FastifyReply) {
+    const result = await this.conversationGroupService.get(BigInt(id));
+
+    return reply.status(HttpStatus.ACCEPTED).send(result);
   }
 }
