@@ -7,6 +7,9 @@ import {
   SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject } from '@nestjs/common';
+import type { Cache } from 'cache-manager';
 
 import { ChatService } from './services/chat.service';
 import type { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
@@ -21,18 +24,42 @@ export class ChatGateway
   @WebSocketServer() server: Server;
   ONLINE_USERS = new Map<string, string>();
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
+  ) {}
 
   afterInit(server: Server) {
     this.chatService.afterInit(server);
   }
 
   handleConnection(client: AuthenticatedSocket) {
-    this.chatService.handleConnect(client, this.server, this.ONLINE_USERS);
+    this.chatService.handleConnect(client, this.server, this.cacheManager);
   }
 
   handleDisconnect(client: AuthenticatedSocket) {
-    this.chatService.handleDisconnect(client, this.server, this.ONLINE_USERS);
+    this.chatService.handleDisconnect(client, this.server, this.cacheManager);
+  }
+
+  @SubscribeMessage('presence:get')
+  async getPresence(client: AuthenticatedSocket, userIds: string[]) {
+    const statuses = await Promise.all(
+      userIds.map(async (userId) => {
+        const sockets = await this.cacheManager.get<string[]>(
+          `online:${userId}`,
+        );
+
+        client.join(`presence:${userId}`);
+
+        return {
+          userId,
+          online: !!sockets?.length,
+        };
+      }),
+    );
+
+    client.emit('presence:list', statuses);
   }
 
   @SubscribeMessage('conversation:join')

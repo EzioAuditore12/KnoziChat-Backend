@@ -11,6 +11,7 @@ import { ChatsGroupService } from './group/chats-group.service';
 import { InsertGroupChatDto } from '../dto/group/chats-group/insert-group-chat.dto';
 import { ChatsGroupDto } from '../dto/group/chats-group/chats-group.dto';
 import { ConversationGroupService } from './group/conversation-group.service';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class ChatService {
@@ -27,11 +28,11 @@ export class ChatService {
     server.use(wsAuthMiddleware);
   }
 
-  public handleConnect(
+  public async handleConnect(
     client: AuthenticatedSocket,
     server: Server,
-    onlineUsers: Map<string, string>,
-  ): void {
+    onlineUsers: Cache,
+  ): Promise<void> {
     const userId = client.handshake.user.id;
 
     if (!userId) {
@@ -41,33 +42,63 @@ export class ChatService {
 
     Logger.log('User connected', userId);
 
-    onlineUsers.set(userId, client.id);
+    const key = `online:${userId}`;
+
+    const sockets = (await onlineUsers.get<string[]>(key)) || [];
+
+    if (!sockets.includes(client.id)) {
+      sockets.push(client.id);
+    }
+
+    await onlineUsers.set(key, sockets, 0);
 
     client.join(`user:${userId}`);
 
-    server.emit('online:users', Array.from(onlineUsers.keys()));
+    server.to(`presence:${userId}`).emit('presence:update', {
+      userId,
+      online: true,
+    });
+
+    const onlineKeys = await this.getOnlineUsers(onlineUsers);
+
+    server.emit('online:users', onlineKeys);
   }
 
-  public handleDisconnect(
+  public async handleDisconnect(
     client: AuthenticatedSocket,
     server: Server,
-    onlineUsers: Map<string, string>,
-  ) {
+    onlineUsers: Cache,
+  ): Promise<void> {
     const userId = client.handshake.user.id;
 
-    const newSocketId = client.id;
-
-    if (userId && onlineUsers.get(userId) === newSocketId) {
-      onlineUsers.delete(userId);
-
-      server.emit('online:users', Array.from(onlineUsers.keys()));
-
-      Logger.log('Disconnected', userId);
-
-      client.disconnect();
-
+    if (!userId) {
       return;
     }
+
+    const key = `online:${userId}`;
+
+    const sockets = (await onlineUsers.get<string[]>(key)) || [];
+
+    const updatedSockets = sockets.filter((id) => id !== client.id);
+
+    if (updatedSockets.length === 0) {
+      await onlineUsers.del(key);
+
+      server.to(`presence:${userId}`).emit('presence:update', {
+        userId,
+        online: false,
+      });
+
+      Logger.log('Disconnected', userId);
+    } else {
+      await onlineUsers.set(key, updatedSockets, 0);
+    }
+
+    const onlineKeys = await this.getOnlineUsers(onlineUsers);
+
+    server.emit('online:users', onlineKeys);
+
+    client.disconnect();
   }
 
   public async joinConversation(
@@ -130,5 +161,19 @@ export class ChatService {
     return await this.conversationGroupService.getParticipantIds(
       BigInt(groupId),
     );
+  }
+
+  private async getOnlineUsers(onlineUsers: Cache): Promise<string[]> {
+    const store = (onlineUsers as any).store;
+
+    if (!store || !store.keys) {
+      return [];
+    }
+
+    const keys: string[] = await store.keys();
+
+    return keys
+      .filter((key) => key.startsWith('online:'))
+      .map((key) => key.replace('online:', ''));
   }
 }
