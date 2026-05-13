@@ -123,4 +123,28 @@ export class ChatGateway
         .emit('message-group:receive', savedMessage);
     }
   }
+
+  @SubscribeMessage('conversation:typing')
+  async handleTyping(
+    client: AuthenticatedSocket,
+    payload: { conversationId: string; isTyping: boolean },
+  ) {
+    const senderId = client.handshake.user.id;
+
+    client.broadcast
+      .to(`conversation:${payload.conversationId}`)
+      .emit('typing', { senderId, isTyping: payload.isTyping });
+  }
+
+  @SubscribeMessage('conversation-group:typing')
+  async handleGroupTyping(
+    client: AuthenticatedSocket,
+    payload: { conversationId: string; isTyping: boolean },
+  ) {
+    const senderId = client.handshake.user.id;
+
+    client.broadcast
+      .to(`conversation-group:${payload.conversationId}`)
+      .emit('typing:group', { senderId, isTyping: payload.isTyping });
+  }
 }
