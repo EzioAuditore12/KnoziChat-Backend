@@ -1,7 +1,6 @@
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { ThrottlerModuleOptions, seconds } from '@nestjs/throttler';
-
-process.loadEnvFile();
+import { env } from 'src/env';
 
 export const throttlerConfig: ThrottlerModuleOptions = {
   throttlers: [
@@ -22,7 +21,7 @@ export const throttlerConfig: ThrottlerModuleOptions = {
     },
   ],
   errorMessage: 'Please slow down please',
-  storage: new ThrottlerStorageRedisService(process.env.REDIS_URL),
+  storage: new ThrottlerStorageRedisService(env.REDIS_URL),
   getTracker: (req: { headers: Record<string, string> }): string => {
     return req.headers['x-tenant-id'];
   },

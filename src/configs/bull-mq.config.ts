@@ -1,10 +1,10 @@
 import { BullRootModuleOptions } from '@nestjs/bullmq';
 
-process.loadEnvFile();
+import { env } from 'src/env';
 
 export const bullMQConfig: BullRootModuleOptions = {
   connection: {
-    url: process.env.REDIS_URL,
+    url: env.REDIS_URL,
   },
   defaultJobOptions: {
     attempts: 3,

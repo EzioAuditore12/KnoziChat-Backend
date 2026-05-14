@@ -3,24 +3,29 @@ import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { BullModule } from '@nestjs/bullmq';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { ZodHttpExceptionFilter } from './common/filters/zod-http-excpetion-filter';
-import { ConfigModule } from '@nestjs/config';
+
 import { UserModule } from './user/user.module';
 import { typeOrmConfig } from './configs/db/typeorm.config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AuthModule } from './auth/auth.module';
 import { createCacheOptions } from './configs/cache.config';
 import { throttlerConfig } from './configs/throttler.config';
 import { bullMQConfig } from './configs/bull-mq.config';
 import { ChatModule } from './chat/chat.module';
-import { MongooseModule } from '@nestjs/mongoose';
+
 import { mongooseConfig } from './configs/db/monoose.config';
 import { SyncModule } from './sync/sync.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -29,6 +34,7 @@ import { SyncModule } from './sync/sync.module';
       useFactory: createCacheOptions,
       isGlobal: true,
     }),
+    MulterModule.register({ dest: './public' }),
     ThrottlerModule.forRoot(throttlerConfig),
     BullModule.forRoot(bullMQConfig),
     TypeOrmModule.forRoot(typeOrmConfig),
@@ -37,6 +43,7 @@ import { SyncModule } from './sync/sync.module';
     AuthModule,
     ChatModule,
     SyncModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [
