@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, MoreThan, Repository } from 'typeorm';
 import { PaginateQuery, PaginationType, paginate } from 'nestjs-paginate';
@@ -10,16 +14,32 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
 import { PublicUserDto, publicUserSchema } from './dto/public-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import { UploadsService } from 'src/uploads/uploads.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly uploadsService: UploadsService,
   ) {}
 
+  private normalizeCreateNullableFields(data: CreateUserDto): CreateUserDto {
+    return {
+      ...data,
+      middleName: data.middleName ?? null,
+      phoneNumber: data.phoneNumber ?? null,
+      avatar: data.avatar ?? null,
+      expoPushToken: data.expoPushToken ?? null,
+    };
+  }
+
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const user = this.userRepository.create(createUserDto);
+    const user = this.userRepository.create(
+      this.normalizeCreateNullableFields(createUserDto),
+    );
     return await this.userRepository.save(user);
   }
 
@@ -110,5 +130,42 @@ export class UserService {
     });
 
     return users;
+  }
+
+  public async update(
+    id: string,
+    updateUserDto: Omit<UpdateUserDto, 'avatar'> & {
+      avatar: MulterFile | undefined;
+    },
+  ): Promise<PublicUserDto> {
+    const { avatar, ...rest } = updateUserDto;
+
+    let updatedUploadedAvatar: string | null = null;
+    if (avatar) {
+      updatedUploadedAvatar = await this.uploadsService.uploadAvatar(avatar);
+    }
+
+    const normalizedUser: Partial<User> = { ...rest };
+
+    if (rest.middleName === '') {
+      normalizedUser.middleName = null;
+    }
+
+    if (updatedUploadedAvatar !== null) {
+      normalizedUser.avatar = updatedUploadedAvatar;
+    }
+
+    const entityToSave = await this.userRepository.preload({
+      id,
+      ...normalizedUser,
+    });
+
+    if (!entityToSave) {
+      throw new NotFoundException(`User not found with id ${id}`);
+    }
+
+    const savedUser = await this.userRepository.save(entityToSave);
+
+    return publicUserSchema.strip().parse(savedUser);
   }
 }

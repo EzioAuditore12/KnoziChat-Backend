@@ -5,43 +5,59 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { hash } from '@node-rs/argon2';
 
-@Entity()
+@Entity({ name: 'user' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ name: 'first_name', type: 'varchar', length: 50 })
   firstName: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
+  @Column({ name: 'middle_name', type: 'varchar', length: 50, nullable: true })
   middleName?: string | null;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ name: 'last_name', type: 'varchar', length: 50 })
   lastName: string;
 
-  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  @Column({
+    name: 'phone_number',
+    type: 'varchar',
+    length: 20,
+    unique: true,
+    nullable: true,
+  })
   phoneNumber?: string | null;
 
-  @Column({ type: 'varchar', length: 254, unique: true })
+  @Column({ name: 'email', type: 'varchar', length: 254, unique: true })
   email: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'avatar', type: 'text', nullable: true })
   avatar?: string | null;
 
-  @Column({ type: 'text' })
+  @Column({ name: 'password', type: 'text' })
   password: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'expo_push_token', type: 'text', nullable: true })
   expoPushToken?: string | null;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  normalizeNullableFields() {
+    this.middleName ??= null;
+    this.phoneNumber ??= null;
+    this.avatar ??= null;
+    this.expoPushToken ??= null;
+  }
 
   @BeforeInsert()
   async hashPassword() {

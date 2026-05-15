@@ -54,7 +54,7 @@ export class AppController {
     file: MulterFile,
   ) {
     const uploadedFile = await appWriteStorage.createFile({
-      bucketId: env.APPWRITE_BUCKET_ID,
+      bucketId: env.APPWRITE_IMAGES_BUCKET_ID,
       fileId: ID.unique(),
 
       file: InputFile.fromPath(file.path, file.originalname),

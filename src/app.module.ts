@@ -34,7 +34,6 @@ import { UploadsModule } from './uploads/uploads.module';
       useFactory: createCacheOptions,
       isGlobal: true,
     }),
-    MulterModule.register({ dest: './public' }),
     ThrottlerModule.forRoot(throttlerConfig),
     BullModule.forRoot(bullMQConfig),
     TypeOrmModule.forRoot(typeOrmConfig),

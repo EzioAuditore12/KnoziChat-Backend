@@ -24,7 +24,9 @@ export const envSchema = z.object({
   APPWRITE_PROJECT_ID: z.string(),
   APPWRITE_END_POINT: z.string(),
   APPWRITE_API_KEY: z.string(),
-  APPWRITE_BUCKET_ID: z.string(),
+  APPWRITE_IMAGES_BUCKET_ID: z.string(),
+  APPWRTIE_AVATARS_BUCKET_ID: z.string(),
+  APPWRITE_VIDEOS_BUCKET_ID: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

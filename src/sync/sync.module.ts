@@ -26,10 +26,12 @@ import {
 } from 'src/chat/entities/group/chats-group';
 import { ConversationGroupService } from 'src/chat/services/group/conversation-group.service';
 import { ChatsGroupService } from 'src/chat/services/group/chats-group.service';
+import { UploadsService } from 'src/uploads/uploads.service';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    UserModule,
     MongooseModule.forFeature([
       { name: ConversationOneToOne.name, schema: ConversationOneToOneSchema },
       { name: ChatsOneToOne.name, schema: ChatsOneToOneSchema },
@@ -44,7 +46,6 @@ import { ChatsGroupService } from 'src/chat/services/group/chats-group.service';
     ConversationOneToOneService,
     ConversationGroupService,
     ChatsGroupService,
-    UserService,
   ],
 })
 export class SyncModule {}

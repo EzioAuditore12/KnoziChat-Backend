@@ -11,6 +11,8 @@ import { minutes } from '@nestjs/throttler';
 import type { Cache } from 'cache-manager';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import Zavudev from '@zavudev/sdk';
 
 import { UserService } from 'src/user/user.service';
 
@@ -24,9 +26,7 @@ import {
   SendMessageJobData,
 } from '../workers/send-sms.worker';
 import { PublicUserDto, publicUserSchema } from 'src/user/dto/public-user.dto';
-import Zavudev from '@zavudev/sdk';
-
-process.loadEnvFile();
+import { UploadsService } from 'src/uploads/uploads.service';
 
 const regiseration_cache_key = 'register';
 
@@ -41,26 +41,34 @@ export class UserAuthService {
 
   constructor(
     private readonly userService: UserService,
+    private readonly uploadsService: UploadsService,
     @InjectQueue(SEND_SMS_QUEUE_NAME) private readonly sendMessageQueue: Queue,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   public async registerUser(
-    registerUserDto: RegisterUserDto,
+    registerUserDto: Omit<RegisterUserDto, 'avatar'> & {
+      avatar: MulterFile | undefined;
+    },
   ): Promise<RegisterUserResponseDto> {
-    const { email } = registerUserDto;
+    const { email, avatar, ...registerData } = registerUserDto;
 
     const user = await this.userService.findByEmail(email);
 
     if (user)
       throw new ConflictException('User with this email already exists');
 
+    let uploadedAvatarUrl: null | string = null;
+
+    if (avatar && avatar.path && avatar.originalname)
+      uploadedAvatarUrl = await this.uploadsService.uploadAvatar(avatar);
+
     const otp = generateOtp();
 
     // Set OTP with 5 minutes (300 seconds) TTL
     await this.cacheManager.set(
       `${regiseration_cache_key}:${registerUserDto.email}`,
-      { ...registerUserDto, otp },
+      { ...registerData, email, avatar: uploadedAvatarUrl, otp },
       this.cacheTime, // 5 minutes in seconds
     );
 
@@ -134,12 +142,5 @@ export class UserAuthService {
       await this.userService.updateExpoPushToken(user.id, expoPushToken);
 
     return publicUserSchema.strip().parse(user);
-  }
-
-  private async sendMessage({ message, recipient }: SendMessageJobData) {
-    await this.sendMessageQueue.add('process', {
-      message,
-      recipient,
-    });
   }
 }

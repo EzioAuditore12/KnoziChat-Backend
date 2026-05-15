@@ -4,12 +4,16 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiHeader, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiConsumes, ApiHeader, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Paginate, type PaginateQuery } from 'nestjs-paginate';
+import { FileInterceptor } from '@webundsoehne/nest-fastify-file-upload';
 
 import { UserService } from './user.service';
 
@@ -19,6 +23,8 @@ import { SerachUserResponseDto } from './dto/search-user/search-user-response.dt
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 import { MultipleUuidDto } from 'src/common/dto/multiple-uuid.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 
 @Controller('user')
 export class UserController {
@@ -41,6 +47,31 @@ export class UserController {
     if (!user) throw new NotFoundException(`User not found with this ${id}`);
 
     return publicUserSchema.strip().parse(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ type: PublicUserDto })
+  async updateDetails(
+    @Req() req: AuthRequest,
+    @UploadedFile()
+    avatar: MulterFile | undefined,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const userId = req.user.id;
+
+    const { firstName, lastName, middleName } = updateUserDto;
+
+    const updatedUser = await this.userService.update(userId, {
+      firstName,
+      middleName,
+      lastName,
+      avatar,
+    });
+
+    return updatedUser;
   }
 
   @UseGuards(JwtAuthGuard)

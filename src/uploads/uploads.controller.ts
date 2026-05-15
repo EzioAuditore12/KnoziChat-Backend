@@ -15,7 +15,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthorizeUploadRequestDto } from './dto/authorize/authorize-upload-request.dto';
 import { AuthorizeUploadResponseDto } from './dto/authorize/authorize-upload-response.dto';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
-import { appWriteUsers } from './configs/appwrite';
 import { UploadsService } from './uploads.service';
 import { env } from 'src/env';
 
@@ -46,7 +45,7 @@ export class UploadsController {
       userId,
       projectId: env.APPWRITE_PROJECT_ID,
       endpoint: env.APPWRITE_END_POINT,
-      bucketId: env.APPWRITE_BUCKET_ID,
+      bucketId: env.APPWRITE_IMAGES_BUCKET_ID,
     });
   }
 }

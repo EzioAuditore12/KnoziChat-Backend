@@ -1,16 +1,16 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'blacklist_refresh_token' })
 export class BlackListedRefreshToken {
   @PrimaryGeneratedColumn('identity')
   id: number;
 
-  @Column({ type: 'text' })
+  @Column({ name: 'refresh_token', type: 'text' })
   refreshToken: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ name: 'expired_at', type: 'timestamp' })
   expiredAt: Date;
 }

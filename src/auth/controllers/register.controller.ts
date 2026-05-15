@@ -1,11 +1,29 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  HttpStatus,
+  Logger,
+  MaxFileSizeValidator,
+  ParseFilePipe,
+  ParseFilePipeBuilder,
+  Post,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import {
   ApiConflictResponse,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import {
+  FileInterceptor,
+  type MulterFile,
+} from '@webundsoehne/nest-fastify-file-upload';
 
 import { UserAuthService } from '../services/user-auth.service';
 
@@ -28,15 +46,40 @@ export class RegisterController {
   ) {}
 
   @Post('register')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('avatar'))
   @ApiOperation({ summary: 'Register User Form' })
   @ApiCreatedResponse({ type: RegisterUserResponseDto })
   @ApiConflictResponse({ type: ConflictDto })
   async register(
     @Body() registerUserDto: RegisterUserDto,
-    @Res() reply: FastifyReply,
+
+    @UploadedFile()
+    avatar: MulterFile | undefined,
+
+    @Res()
+    reply: FastifyReply,
   ) {
-    const userSentForRegisteration =
-      await this.userAuthService.registerUser(registerUserDto);
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      expoPushToken,
+      middleName,
+      phoneNumber,
+    } = registerUserDto;
+
+    const userSentForRegisteration = await this.userAuthService.registerUser({
+      email,
+      firstName,
+      lastName,
+      password,
+      expoPushToken: expoPushToken ?? null,
+      middleName: middleName ?? null,
+      phoneNumber: phoneNumber ?? null,
+      avatar: avatar ?? undefined,
+    });
 
     return reply.status(HttpStatus.CREATED).send(userSentForRegisteration);
   }
