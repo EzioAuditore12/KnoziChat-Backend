@@ -39,9 +39,11 @@ export class ChatsOneToOneService {
 
     const insertedChat = await this.insert({
       conversationId: conversation.id,
+      attachmentUrl: null, // TODO: Need to add logic here
       senderId,
       status: 'SENT',
-      text,
+      content: text,
+      contentType: 'text',
       createdAt,
       updatedAt,
     });
@@ -55,15 +57,24 @@ export class ChatsOneToOneService {
   public async insert(
     insertOneToOneChatDto: InsertOneToOneChatDto,
   ): Promise<ChatsOneToOneDto> {
-    const { id, conversationId, senderId, status, text, createdAt, updatedAt } =
-      insertOneToOneChatDto;
+    const {
+      id,
+      conversationId,
+      senderId,
+      status,
+      content,
+      contentType, // TODO: HEre also
+      createdAt,
+      updatedAt,
+    } = insertOneToOneChatDto;
 
     const insertedChat = await this.chatsOneToOneRepository.insertOne({
       _id: id ? BigInt(id) : new SnowFlakeId(1).generate(),
       conversationId: BigInt(conversationId),
       senderId,
       status,
-      text,
+      content,
+      contentType: 'text',
       createdAt: createdAt ?? new Date(),
       updatedAt: updatedAt ?? new Date(),
     });

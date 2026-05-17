@@ -6,7 +6,10 @@ import { ConversationGroup } from './conversation-group.entity';
 
 export const CHAT_GROUP_TABLE_NAME = 'chat_group';
 
-@Schema({ timestamps: true, collection: CHAT_GROUP_TABLE_NAME })
+@Schema({
+  timestamps: true,
+  collection: CHAT_GROUP_TABLE_NAME,
+})
 export class ChatsGroup {
   @Prop({
     type: BigInt,
@@ -26,22 +29,14 @@ export class ChatsGroup {
   @Prop({ required: true })
   senderId: string;
 
-  @Prop({ type: String, maxLength: 1000, trim: true })
-  text: string;
+  @Prop({ type: String, enum: ['image', 'video', 'text', 'file'] })
+  contentType: string;
 
-  @Prop({
-    type: [String],
-    default: [],
-    description: 'User IDs who have received the message',
-  })
-  deliveredTo: string[];
+  @Prop({ type: String, trim: true })
+  content: string | null;
 
-  @Prop({
-    type: [String],
-    default: [],
-    description: 'User IDs who have seen the message',
-  })
-  seenBy: string[];
+  @Prop({ type: String, default: null })
+  attachmentUrl: string | null;
 
   @Prop({
     type: String,
@@ -63,4 +58,7 @@ export class ChatsGroup {
 }
 
 export const ChatsGroupSchema = SchemaFactory.createForClass(ChatsGroup);
+
+ChatsGroupSchema.index({ updatedAt: 1 });
+
 export type ChatsGroupDocument = HydratedDocument<ChatsGroup>;

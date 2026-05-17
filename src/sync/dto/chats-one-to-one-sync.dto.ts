@@ -4,7 +4,7 @@ import { createZodDto } from 'nestjs-zod';
 import { chatsOneToOneSchema } from 'src/chat/dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
 
 export const chatsOneToOneSyncSchema = chatsOneToOneSchema
-  .omit({ senderId: true })
+  .omit({ senderId: true, attachmentUrl: true })
   .extend({
     mode: z.enum(['SENT', 'RECEIVED']),
     createdAt: z.number(),

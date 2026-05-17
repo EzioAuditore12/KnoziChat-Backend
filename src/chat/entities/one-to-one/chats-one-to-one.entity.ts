@@ -26,8 +26,14 @@ export class ChatsOneToOne {
   @Prop({ required: true })
   senderId: string;
 
-  @Prop({ type: String, maxLength: 1000, trim: true })
-  text: string;
+  @Prop({ type: String, enum: ['image', 'video', 'text', 'file'] })
+  contentType: 'image' | 'video' | 'text' | 'file';
+
+  @Prop({ type: String, default: null })
+  content: string | null;
+
+  @Prop({ type: String, default: null })
+  attachmentUrl: string | null;
 
   @Prop({
     type: String,
@@ -49,4 +55,7 @@ export class ChatsOneToOne {
 }
 
 export const ChatsOneToOneSchema = SchemaFactory.createForClass(ChatsOneToOne);
+
+ChatsOneToOneSchema.index({ updatedAt: 1 });
+
 export type ChatsOneToOneDocument = HydratedDocument<ChatsOneToOne>;

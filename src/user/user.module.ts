@@ -7,14 +7,16 @@ import { UserController } from './user.controller';
 import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 
 import { UploadsService } from 'src/uploads/uploads.service';
+import { UploadsModule } from 'src/uploads/uploads.module';
 
 @Module({
   imports: [
+    UploadsModule,
     TypeOrmModule.forFeature([User]),
     MulterModule.register({ dest: './public/temp' }),
   ],
   controllers: [UserController],
-  providers: [UserService, UploadsService],
-  exports: [UserService, UploadsService],
+  providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

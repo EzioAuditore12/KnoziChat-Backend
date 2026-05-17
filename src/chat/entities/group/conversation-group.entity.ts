@@ -17,26 +17,8 @@ export class ConversationGroup {
   @Prop({ type: String, maxLength: 50, trim: true })
   name: string;
 
-  @Prop({
-    type: [String],
-    required: true,
-    index: true,
-  })
-  admins: string[];
-
-  @Prop({ type: String, required: false, default: null })
+  @Prop({ type: String, allowNull: true })
   avatar: string | null;
-
-  @Prop({
-    type: [String],
-    required: true,
-    index: true,
-    validate: [
-      (val: string[]) => val.length >= 2,
-      'Must have more than 2 participants',
-    ],
-  })
-  participants: string[];
 
   createdAt: Date;
   updatedAt: Date;

@@ -6,8 +6,6 @@ export const conversationGroupSchema = z.object({
   id: z.any().transform((val) => String(val)),
   name: z.string().nonempty().max(50),
   avatar: z.string().nullable(),
-  admins: z.array(z.uuid()),
-  participants: z.array(z.uuid()).min(3),
   createdAt: z.any(),
   updatedAt: z.any(),
 });

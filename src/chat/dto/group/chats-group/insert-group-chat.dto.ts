@@ -2,16 +2,11 @@ import { createZodDto } from 'nestjs-zod';
 import { chatsGroupSchema } from './chats-group.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
-export const insertGroupChatSchema = chatsGroupSchema
-  .omit({
-    deliveredTo: true,
-    seenBy: true,
-  })
-  .partial({
-    id: true,
-    createdAt: true,
-    updatedAt: true,
-  });
+export const insertGroupChatSchema = chatsGroupSchema.partial({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export class InsertGroupChatDto extends createZodDto(insertGroupChatSchema) {
   @ApiProperty({

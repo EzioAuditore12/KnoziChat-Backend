@@ -18,10 +18,12 @@ import { RefreshJwtStrategy } from './strategies/refresh-jwt.stratergy';
 import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 import { UserModule } from 'src/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UploadsModule } from 'src/uploads/uploads.module';
 
 @Module({
   imports: [
     UserModule,
+    UploadsModule,
     BullModule.registerQueue({ name: SEND_SMS_QUEUE_NAME }),
     TypeOrmModule.forFeature([BlackListedRefreshToken]),
     ConfigModule.forFeature(jwtConfig),

@@ -53,6 +53,13 @@ export class UserAuthService {
   ): Promise<RegisterUserResponseDto> {
     const { email, avatar, ...registerData } = registerUserDto;
 
+    const normalizedRegisterData = Object.fromEntries(
+      Object.entries(registerData).map(([k, v]) => [
+        k as string,
+        typeof v === 'string' && v.trim() === '' ? null : v,
+      ]),
+    ) as typeof registerData;
+
     const user = await this.userService.findByEmail(email);
 
     if (user)
@@ -68,7 +75,7 @@ export class UserAuthService {
     // Set OTP with 5 minutes (300 seconds) TTL
     await this.cacheManager.set(
       `${regiseration_cache_key}:${registerUserDto.email}`,
-      { ...registerData, email, avatar: uploadedAvatarUrl, otp },
+      { ...normalizedRegisterData, email, avatar: uploadedAvatarUrl, otp },
       this.cacheTime, // 5 minutes in seconds
     );
 

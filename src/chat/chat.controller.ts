@@ -22,7 +22,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 import { StartNewConversationResponseDto } from './dto/one-to-one/start-new-conversation/start-new-conversation-response.dto';
 import { ConversationGroupDto } from './dto/group/conversation-group/conversation-group.dto';
-import { CreateConversationGroupDto } from './dto/group/conversation-group/create-conversation.dto';
+import { CreateConversationGroupDto } from './dto/group/conversation-group/create-conversation/create-conversation.dto';
 import { ConversationGroupService } from './services/group/conversation-group.service';
 import { ChatGateway } from './chat.gateway';
 
@@ -90,7 +90,7 @@ export class ChatController {
       createConversationGroupDto,
     );
 
-    const participants = result.participants.filter((id) => id !== userId);
+    const participants = result.participantIds.filter((id) => id !== userId);
     const participantRooms = participants.map((id) => `user:${id}`);
 
     if (participantRooms.length > 0) {

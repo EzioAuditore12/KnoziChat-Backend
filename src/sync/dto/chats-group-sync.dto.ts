@@ -3,10 +3,12 @@ import { createZodDto } from 'nestjs-zod';
 
 import { chatsGroupSchema } from 'src/chat/dto/group/chats-group/chats-group.dto';
 
-export const chatsGroupSyncSchema = chatsGroupSchema.extend({
-  createdAt: z.number(),
-  updatedAt: z.number(),
-});
+export const chatsGroupSyncSchema = chatsGroupSchema
+  .omit({ attachmentUrl: true })
+  .extend({
+    createdAt: z.number(),
+    updatedAt: z.number(),
+  });
 
 export const chatsGroupSyncChangeSchema = z.object({
   created: chatsGroupSyncSchema.array(),

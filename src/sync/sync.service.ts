@@ -8,7 +8,7 @@ import {
   ConversationOneToOneSyncChangeDto,
   ConversationOneToOneSyncDto,
 } from './dto/conversation-one-to-one-sync.dto';
-import { UserSyncChangeDto } from './dto/user-sync.dto';
+import { UserSyncChangeDto, UserSyncDto } from './dto/user-sync.dto';
 import {
   ChatsOneToOneSyncChangeDto,
   ChatsOneToOneSyncDto,
@@ -23,6 +23,10 @@ import {
   ConversationGroupSyncChangeDto,
   ConversationGroupSyncDto,
 } from './dto/conversation-group-sync.shema';
+import {
+  ChatsAttachmentSyncChangeDto,
+  ChatsAttachmentSyncDto,
+} from './dto/chat-attachment-sync.dto';
 
 @Injectable()
 export class SyncService {
@@ -65,7 +69,7 @@ export class SyncService {
 
     const involvedUserIds = this.findAllInvolvedUserIds(
       conversationOneToOneChanges,
-      conversationGroupChanges,
+      groupParticipantIds,
     );
 
     // Combine 1-to-1 contacts and group participants
@@ -80,25 +84,24 @@ export class SyncService {
 
     await this.addMissingUserDetails(userChanges, involvedUserIds);
 
-    const chatsOneToOneChanges = await this.pullOneToOneChatsChanges(
-      userId,
-      conversationIds,
-      timestamp,
-    );
+    const { chatsOneToOne, chatOneToOneAttachments } =
+      await this.pullOneToOneChatsChanges(userId, conversationIds, timestamp);
 
-    const chatsGroupChanges = await this.pullGroupChatsChanges(
-      groupConversationIds,
-      timestamp,
-    );
+    const { chatsGroup, chatsGroupAttachments } =
+      await this.pullGroupChatsChanges(groupConversationIds, timestamp);
 
     return {
       timestamp: Date.now(),
       changes: {
         user: userChanges,
-        conversationOneToOne: conversationOneToOneChanges,
+        conversationDirect: conversationOneToOneChanges,
         conversationGroup: conversationGroupChanges,
-        chatsOneToOne: chatsOneToOneChanges,
-        chatsGroup: chatsGroupChanges,
+        chatsDirect: chatsOneToOne,
+        chatsGroup,
+        chatsAttachments: this.mergeAttachmentChanges(
+          chatOneToOneAttachments,
+          chatsGroupAttachments,
+        ),
       },
     };
   }
@@ -113,26 +116,29 @@ export class SyncService {
         timestamp,
       );
 
-    const mappedConversations: ConversationOneToOneSyncDto[] =
-      conversations.map((c) => {
-        const { participants, ...rest } = c;
-        return {
-          ...rest,
-          userId: participants.find((id) => id !== userId) as string,
-          createdAt: c.createdAt.getTime(),
-          updatedAt: c.updatedAt.getTime(),
-        };
-      });
+    const created: ConversationOneToOneSyncDto[] = [];
+    const updated: ConversationOneToOneSyncDto[] = [];
+
+    for (const c of conversations) {
+      const { participants, ...rest } = c;
+
+      const mappedConversation: ConversationOneToOneSyncDto = {
+        ...rest,
+        userId: participants.find((id) => id !== userId) as string,
+        createdAt: c.createdAt.getTime(),
+        updatedAt: c.updatedAt.getTime(),
+      };
+
+      if (mappedConversation.createdAt > timestamp.getTime()) {
+        created.push(mappedConversation);
+      } else if (mappedConversation.updatedAt > timestamp.getTime()) {
+        updated.push(mappedConversation);
+      }
+    }
 
     return {
-      created: mappedConversations.filter(
-        (c) => c.createdAt > timestamp.getTime(),
-      ),
-      updated: mappedConversations.filter(
-        (c) =>
-          c.createdAt <= timestamp.getTime() &&
-          c.updatedAt > timestamp.getTime(),
-      ),
+      created,
+      updated,
       deleted: [],
     };
   }
@@ -147,28 +153,28 @@ export class SyncService {
         timestamp,
       );
 
-    const mappedConversations: ConversationGroupSyncDto[] = conversations.map(
-      (c) => {
-        const { createdAt, updatedAt, participants, admins, ...rest } = c;
-        return {
-          ...rest,
-          participantIds: participants,
-          adminIds: admins,
-          createdAt: createdAt.getTime(),
-          updatedAt: updatedAt.getTime(),
-        };
-      },
-    );
+    const created: ConversationGroupSyncDto[] = [];
+    const updated: ConversationGroupSyncDto[] = [];
+
+    for (const c of conversations) {
+      const { createdAt, updatedAt, ...rest } = c;
+
+      const mappedConversation: ConversationGroupSyncDto = {
+        ...rest,
+        createdAt: createdAt.getTime(),
+        updatedAt: updatedAt.getTime(),
+      };
+
+      if (mappedConversation.createdAt > timestamp.getTime()) {
+        created.push(mappedConversation);
+      } else if (mappedConversation.updatedAt > timestamp.getTime()) {
+        updated.push(mappedConversation);
+      }
+    }
 
     return {
-      created: mappedConversations.filter(
-        (c) => c.createdAt > timestamp.getTime(),
-      ),
-      updated: mappedConversations.filter(
-        (c) =>
-          c.createdAt <= timestamp.getTime() &&
-          c.updatedAt > timestamp.getTime(),
-      ),
+      created,
+      updated,
       deleted: [],
     };
   }
@@ -204,19 +210,26 @@ export class SyncService {
       timestamp,
     );
 
-    const mappedUsers = users.map((u) => ({
-      ...u,
-      createdAt: u.createdAt.getTime(),
-      updatedAt: u.updatedAt.getTime(),
-    }));
+    const created: UserSyncDto[] = [];
+    const updated: UserSyncDto[] = [];
+
+    for (const u of users) {
+      const mappedUser = {
+        ...u,
+        createdAt: u.createdAt.getTime(),
+        updatedAt: u.updatedAt.getTime(),
+      };
+
+      if (mappedUser.createdAt > timestamp.getTime()) {
+        created.push(mappedUser);
+      } else if (mappedUser.updatedAt > timestamp.getTime()) {
+        updated.push(mappedUser);
+      }
+    }
 
     return {
-      created: mappedUsers.filter((u) => u.createdAt > timestamp.getTime()),
-      updated: mappedUsers.filter(
-        (u) =>
-          u.createdAt <= timestamp.getTime() &&
-          u.updatedAt > timestamp.getTime(),
-      ),
+      created,
+      updated,
       deleted: [],
     };
   }
@@ -225,87 +238,176 @@ export class SyncService {
     userId: string,
     conversationIds: string[],
     timestamp: Date,
-  ): Promise<ChatsOneToOneSyncChangeDto> {
+  ): Promise<{
+    chatsOneToOne: ChatsOneToOneSyncChangeDto;
+    chatOneToOneAttachments: ChatsAttachmentSyncChangeDto;
+  }> {
     const chats =
       await this.chatsOneToOneService.findChatsSinceForConversations(
         conversationIds,
         timestamp,
       );
 
-    const mappedChats: ChatsOneToOneSyncDto[] = chats.map((c) => {
-      const { createdAt, updatedAt, senderId, deletedAt, ...rest } = c;
+    const createdChats: ChatsOneToOneSyncDto[] = [];
+    const updatedChats: ChatsOneToOneSyncDto[] = [];
 
-      return {
+    const createdAttachments: ChatsAttachmentSyncDto[] = [];
+    const updatedAttachments: ChatsAttachmentSyncDto[] = [];
+
+    for (const c of chats) {
+      const {
+        createdAt,
+        updatedAt,
+        senderId,
+        deletedAt,
+        attachmentUrl,
+        id,
+        ...rest
+      } = c;
+
+      const mappedChat: ChatsOneToOneSyncDto = {
         ...rest,
+        id,
         mode: senderId === userId ? 'SENT' : 'RECEIVED',
         deletedAt: deletedAt ? deletedAt.getTime() : null,
         createdAt: createdAt.getTime(),
         updatedAt: updatedAt.getTime(),
       };
-    });
+
+      const isCreated = createdAt.getTime() > timestamp.getTime();
+
+      if (isCreated) {
+        createdChats.push(mappedChat);
+
+        if (attachmentUrl) {
+          createdAttachments.push({
+            id,
+            remoteUrl: attachmentUrl,
+          });
+        }
+      } else if (updatedAt.getTime() > timestamp.getTime()) {
+        updatedChats.push(mappedChat);
+
+        if (attachmentUrl) {
+          updatedAttachments.push({
+            id,
+            remoteUrl: attachmentUrl,
+          });
+        }
+      }
+    }
 
     return {
-      created: mappedChats.filter((d) => d.createdAt > timestamp.getTime()),
-      updated: mappedChats.filter(
-        (d) =>
-          d.createdAt <= timestamp.getTime() &&
-          d.updatedAt > timestamp.getTime(),
-      ),
-      deleted: [],
+      chatsOneToOne: {
+        created: createdChats,
+        updated: updatedChats,
+        deleted: [],
+      },
+      chatOneToOneAttachments: {
+        created: createdAttachments,
+        updated: updatedAttachments,
+        deleted: [],
+      },
     };
   }
 
   private async pullGroupChatsChanges(
     conversationIds: string[],
     timestamp: Date,
-  ): Promise<ChatsGroupSyncChangeDto> {
+  ): Promise<{
+    chatsGroup: ChatsGroupSyncChangeDto;
+    chatsGroupAttachments: ChatsAttachmentSyncChangeDto;
+  }> {
     const chats = await this.chatsGroupService.findChatsSinceForConversations(
       conversationIds,
       timestamp,
     );
 
-    const mappedChats: ChatsGroupSyncDto[] = chats.map((c) => {
-      const { createdAt, updatedAt, deletedAt, ...rest } = c;
+    const createdChats: ChatsGroupSyncDto[] = [];
+    const updatedChats: ChatsGroupSyncDto[] = [];
 
-      return {
+    const createdAttachments: ChatsAttachmentSyncDto[] = [];
+    const updatedAttachments: ChatsAttachmentSyncDto[] = [];
+
+    for (const c of chats) {
+      const { createdAt, updatedAt, deletedAt, attachmentUrl, id, ...rest } = c;
+
+      const mappedChat: ChatsGroupSyncDto = {
         ...rest,
+        id,
         deletedAt: deletedAt ? deletedAt.getTime() : null,
         createdAt: createdAt.getTime(),
         updatedAt: updatedAt.getTime(),
       };
-    });
+
+      const isCreated = createdAt.getTime() > timestamp.getTime();
+
+      if (isCreated) {
+        createdChats.push(mappedChat);
+
+        if (attachmentUrl) {
+          createdAttachments.push({
+            id,
+            remoteUrl: attachmentUrl,
+          });
+        }
+      } else if (updatedAt.getTime() > timestamp.getTime()) {
+        updatedChats.push(mappedChat);
+
+        if (attachmentUrl) {
+          updatedAttachments.push({
+            id,
+            remoteUrl: attachmentUrl,
+          });
+        }
+      }
+    }
 
     return {
-      created: mappedChats.filter((d) => d.createdAt > timestamp.getTime()),
-      updated: mappedChats.filter(
-        (d) =>
-          d.createdAt <= timestamp.getTime() &&
-          d.updatedAt > timestamp.getTime(),
-      ),
-      deleted: [],
+      chatsGroup: {
+        created: createdChats,
+        updated: updatedChats,
+        deleted: [],
+      },
+
+      chatsGroupAttachments: {
+        created: createdAttachments,
+        updated: updatedAttachments,
+        deleted: [],
+      },
+    };
+  }
+
+  private mergeAttachmentChanges(
+    attachment1: ChatsAttachmentSyncChangeDto,
+    attachment2: ChatsAttachmentSyncChangeDto,
+  ): ChatsAttachmentSyncChangeDto {
+    return {
+      created: [...attachment1.created, ...attachment2.created],
+
+      updated: [...attachment1.updated, ...attachment2.updated],
+
+      deleted: [...attachment1.deleted, ...attachment2.deleted],
     };
   }
 
   private findAllInvolvedUserIds(
     conversationOneToOneChanges: ConversationOneToOneSyncChangeDto,
-    conversationGroupChanges: ConversationGroupSyncChangeDto,
+    groupParticipantIds: string[],
   ): Set<string> {
     const involvedUserIds = new Set<string>();
 
     const collectOneToOneUserIds = (c: ConversationOneToOneSyncDto) => {
-      if (c.userId) involvedUserIds.add(c.userId);
-    };
-
-    const collectGroupUserIds = (c: ConversationGroupSyncDto) => {
-      c.participantIds?.forEach((id) => involvedUserIds.add(id));
-      c.adminIds?.forEach((id) => involvedUserIds.add(id));
+      if (c.userId) {
+        involvedUserIds.add(c.userId);
+      }
     };
 
     conversationOneToOneChanges.created.forEach(collectOneToOneUserIds);
+
     conversationOneToOneChanges.updated.forEach(collectOneToOneUserIds);
 
-    conversationGroupChanges.created.forEach(collectGroupUserIds);
-    conversationGroupChanges.updated.forEach(collectGroupUserIds);
+    groupParticipantIds.forEach((id) => involvedUserIds.add(id));
 
     return involvedUserIds;
   }

@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import {
   ChatsGroup,
   ChatsGroupDocument,
-} from 'src/chat/entities/group/chats-group';
+} from 'src/chat/entities/group/chats-group.entity';
 import { ConversationGroupService } from './conversation-group.service';
 import { InsertGroupChatDto } from 'src/chat/dto/group/chats-group/insert-group-chat.dto';
 import { SnowFlakeId } from 'src/common/utils/snowflake';
@@ -24,14 +24,22 @@ export class ChatsGroupService {
   public async insert(
     insertChatGroupDto: InsertGroupChatDto,
   ): Promise<ChatsGroupDto> {
-    const { id, conversationId, senderId, text, createdAt, updatedAt } =
-      insertChatGroupDto;
+    const {
+      id,
+      conversationId,
+      senderId,
+      content,
+      contentType,
+      createdAt,
+      updatedAt,
+    } = insertChatGroupDto;
 
     const insertedChat = await this.chatsGroupModel.insertOne({
       _id: id ? BigInt(id) : new SnowFlakeId(1).generate(),
       conversationId: BigInt(conversationId),
       senderId,
-      text,
+      content,
+      contentType,
       createdAt: createdAt ?? new Date(),
       updatedAt: updatedAt ?? new Date(),
     });

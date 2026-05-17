@@ -3,6 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 
 export const createConversationGroupSchema = z.object({
   name: z.string().nonempty().max(50),
+  avatar: z.string().optional(),
   participants: z.array(z.uuid()),
 });
 

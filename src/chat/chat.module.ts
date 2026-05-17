@@ -11,9 +11,7 @@ import {
 } from './entities/one-to-one/chats-one-to-one.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChatController } from './chat.controller';
-import { UserService } from 'src/user/user.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
+
 import { ChatsOneToOneService } from './services/one-to-one/chats-one-to-one.service';
 import { ConversationOneToOneService } from './services/one-to-one/conversation-one-to-one.service';
 import { ChatService } from './services/chat.service';
@@ -24,10 +22,17 @@ import {
   ConversationGroup,
   ConversationGroupSchema,
 } from './entities/group/conversation-group.entity';
-import { ChatsGroup, ChatsGroupSchema } from './entities/group/chats-group';
+import {
+  ChatsGroup,
+  ChatsGroupSchema,
+} from './entities/group/chats-group.entity';
 import { ConversationGroupService } from './services/group/conversation-group.service';
 import { ChatsGroupService } from './services/group/chats-group.service';
 import { UserModule } from 'src/user/user.module';
+import {
+  ConversationGroupMember,
+  ConversationGroupMemberSchema,
+} from './entities/group/conversation-group-members.entity';
 
 @Module({
   imports: [
@@ -37,6 +42,10 @@ import { UserModule } from 'src/user/user.module';
       { name: ConversationOneToOne.name, schema: ConversationOneToOneSchema },
       { name: ChatsOneToOne.name, schema: ChatsOneToOneSchema },
       { name: ConversationGroup.name, schema: ConversationGroupSchema },
+      {
+        name: ConversationGroupMember.name,
+        schema: ConversationGroupMemberSchema,
+      },
       { name: ChatsGroup.name, schema: ChatsGroupSchema },
     ]),
     ConfigModule.forFeature(jwtConfig),
@@ -45,6 +54,13 @@ import { UserModule } from 'src/user/user.module';
   controllers: [ChatController],
   providers: [
     ChatGateway,
+    ChatService,
+    ChatsOneToOneService,
+    ConversationOneToOneService,
+    ConversationGroupService,
+    ChatsGroupService,
+  ],
+  exports: [
     ChatService,
     ChatsOneToOneService,
     ConversationOneToOneService,
