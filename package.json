@@ -42,7 +42,7 @@
     "@scalar/nestjs-api-reference": "^1.1.16",
     "@webundsoehne/nest-fastify-file-upload": "^2.3.1",
     "@zavudev/sdk": "^0.38.0",
-    "bullmq": "^5.76.9",
+    "bullmq": "^5.76.10",
     "cache-manager": "^7.2.8",
     "cacheable": "^2.3.5",
     "expo-server-sdk": "^4.0.0",

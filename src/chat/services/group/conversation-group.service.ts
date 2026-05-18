@@ -2,7 +2,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model } from 'mongoose';
 import {
+  ConversationGroupMemberDto,
+  convertConversationGroupMemberSchemaFromMongoose,
+} from 'src/chat/dto/group/conversation-group/conversation-group-member.dto';
+import {
   ConversationGroupDto,
+  conversationGroupSchema,
   convertConversationGroupSchemaFromMongoose,
 } from 'src/chat/dto/group/conversation-group/conversation-group.dto';
 import { CreateConversationGroupResponseDto } from 'src/chat/dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
@@ -207,5 +212,23 @@ export class ConversationGroupService {
     return convertConversationGroupSchemaFromMongoose
       .array()
       .parse(conversations);
+  }
+
+  public async getMembers(id: bigint): Promise<ConversationGroupMemberDto[]> {
+    const members = await this.conversationGroupMemberModel.find({
+      groupId: id,
+    });
+
+    return convertConversationGroupMemberSchemaFromMongoose
+      .array()
+      .parse(members);
+  }
+
+  public async findMembershipsForConversations(conversationIds: bigint[]) {
+    return this.conversationGroupMemberModel.find({
+      groupId: {
+        $in: conversationIds,
+      },
+    });
   }
 }

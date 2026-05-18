@@ -128,7 +128,7 @@ export class ConversationOneToOneService {
     updatedAt?: Date,
   ): Promise<ConversationOneToOneDto> {
     const conversation = await this.conversationsOneToOneModel.create({
-      participants: [participant1, participant2],
+      participants: [participant1, participant2].sort(),
       createdAt: createdAt ?? new Date(),
       updatedAt: updatedAt ?? new Date(),
     });

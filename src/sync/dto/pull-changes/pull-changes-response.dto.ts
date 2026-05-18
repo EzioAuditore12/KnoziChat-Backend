@@ -7,6 +7,7 @@ import { chatsOneToOneSyncChangeSchema } from '../chats-one-to-one-sync.dto';
 import { conversationGroupSyncChangeSchema } from '../conversation-group-sync.shema';
 import { chatsGroupSyncChangeSchema } from '../chats-group-sync.dto';
 import { chatsAttachmentSyncChangeSchema } from '../chat-attachment-sync.dto';
+import { conversationGroupMemberSyncChangeSchema } from '../conversation-group-member-sync.dto';
 
 export const pullChangesResponseSchema = z.object({
   timestamp: z.number(),
@@ -16,6 +17,7 @@ export const pullChangesResponseSchema = z.object({
     conversationGroup: conversationGroupSyncChangeSchema,
     chatsDirect: chatsOneToOneSyncChangeSchema,
     chatsGroup: chatsGroupSyncChangeSchema,
+    conversationGroupMembers: conversationGroupMemberSyncChangeSchema,
     chatsAttachments: chatsAttachmentSyncChangeSchema,
   }),
 });

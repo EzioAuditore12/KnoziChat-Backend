@@ -27,6 +27,10 @@ import {
   ChatsAttachmentSyncChangeDto,
   ChatsAttachmentSyncDto,
 } from './dto/chat-attachment-sync.dto';
+import {
+  ConversationGroupMemberSyncChangeDto,
+  ConversationGroupMemberSyncDto,
+} from './dto/conversation-group-member-sync.dto';
 
 @Injectable()
 export class SyncService {
@@ -74,7 +78,7 @@ export class SyncService {
 
     // Combine 1-to-1 contacts and group participants
     const allKnownContactIds = Array.from(
-      new Set([...contactIds, ...groupParticipantIds]),
+      new Set([...contactIds, ...groupParticipantIds, userId]),
     );
 
     const userChanges = await this.pullUserChanges(
@@ -90,12 +94,19 @@ export class SyncService {
     const { chatsGroup, chatsGroupAttachments } =
       await this.pullGroupChatsChanges(groupConversationIds, timestamp);
 
+    const conversationGroupMembers =
+      await this.pullConversationGroupMemberChanges(
+        groupConversationIds,
+        timestamp,
+      );
+
     return {
       timestamp: Date.now(),
       changes: {
         user: userChanges,
         conversationDirect: conversationOneToOneChanges,
         conversationGroup: conversationGroupChanges,
+        conversationGroupMembers,
         chatsDirect: chatsOneToOne,
         chatsGroup,
         chatsAttachments: this.mergeAttachmentChanges(
@@ -375,6 +386,45 @@ export class SyncService {
         updated: updatedAttachments,
         deleted: [],
       },
+    };
+  }
+
+  private async pullConversationGroupMemberChanges(
+    conversationIds: string[],
+    timestamp: Date,
+  ): Promise<ConversationGroupMemberSyncChangeDto> {
+    const memberships =
+      await this.conversationGroupService.findMembershipsForConversations(
+        conversationIds.map((id) => BigInt(id)),
+      );
+
+    const created: ConversationGroupMemberSyncDto[] = [];
+    const updated: ConversationGroupMemberSyncDto[] = [];
+
+    for (const m of memberships) {
+      const mappedMember: ConversationGroupMemberSyncDto = {
+        id: m._id,
+
+        groupId: m.groupId.toString(),
+
+        userId: m.userId,
+
+        isAdmin: m.isAdmin,
+
+        joinedAt: m.joinedAt.getTime(),
+      };
+
+      if (m.joinedAt.getTime() > timestamp.getTime()) {
+        created.push(mappedMember);
+      } else {
+        updated.push(mappedMember);
+      }
+    }
+
+    return {
+      created,
+      updated,
+      deleted: [],
     };
   }
 

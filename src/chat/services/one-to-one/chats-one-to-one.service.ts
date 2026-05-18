@@ -26,9 +26,11 @@ export class ChatsOneToOneService {
 
   public async startNewConversation(
     senderId: string,
+    receiverId: string,
     startNewConversationDto: StartNewConversationDto,
   ): Promise<StartNewConversationResponseDto> {
-    const { receiverId, text, createdAt, updatedAt } = startNewConversationDto;
+    const { createdAt, updatedAt, attachmentUrl, ...rest } =
+      startNewConversationDto;
 
     const conversation = await this.conversationOneToOneService.create({
       participant1: senderId,
@@ -38,14 +40,13 @@ export class ChatsOneToOneService {
     });
 
     const insertedChat = await this.insert({
+      ...rest,
+      attachmentUrl: attachmentUrl ?? null,
       conversationId: conversation.id,
-      attachmentUrl: null, // TODO: Need to add logic here
-      senderId,
-      status: 'SENT',
-      content: text,
-      contentType: 'text',
       createdAt,
       updatedAt,
+      senderId,
+      status: 'DELIVERED',
     });
 
     return {
@@ -63,7 +64,8 @@ export class ChatsOneToOneService {
       senderId,
       status,
       content,
-      contentType, // TODO: HEre also
+      attachmentUrl,
+      contentType,
       createdAt,
       updatedAt,
     } = insertOneToOneChatDto;
@@ -74,7 +76,8 @@ export class ChatsOneToOneService {
       senderId,
       status,
       content,
-      contentType: 'text',
+      attachmentUrl,
+      contentType,
       createdAt: createdAt ?? new Date(),
       updatedAt: updatedAt ?? new Date(),
     });

@@ -18,6 +18,7 @@ export class ConversationOneToOne {
     type: [String],
     required: true,
     index: true,
+    unique: true,
     validate: [
       (val: string[]) => val.length === 2,
       'Must have exactly 2 participants',

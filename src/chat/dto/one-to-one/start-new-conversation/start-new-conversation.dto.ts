@@ -1,13 +1,20 @@
-import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
 
-export const startNewConversationSchema = z.object({
-  receiverId: z.uuid(),
-  text: z.string().max(1000),
-  createdAt: z.any().optional(),
-  updatedAt: z.any().optional(),
-});
+import { chatsOneToOneSchema } from '../chats-one-to-one/chats-one-to-one.dto';
+
+export const startNewConversationSchema = chatsOneToOneSchema
+  .omit({
+    senderId: true,
+    status: true,
+    deletedAt: true,
+    conversationId: true,
+  })
+  .partial({ id: true, createdAt: true, updatedAt: true, attachmentUrl: true })
+  .extend({
+    attachmentUrl: z.url().nullable().optional().default(null),
+  });
 
 export class StartNewConversationDto extends createZodDto(
   startNewConversationSchema,

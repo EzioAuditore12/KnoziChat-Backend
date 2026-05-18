@@ -25,6 +25,8 @@ import { ConversationGroupDto } from './dto/group/conversation-group/conversatio
 import { CreateConversationGroupDto } from './dto/group/conversation-group/create-conversation/create-conversation.dto';
 import { ConversationGroupService } from './services/group/conversation-group.service';
 import { ChatGateway } from './chat.gateway';
+import { CreateConversationGroupResponseDto } from './dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
+import { ConversationGroupMemberDto } from './dto/group/conversation-group/conversation-group-member.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -35,7 +37,7 @@ export class ChatController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post(':id')
   @ApiHeader({
     name: 'Authorization',
     description: 'Bearer JWT token',
@@ -45,6 +47,7 @@ export class ChatController {
   @ApiCreatedResponse({ type: StartNewConversationResponseDto })
   async create(
     @Req() req: AuthRequest,
+    @Param('id') receiverId: string,
     @Body() startNewConversationDto: StartNewConversationDto,
     @Res() reply: FastifyReply,
   ) {
@@ -52,19 +55,20 @@ export class ChatController {
 
     const result = await this.chatsOneToOneService.startNewConversation(
       userId,
+      receiverId,
       startNewConversationDto,
     );
 
-    const { receiverId, ...inserChatDto } = result;
+    const insertChatDto = result;
 
     this.chatGateway.server
       .to(`conversation:${result.conversationId}`)
-      .emit('message:receive', inserChatDto);
+      .emit('message:receive', insertChatDto);
 
     this.chatGateway.server
       .to(`user:${receiverId}`)
       .except(`conversation:${result.conversationId}`)
-      .emit('message:receive', inserChatDto);
+      .emit('message:receive', insertChatDto);
 
     return reply.status(HttpStatus.CREATED).send(result);
   }
@@ -77,7 +81,7 @@ export class ChatController {
     required: true,
     example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
-  @ApiCreatedResponse({ type: ConversationGroupDto })
+  @ApiCreatedResponse({ type: CreateConversationGroupResponseDto })
   async createGroup(
     @Req() req: AuthRequest,
     @Body() createConversationGroupDto: CreateConversationGroupDto,
@@ -106,6 +110,17 @@ export class ChatController {
   @ApiAcceptedResponse({ type: ConversationGroupDto })
   public async getGroup(@Param('id') id: string, @Res() reply: FastifyReply) {
     const result = await this.conversationGroupService.get(BigInt(id));
+
+    return reply.status(HttpStatus.ACCEPTED).send(result);
+  }
+
+  @Get('group/members/:id')
+  @ApiAcceptedResponse({ type: [ConversationGroupMemberDto] })
+  public async getGroupMembers(
+    @Param('id') id: string,
+    @Res() reply: FastifyReply,
+  ) {
+    const result = await this.conversationGroupService.getMembers(BigInt(id));
 
     return reply.status(HttpStatus.ACCEPTED).send(result);
   }
