@@ -12,6 +12,11 @@ export class UploadsService {
   private readonly appWriteUsers = appWriteUsers;
   private readonly appWriteStorage = appWriteStorage;
 
+  private readonly appWriteEndPoint = env.APPWRITE_END_POINT;
+  private readonly appWriteProjectId = env.APPWRITE_PROJECT_ID;
+  private readonly appWriteImageBucketId = env.APPWRITE_IMAGES_BUCKET_ID;
+  private readonly appWriteVideoBucketId = env.APPWRITE_VIDEOS_BUCKET_ID;
+
   public async createUser(
     userId: string,
   ): Promise<Models.User<Models.Preferences>> {
@@ -29,8 +34,55 @@ export class UploadsService {
     }
   }
 
-  public async generateToken(userId: string): Promise<Models.Token> {
-    return await appWriteUsers.createToken({ userId });
+  public async generateToken(userId: string): Promise<string> {
+    const session = await appWriteUsers.createToken({ userId });
+
+    return session.secret;
+  }
+
+  public async generateJwtToken(userId: string): Promise<string> {
+    const session = await appWriteUsers.createJWT({ userId });
+
+    return session.jwt;
+  }
+
+  public getUploadImageBucketUrl(): string {
+    const endpoint = `${this.appWriteEndPoint}/storage/buckets/${this.appWriteImageBucketId}/files`;
+
+    return endpoint;
+  }
+
+  public getUploadVideoBucketUrl(): string {
+    const endpoint = `${this.appWriteEndPoint}/storage/buckets/${this.appWriteVideoBucketId}/files`;
+
+    return endpoint;
+  }
+
+  public getProjectId(): string {
+    return this.appWriteProjectId;
+  }
+
+  public getVideoBucketId(): string {
+    return this.appWriteVideoBucketId;
+  }
+
+  public getImageBucketId(): string {
+    return this.appWriteImageBucketId;
+  }
+
+  public getEndpoint(): string {
+    return this.appWriteEndPoint;
+  }
+
+  public supportedHeadersForUpload(): object {
+    const headers = {
+      'x-appwrite-project': 'x-appwrite-project',
+      'x-appwrite-jwt': 'x-appwrite-jwt',
+      'content-range': 'content-range',
+      'x-appwrite-id': 'x-appwrite-id',
+    };
+
+    return headers;
   }
 
   public async uploadAvatar(

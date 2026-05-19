@@ -98,6 +98,61 @@ export class ChatsOneToOneService {
     return convertChatsOneToOneFromMongoose.array().parse(chats);
   }
 
+  public async findByIdAndUpdateStatus(
+    id: bigint,
+    status: ChatsOneToOne['status'],
+  ): Promise<ChatsOneToOneDto> {
+    const message = await this.chatsOneToOneRepository.findByIdAndUpdate(
+      id,
+      {
+        status,
+      },
+      {
+        new: true,
+      },
+    );
+
+    return convertChatsOneToOneFromMongoose.parse(message);
+  }
+
+  public async markConversationMessagesSeen(
+    conversationId: bigint,
+    userId: string,
+  ): Promise<ChatsOneToOneDto[]> {
+    const messages = await this.chatsOneToOneRepository.find({
+      conversationId,
+
+      senderId: {
+        $ne: userId,
+      },
+
+      status: {
+        $ne: 'SEEN',
+      },
+    });
+
+    if (!messages.length) {
+      return [];
+    }
+
+    const messageIds = messages.map((message) => message._id);
+
+    await this.chatsOneToOneRepository.updateMany(
+      {
+        _id: {
+          $in: messageIds,
+        },
+      },
+      {
+        $set: {
+          status: 'SEEN',
+        },
+      },
+    );
+
+    return convertChatsOneToOneFromMongoose.array().parse(messages);
+  }
+
   public async findChatsSince(
     conversationId: bigint,
     timestamp: Date,

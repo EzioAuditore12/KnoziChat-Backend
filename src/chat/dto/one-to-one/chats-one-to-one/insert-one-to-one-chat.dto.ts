@@ -6,6 +6,7 @@ export const insertOneToOneChatSchema = chatsOneToOneSchema.partial({
   id: true,
   createdAt: true,
   updatedAt: true,
+  status: true,
 });
 
 export class InsertOneToOneChatDto extends createZodDto(

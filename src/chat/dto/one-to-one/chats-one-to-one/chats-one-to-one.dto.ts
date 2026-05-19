@@ -9,7 +9,7 @@ export const chatsOneToOneSchema = z.object({
   contentType: z.enum(['image', 'video', 'text', 'file']),
   content: z.string().nullable(),
   attachmentUrl: z.url().nullable(),
-  status: z.enum(['SENT', 'DELIVERED', 'SEEN']),
+  status: z.enum(['DELIVERED', 'SEEN']).default('DELIVERED'),
   deletedAt: z.any().nullable().optional(),
   createdAt: z.any(),
   updatedAt: z.any(),

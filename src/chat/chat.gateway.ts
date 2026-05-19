@@ -81,7 +81,7 @@ export class ChatGateway
   @SubscribeMessage('message:send')
   async sendMessage(
     client: AuthenticatedSocket,
-    insertChatDto: Omit<InsertOneToOneChatDto, 'senderId'> & {
+    insertChatDto: Omit<InsertOneToOneChatDto, 'senderId' | 'status'> & {
       receiverId: string;
     },
   ) {
@@ -100,6 +100,51 @@ export class ChatGateway
       .to(`user:${insertChatDto.receiverId}`)
       .except(`conversation:${savedMessage.conversationId}`)
       .emit('message:receive', savedMessage);
+
+    return {
+      success: true,
+      messageId: savedMessage.id,
+    };
+  }
+
+  @SubscribeMessage('message:seen')
+  async markSeen(
+    client: AuthenticatedSocket,
+    payload: {
+      conversationId: string;
+    },
+  ) {
+    const userId = client.handshake.user.id;
+
+    const updatedMessages = await this.chatService.markConversationMessagesSeen(
+      payload.conversationId,
+      userId,
+    );
+
+    if (!updatedMessages.length) {
+      return;
+    }
+
+    this.server
+      .to(`conversation:${payload.conversationId}`)
+      .emit('message:seen:update', {
+        conversationId: payload.conversationId,
+        userId,
+        messageIds: updatedMessages.map((m) => m.id),
+      });
+
+    const senderIds = [
+      ...new Set(updatedMessages.map((message) => message.senderId)),
+    ];
+
+    senderIds.forEach((senderId) => {
+      this.server
+        .to(`user:${senderId}`)
+        .except(`conversation:${payload.conversationId}`)
+        .emit('message:seen:update', {
+          conversationId: payload.conversationId,
+        });
+    });
   }
 
   @SubscribeMessage('conversation-group:join')

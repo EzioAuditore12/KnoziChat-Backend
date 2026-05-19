@@ -37,10 +37,10 @@ export class ChatsOneToOne {
 
   @Prop({
     type: String,
-    enum: ['SENT', 'DELIVERED', 'SEEN'],
-    default: 'SENT',
+    enum: ['DELIVERED', 'SEEN'],
+    default: 'DELIVERED',
   })
-  status: 'SENT' | 'DELIVERED' | 'SEEN';
+  status: 'DELIVERED' | 'SEEN';
 
   @Prop({
     type: Date,

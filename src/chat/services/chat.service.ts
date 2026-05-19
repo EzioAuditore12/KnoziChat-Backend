@@ -129,6 +129,26 @@ export class ChatService {
     return await this.chatsOneToOneService.insert(insertOneToOneChatDto);
   }
 
+  public async updateMessageStatus(
+    id: string,
+    status: ChatsOneToOneDto['status'],
+  ): Promise<ChatsOneToOneDto> {
+    return await this.chatsOneToOneService.findByIdAndUpdateStatus(
+      BigInt(id),
+      status,
+    );
+  }
+
+  public async markConversationMessagesSeen(
+    conversationId: string,
+    userId: string,
+  ): Promise<ChatsOneToOneDto[]> {
+    return await this.chatsOneToOneService.markConversationMessagesSeen(
+      BigInt(conversationId),
+      userId,
+    );
+  }
+
   public async joinGroupConversation(
     client: AuthenticatedSocket,
     conversationId: string,

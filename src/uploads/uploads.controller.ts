@@ -23,9 +23,9 @@ export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post('authorize')
+  @Post('image')
   @ApiAcceptedResponse({ type: AuthorizeUploadResponseDto })
-  public async authorizeUpload(
+  public async authorizeUploadImage(
     @Req() req: AuthRequest,
     @Body() authorizeUploadRequestDto: AuthorizeUploadRequestDto,
     @Res() reply: FastifyReply,
@@ -37,15 +37,44 @@ export class UploadsController {
 
     if (!isExistingAppWriteUser) await this.uploadsService.createUser(userId);
 
-    const token = await this.uploadsService.generateToken(userId);
+    const appWriteJwtToken = await this.uploadsService.generateJwtToken(userId);
 
     return reply.status(HttpStatus.ACCEPTED).send({
       allowed: true,
-      token: token.secret,
-      userId,
-      projectId: env.APPWRITE_PROJECT_ID,
-      endpoint: env.APPWRITE_END_POINT,
-      bucketId: env.APPWRITE_IMAGES_BUCKET_ID,
+      projectId: this.uploadsService.getProjectId(),
+      bucketId: this.uploadsService.getImageBucketId(),
+      endpoint: this.uploadsService.getEndpoint(),
+      url: this.uploadsService.getUploadImageBucketUrl(),
+      authorizationToken: appWriteJwtToken,
+      requiredHeaders: this.uploadsService.supportedHeadersForUpload(),
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('video')
+  @ApiAcceptedResponse({ type: AuthorizeUploadResponseDto })
+  public async authorizeUploadVideo(
+    @Req() req: AuthRequest,
+    @Body() authorizeUploadRequestDto: AuthorizeUploadRequestDto,
+    @Res() reply: FastifyReply,
+  ) {
+    const userId = req.user.id;
+
+    const isExistingAppWriteUser =
+      await this.uploadsService.isExistingUser(userId);
+
+    if (!isExistingAppWriteUser) await this.uploadsService.createUser(userId);
+
+    const appWriteJwtToken = await this.uploadsService.generateJwtToken(userId);
+
+    return reply.status(HttpStatus.ACCEPTED).send({
+      allowed: true,
+      projectId: this.uploadsService.getProjectId(),
+      bucketId: this.uploadsService.getVideoBucketId(),
+      endpoint: this.uploadsService.getEndpoint(),
+      url: this.uploadsService.getUploadVideoBucketUrl(),
+      authorizationToken: appWriteJwtToken,
+      requiredHeaders: this.uploadsService.supportedHeadersForUpload(),
     });
   }
 }
