@@ -16,7 +16,8 @@ import { AuthorizeUploadRequestDto } from './dto/authorize/authorize-upload-requ
 import { AuthorizeUploadResponseDto } from './dto/authorize/authorize-upload-response.dto';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 import { UploadsService } from './uploads.service';
-import { env } from 'src/env';
+
+import { AuthorizeDownloadRequestDto } from './dto/authorize/authorize-download-request.dto';
 
 @Controller('uploads')
 export class UploadsController {
@@ -75,6 +76,28 @@ export class UploadsController {
       url: this.uploadsService.getUploadVideoBucketUrl(),
       authorizationToken: appWriteJwtToken,
       requiredHeaders: this.uploadsService.supportedHeadersForUpload(),
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('download')
+  @ApiAcceptedResponse({ type: AuthorizeUploadResponseDto })
+  public async authorizeDownload(
+    @Req() req: AuthRequest,
+    @Body() authorizeDownloadRequestDto: AuthorizeDownloadRequestDto,
+    @Res() reply: FastifyReply,
+  ) {
+    const userId = req.user.id;
+
+    const { url } = authorizeDownloadRequestDto;
+
+    const { url: downloadUrl, fileType } =
+      await this.uploadsService.verifyUrlAndDownloadLink(url);
+
+    return reply.status(HttpStatus.ACCEPTED).send({
+      allowed: true,
+      downloadUrl,
+      fileType,
     });
   }
 }
