@@ -126,7 +126,9 @@ export class ChatService {
   public async saveMessage(
     insertOneToOneChatDto: InsertOneToOneChatDto,
   ): Promise<ChatsOneToOneDto> {
-    return await this.chatsOneToOneService.insert(insertOneToOneChatDto);
+    const { createdAt, updatedAt, ...rest } = insertOneToOneChatDto;
+
+    return await this.chatsOneToOneService.insert({ ...rest });
   }
 
   public async updateMessageStatus(
@@ -142,7 +144,7 @@ export class ChatService {
   public async markConversationMessagesSeen(
     conversationId: string,
     userId: string,
-  ): Promise<ChatsOneToOneDto[]> {
+  ): Promise<{ conversationId: string; userId: string; lastSeenAt: Date }> {
     return await this.chatsOneToOneService.markConversationMessagesSeen(
       BigInt(conversationId),
       userId,

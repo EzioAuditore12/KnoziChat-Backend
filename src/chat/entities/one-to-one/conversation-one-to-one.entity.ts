@@ -26,6 +26,13 @@ export class ConversationOneToOne {
   })
   participants: string[];
 
+  @Prop({
+    type: Map,
+    of: Date,
+    default: {},
+  })
+  lastSeenAt: Map<string, Date>;
+
   createdAt: Date;
   updatedAt: Date;
 }

@@ -135,4 +135,24 @@ export class ConversationOneToOneService {
 
     return convertConversationOneToOneSchemaFromMongoose.parse(conversation);
   }
+
+  public async updateLastSeenAt(
+    conversationId: bigint,
+    userId: string,
+  ): Promise<Date> {
+    const now = new Date();
+
+    await this.conversationsOneToOneModel.findByIdAndUpdate(
+      conversationId,
+      {
+        $set: {
+          [`lastSeenAt.${userId}`]: now,
+          updatedAt: now,
+        },
+      },
+      { returnDocument: 'after' },
+    );
+
+    return now;
+  }
 }

@@ -49,6 +49,7 @@ export class SyncService {
     const { lastSyncedAt, tableNames } = pullChangesRequestDto;
 
     const timestamp = new Date(lastSyncedAt);
+    const syncCutoff = new Date();
 
     const { contactIds, conversationIds } =
       await this.conversationOneToOneService.findAllUserConversationsAndContacts(
@@ -101,7 +102,7 @@ export class SyncService {
       );
 
     return {
-      timestamp: Date.now(),
+      timestamp: syncCutoff.getTime(),
       changes: {
         user: userChanges,
         conversationDirect: conversationOneToOneChanges,
@@ -118,7 +119,7 @@ export class SyncService {
   }
 
   private async pullOneToOneConversationChanges(
-    userId: string,
+    userId: string, // the current logged in user asking for sync
     timestamp: Date,
   ): Promise<ConversationOneToOneSyncChangeDto> {
     const conversations =
@@ -131,11 +132,25 @@ export class SyncService {
     const updated: ConversationOneToOneSyncDto[] = [];
 
     for (const c of conversations) {
-      const { participants, ...rest } = c;
+      const { participants, lastSeenAt, ...rest } = c;
+      const otherUserId = participants.find((id) => id !== userId) as string;
+
+      // Extract my read receipt and their read receipt
+      let myLastSeenAt = 0;
+      let theirLastSeenAt = 0;
+
+      if (lastSeenAt) {
+        if (lastSeenAt[userId])
+          myLastSeenAt = new Date(lastSeenAt[userId]).getTime();
+        if (lastSeenAt[otherUserId])
+          theirLastSeenAt = new Date(lastSeenAt[otherUserId]).getTime();
+      }
 
       const mappedConversation: ConversationOneToOneSyncDto = {
         ...rest,
-        userId: participants.find((id) => id !== userId) as string,
+        userId: otherUserId,
+        myLastSeenAt,
+        theirLastSeenAt,
         createdAt: c.createdAt.getTime(),
         updatedAt: c.updatedAt.getTime(),
       };
@@ -147,11 +162,7 @@ export class SyncService {
       }
     }
 
-    return {
-      created,
-      updated,
-      deleted: [],
-    };
+    return { created, updated, deleted: [] };
   }
 
   private async pullGroupConversationChanges(
@@ -183,11 +194,7 @@ export class SyncService {
       }
     }
 
-    return {
-      created,
-      updated,
-      deleted: [],
-    };
+    return { created, updated, deleted: [] };
   }
 
   private async addMissingUserDetails(
@@ -238,11 +245,7 @@ export class SyncService {
       }
     }
 
-    return {
-      created,
-      updated,
-      deleted: [],
-    };
+    return { created, updated, deleted: [] };
   }
 
   private async pullOneToOneChatsChanges(
@@ -421,11 +424,7 @@ export class SyncService {
       }
     }
 
-    return {
-      created,
-      updated,
-      deleted: [],
-    };
+    return { created, updated, deleted: [] };
   }
 
   private mergeAttachmentChanges(
