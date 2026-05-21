@@ -8,10 +8,11 @@ import { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
 import { InsertOneToOneChatDto } from '../dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
 import { ChatsOneToOneDto } from '../dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
 import { ChatsGroupService } from './group/chats-group.service';
-import { InsertGroupChatDto } from '../dto/group/chats-group/insert-group-chat.dto';
 import { ChatsGroupDto } from '../dto/group/chats-group/chats-group.dto';
 import { ConversationGroupService } from './group/conversation-group.service';
 import type { Cache } from 'cache-manager';
+import { ConversationGroupMemberService } from './group/conversation-group-member.service';
+import { InsertGroupChatContentDto } from '../dto/group/chats-group/insert-group-chat-content.dto';
 
 @Injectable()
 export class ChatService {
@@ -19,6 +20,8 @@ export class ChatService {
     private readonly chatsOneToOneService: ChatsOneToOneService,
     private readonly chatsGroupService: ChatsGroupService,
     private readonly conversationGroupService: ConversationGroupService,
+    private readonly conversationGroupMemberService: ConversationGroupMemberService,
+
     private readonly jwtService: JwtService,
   ) {}
 
@@ -174,13 +177,13 @@ export class ChatService {
   }
 
   public async saveGroupMessage(
-    insertGroupChatDto: InsertGroupChatDto,
+    insertGroupChatContentDto: InsertGroupChatContentDto,
   ): Promise<ChatsGroupDto> {
-    return await this.chatsGroupService.insert(insertGroupChatDto);
+    return await this.chatsGroupService.insert(insertGroupChatContentDto);
   }
 
   public async getGroupParticipantIds(groupId: string): Promise<string[]> {
-    return await this.conversationGroupService.getParticipantIds(
+    return await this.conversationGroupMemberService.getParticipantIds(
       BigInt(groupId),
     );
   }

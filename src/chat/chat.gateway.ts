@@ -16,6 +16,7 @@ import type { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
 import { InsertOneToOneChatDto } from './dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
 
 import { InsertGroupChatDto } from './dto/group/chats-group/insert-group-chat.dto';
+import { InsertGroupChatContentDto } from './dto/group/chats-group/insert-group-chat-content.dto';
 
 @WebSocketGateway()
 export class ChatGateway
@@ -158,20 +159,20 @@ export class ChatGateway
   @SubscribeMessage('message-group:send')
   async sendGroupMessage(
     client: AuthenticatedSocket,
-    insertGroupChatDto: Omit<InsertGroupChatDto, 'senderId'>,
+    insertGroupChatContentDto: Omit<InsertGroupChatContentDto, 'senderId'>,
   ) {
     const senderId = client.handshake.user.id;
 
     const savedMessage = await this.chatService.saveGroupMessage({
       senderId,
-      ...insertGroupChatDto,
+      ...insertGroupChatContentDto,
     });
 
     client.broadcast
       .to(`conversation-group:${savedMessage.conversationId}`)
       .emit('message-group:receive', savedMessage);
 
-    const conversationId = insertGroupChatDto.conversationId;
+    const conversationId = insertGroupChatContentDto.conversationId;
 
     const participants =
       await this.chatService.getGroupParticipantIds(conversationId);

@@ -1,26 +1,26 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model } from 'mongoose';
 import {
-  ConversationGroupMemberDto,
-  convertConversationGroupMemberSchemaFromMongoose,
-} from 'src/chat/dto/group/conversation-group/conversation-group-member.dto';
+  ForbiddenException,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import { Connection, Model } from 'mongoose';
+
 import {
   ConversationGroupDto,
-  conversationGroupSchema,
   convertConversationGroupSchemaFromMongoose,
 } from 'src/chat/dto/group/conversation-group/conversation-group.dto';
 import { CreateConversationGroupResponseDto } from 'src/chat/dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
 import { CreateConversationGroupDto } from 'src/chat/dto/group/conversation-group/create-conversation/create-conversation.dto';
-import {
-  ConversationGroupMember,
-  ConversationGroupMemberDocument,
-} from 'src/chat/entities/group/conversation-group-members.entity';
+
 import {
   ConversationGroup,
   ConversationGroupDocument,
 } from 'src/chat/entities/group/conversation-group.entity';
 import { UserService } from 'src/user/user.service';
+import { ChatsGroupService } from './chats-group.service';
+import { ConversationGroupMemberService } from './conversation-group-member.service';
 
 @Injectable()
 export class ConversationGroupService {
@@ -29,8 +29,11 @@ export class ConversationGroupService {
     private readonly connection: Connection,
     @InjectModel(ConversationGroup.name)
     private readonly conversationsGroupModel: Model<ConversationGroupDocument>,
-    @InjectModel(ConversationGroupMember.name)
-    private readonly conversationGroupMemberModel: Model<ConversationGroupMemberDocument>,
+
+    @Inject(forwardRef(() => ChatsGroupService))
+    private readonly chatGroupService: ChatsGroupService,
+    @Inject(forwardRef(() => ConversationGroupMemberService))
+    private readonly conversationGroupMemberService: ConversationGroupMemberService,
 
     private readonly userService: UserService,
   ) {}
@@ -69,13 +72,25 @@ export class ConversationGroupService {
         { session },
       );
 
-      await this.insertGroupParticipants(
+      await this.conversationGroupMemberService.insertGroupParticipants(
         conversation._id,
         uniqueParticipants,
         [creatorId],
         conversation.createdAt,
         session,
       );
+
+      const firstChat = await this.chatGroupService.insert({
+        contentType: 'system',
+        conversationId: conversation._id.toString(),
+        senderId: creatorId,
+        systemEventType: 'group_created',
+        metadata: {
+          creatorId,
+          uniqueParticipants,
+          groupName: conversation.name,
+        },
+      });
 
       await session.commitTransaction();
 
@@ -85,6 +100,7 @@ export class ConversationGroupService {
         avatar: conversation.avatar,
         name: conversation.name,
         participantIds: uniqueParticipants,
+        chat: firstChat,
         createdAt: conversation.createdAt,
         updatedAt: conversation.updatedAt,
       };
@@ -97,45 +113,6 @@ export class ConversationGroupService {
     } finally {
       await session.endSession();
     }
-  }
-
-  private async insertGroupParticipants(
-    groupId: bigint,
-    participantIds: string[],
-    adminIds: string[],
-    joinedAt?: Date,
-    session?: ClientSession,
-  ): Promise<void> {
-    const adminSet = new Set(adminIds);
-
-    const mappedMembers: ConversationGroupMember[] = participantIds.map(
-      (userId) => ({
-        _id: `${groupId.toString()}:${userId}`,
-
-        groupId,
-
-        userId,
-
-        isAdmin: adminSet.has(userId),
-
-        joinedAt: joinedAt ?? new Date(),
-      }),
-    );
-
-    await this.conversationGroupMemberModel.bulkWrite(
-      mappedMembers.map((member) => ({
-        updateOne: {
-          filter: { _id: member._id },
-
-          update: {
-            $setOnInsert: member,
-          },
-
-          upsert: true,
-        },
-      })),
-      { session },
-    );
   }
 
   public async get(id: bigint): Promise<ConversationGroupDto> {
@@ -157,52 +134,14 @@ export class ConversationGroupService {
     );
   }
 
-  public async findAllUserConversationsAndContacts(
-    userId: string,
-  ): Promise<{ conversationIds: string[]; contactIds: string[] }> {
-    const memberships = await this.conversationGroupMemberModel.find({
-      userId,
-    });
-
-    const conversationIds = memberships.map((m) => m.groupId.toString());
-
-    const allGroupMembers = await this.conversationGroupMemberModel.find({
-      groupId: {
-        $in: memberships.map((m) => m.groupId),
-      },
-    });
-
-    const contactIds = new Set<string>();
-
-    allGroupMembers.forEach((member) => {
-      if (member.userId !== userId) {
-        contactIds.add(member.userId);
-      }
-    });
-
-    return {
-      conversationIds,
-      contactIds: Array.from(contactIds),
-    };
-  }
-
-  public async getParticipantIds(conversationId: bigint): Promise<string[]> {
-    const participants = await this.conversationGroupMemberModel.find({
-      groupId: conversationId,
-    });
-
-    return participants.map((p) => p.userId);
-  }
-
   public async findConversationsContainingUser(
     userId: string,
     timestamp: Date,
   ): Promise<ConversationGroupDto[]> {
-    const memberships = await this.conversationGroupMemberModel.find({
-      userId,
-    });
-
-    const groupIds = memberships.map((m) => m.groupId);
+    const groupIds =
+      await this.conversationGroupMemberService.findUserMemberShipInGroups(
+        userId,
+      );
 
     const conversations = await this.conversationsGroupModel.find({
       _id: { $in: groupIds },
@@ -212,23 +151,5 @@ export class ConversationGroupService {
     return convertConversationGroupSchemaFromMongoose
       .array()
       .parse(conversations);
-  }
-
-  public async getMembers(id: bigint): Promise<ConversationGroupMemberDto[]> {
-    const members = await this.conversationGroupMemberModel.find({
-      groupId: id,
-    });
-
-    return convertConversationGroupMemberSchemaFromMongoose
-      .array()
-      .parse(members);
-  }
-
-  public async findMembershipsForConversations(conversationIds: bigint[]) {
-    return this.conversationGroupMemberModel.find({
-      groupId: {
-        $in: conversationIds,
-      },
-    });
   }
 }

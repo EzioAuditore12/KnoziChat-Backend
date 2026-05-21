@@ -31,15 +31,19 @@ import {
   ConversationGroupMemberSyncChangeDto,
   ConversationGroupMemberSyncDto,
 } from './dto/conversation-group-member-sync.dto';
+import { ConversationGroupMemberService } from 'src/chat/services/group/conversation-group-member.service';
 
 @Injectable()
 export class SyncService {
   constructor(
     private readonly userService: UserService,
+
     private readonly conversationOneToOneService: ConversationOneToOneService,
     private readonly chatsOneToOneService: ChatsOneToOneService,
+
     private readonly conversationGroupService: ConversationGroupService,
     private readonly chatsGroupService: ChatsGroupService,
+    private readonly conversationGroupMemberService: ConversationGroupMemberService,
   ) {}
 
   public async pullChanges(
@@ -60,7 +64,7 @@ export class SyncService {
       contactIds: groupParticipantIds,
       conversationIds: groupConversationIds,
     } =
-      await this.conversationGroupService.findAllUserConversationsAndContacts(
+      await this.conversationGroupMemberService.findAllUserConversationsAndContacts(
         userId,
       );
 
@@ -397,7 +401,7 @@ export class SyncService {
     timestamp: Date,
   ): Promise<ConversationGroupMemberSyncChangeDto> {
     const memberships =
-      await this.conversationGroupService.findMembershipsForConversations(
+      await this.conversationGroupMemberService.findMembershipsForConversations(
         conversationIds.map((id) => BigInt(id)),
       );
 
@@ -406,18 +410,13 @@ export class SyncService {
 
     for (const m of memberships) {
       const mappedMember: ConversationGroupMemberSyncDto = {
-        id: m._id,
-
-        groupId: m.groupId.toString(),
-
-        userId: m.userId,
-
-        isAdmin: m.isAdmin,
-
-        joinedAt: m.joinedAt.getTime(),
+        ...m,
+        createdAt: m.createdAt.getTime(),
+        updatedAt: m.updatedAt.getTime(),
+        deletedAt: m.deletedAt ? m.deletedAt.getTime() : null,
       };
 
-      if (m.joinedAt.getTime() > timestamp.getTime()) {
+      if (m.createdAt.getTime() > timestamp.getTime()) {
         created.push(mappedMember);
       } else {
         updated.push(mappedMember);

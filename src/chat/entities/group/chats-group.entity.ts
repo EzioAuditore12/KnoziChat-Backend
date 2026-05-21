@@ -29,14 +29,41 @@ export class ChatsGroup {
   @Prop({ required: true })
   senderId: string;
 
-  @Prop({ type: String, enum: ['image', 'video', 'text', 'file'] })
-  contentType: string;
+  @Prop({ type: String, enum: ['image', 'video', 'text', 'file', 'system'] })
+  contentType: 'image' | 'video' | 'text' | 'file' | 'system';
 
-  @Prop({ type: String, trim: true })
+  @Prop({ type: String, trim: true, default: null })
   content: string | null;
+
+  @Prop({
+    type: String,
+    enum: [
+      'member_left',
+      'member_joined',
+      'admin_changed',
+      'group_name_changed',
+      'group_avatar_changed',
+      'group_created',
+    ],
+    default: null,
+  })
+  systemEventType:
+    | 'member_left'
+    | 'member_joined'
+    | 'admin_changed'
+    | 'group_name_changed'
+    | 'group_avatar_changed'
+    | 'group_created'
+    | null;
 
   @Prop({ type: String, default: null })
   attachmentUrl: string | null;
+
+  @Prop({
+    type: Object,
+    default: null,
+  })
+  metadata: Record<string, any> | null;
 
   @Prop({
     type: String,

@@ -1,18 +1,22 @@
 import { createZodDto } from 'nestjs-zod';
-import { chatsGroupSchema } from './chats-group.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
 
-export const insertGroupChatSchema = chatsGroupSchema.partial({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  metadata: true,
-  attachmentUrl: true,
-  content: true,
-  systemEventType: true,
-});
+import { insertGroupChatSchema } from './insert-group-chat.dto';
 
-export class InsertGroupChatDto extends createZodDto(insertGroupChatSchema) {
+export const insertGroupChatContentSchema = insertGroupChatSchema
+  .omit({
+    systemEventType: true,
+    metadata: true,
+    contentType: true,
+  })
+  .extend({
+    contentType: z.enum(['image', 'video', 'text', 'file']),
+  });
+
+export class InsertGroupChatContentDto extends createZodDto(
+  insertGroupChatContentSchema,
+) {
   @ApiProperty({
     type: 'string',
     example: '12345678',

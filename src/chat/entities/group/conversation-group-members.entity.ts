@@ -5,7 +5,7 @@ import { HydratedDocument } from 'mongoose';
 
 export const CONVERSATION_GROUP_MEMBER_TABLE_NAME = 'conversation_group_member';
 
-@Schema({ collection: CONVERSATION_GROUP_MEMBER_TABLE_NAME, timestamps: false })
+@Schema({ collection: CONVERSATION_GROUP_MEMBER_TABLE_NAME, timestamps: true })
 export class ConversationGroupMember {
   @Prop({
     type: String,
@@ -34,15 +34,25 @@ export class ConversationGroupMember {
   })
   isAdmin: boolean;
 
+  createdAt: Date;
+
+  updatedAt: Date;
+
   @Prop({
     type: Date,
-    default: Date.now,
+    default: null,
+    index: true,
   })
-  joinedAt: Date;
+  deletedAt?: Date | null;
 }
 
 export const ConversationGroupMemberSchema = SchemaFactory.createForClass(
   ConversationGroupMember,
 );
+
+ConversationGroupMemberSchema.index({
+  updatedAt: 1,
+});
+
 export type ConversationGroupMemberDocument =
   HydratedDocument<ConversationGroupMember>;

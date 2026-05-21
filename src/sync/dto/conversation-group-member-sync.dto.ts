@@ -5,7 +5,9 @@ import { conversationGroupMemberSchema } from 'src/chat/dto/group/conversation-g
 
 export const conversationGroupMemberSyncSchema =
   conversationGroupMemberSchema.extend({
-    joinedAt: z.number(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+    deletedAt: z.number().nullable(),
   });
 
 export const conversationGroupMemberSyncChangeSchema = z.object({

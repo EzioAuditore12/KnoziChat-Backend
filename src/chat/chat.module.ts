@@ -10,7 +10,6 @@ import {
   ChatsOneToOneSchema,
 } from './entities/one-to-one/chats-one-to-one.entity';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ChatController } from './chat.controller';
 
 import { ChatsOneToOneService } from './services/one-to-one/chats-one-to-one.service';
 import { ConversationOneToOneService } from './services/one-to-one/conversation-one-to-one.service';
@@ -33,6 +32,10 @@ import {
   ConversationGroupMember,
   ConversationGroupMemberSchema,
 } from './entities/group/conversation-group-members.entity';
+import { ChatDirectController } from './controllers/chat-direct.controller';
+import { ChatGroupController } from './controllers/chat-group.controller';
+import { ConversationGroupMemberService } from './services/group/conversation-group-member.service';
+import { ConversationGroupOrchestratorService } from './services/conversation-group-orchestrator.service';
 
 @Module({
   imports: [
@@ -51,13 +54,15 @@ import {
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
-  controllers: [ChatController],
+  controllers: [ChatDirectController, ChatGroupController],
   providers: [
     ChatGateway,
     ChatService,
     ChatsOneToOneService,
     ConversationOneToOneService,
     ConversationGroupService,
+    ConversationGroupMemberService,
+    ConversationGroupOrchestratorService,
     ChatsGroupService,
   ],
   exports: [
@@ -65,6 +70,8 @@ import {
     ChatsOneToOneService,
     ConversationOneToOneService,
     ConversationGroupService,
+    ConversationGroupMemberService,
+    ConversationGroupOrchestratorService,
     ChatsGroupService,
   ],
 })
