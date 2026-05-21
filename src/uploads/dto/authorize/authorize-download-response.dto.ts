@@ -1,12 +1,13 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-export const authorizeDownloadRequestSchema = z.object({
+export const authorizeDownloadResponseSchema = z.object({
   allowed: z.boolean(),
   downloadUrl: z.url(),
   fileType: z.enum(['file', 'image', 'video']),
+  size: z.number(),
 });
 
-export class AuthorizeDownloadRequestDto extends createZodDto(
-  authorizeDownloadRequestSchema,
+export class AuthorizeDownloadResponseDto extends createZodDto(
+  authorizeDownloadResponseSchema,
 ) {}

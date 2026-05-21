@@ -115,6 +115,7 @@ export class UploadsService {
   public async verifyUrlAndDownloadLink(url: string): Promise<{
     url: string;
     fileType: 'image' | 'video';
+    size: number; // 👈 Add this to the return type
   }> {
     const parsedUrl = new URL(url);
 
@@ -124,7 +125,6 @@ export class UploadsService {
     }
 
     const parts = parsedUrl.pathname.split('/');
-
     const bucketId = parts[4];
     const fileId = parts[6];
 
@@ -134,7 +134,6 @@ export class UploadsService {
 
     let fileType: 'image' | 'video';
 
-    // Determine file type from bucket
     if (bucketId === this.appWriteImageBucketId) {
       fileType = 'image';
     } else if (bucketId === this.appWriteVideoBucketId) {
@@ -143,26 +142,26 @@ export class UploadsService {
       throw new NotFoundException(`Bucket ${bucketId} is not allowed`);
     }
 
-    // Verify file exists
-    await this.isExistingFile(fileId, bucketId);
+    // 1. 👇 Get the full file info instead of just a boolean
+    const fileInfo = await this.getFileInfo(fileId, bucketId);
 
-    // Create secure temporary token
     const token = await this.appWriteTokens.createFileToken({
       bucketId,
       fileId,
     });
 
-    // Generate secure download URL
+    // 2. 👇 Change /download to /view for better streaming support
     const downloadUrl =
       `${this.appWriteEndPoint}` +
       `/storage/buckets/${bucketId}` +
       `/files/${fileId}` +
-      `/download?project=${this.appWriteProjectId}` +
+      `/view?project=${this.appWriteProjectId}` +
       `&token=${token.secret}`;
 
     return {
       url: downloadUrl,
       fileType,
+      size: fileInfo.sizeOriginal, // 👈 Return the exact byte size!
     };
   }
 
@@ -190,5 +189,19 @@ export class UploadsService {
     }
 
     return true;
+  }
+
+  private async getFileInfo(
+    id: string,
+    bucketId: string,
+  ): Promise<Models.File> {
+    try {
+      return await this.appWriteStorage.getFile({
+        bucketId,
+        fileId: id,
+      });
+    } catch {
+      throw new NotFoundException(`Unable to locate file with id = ${id}`);
+    }
   }
 }

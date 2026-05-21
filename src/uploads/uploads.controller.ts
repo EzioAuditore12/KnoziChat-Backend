@@ -18,6 +18,7 @@ import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
 import { UploadsService } from './uploads.service';
 
 import { AuthorizeDownloadRequestDto } from './dto/authorize/authorize-download-request.dto';
+import { AuthorizeDownloadResponseDto } from './dto/authorize/authorize-download-response.dto';
 
 @Controller('uploads')
 export class UploadsController {
@@ -81,7 +82,7 @@ export class UploadsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('download')
-  @ApiAcceptedResponse({ type: AuthorizeUploadResponseDto })
+  @ApiAcceptedResponse({ type: AuthorizeDownloadResponseDto })
   public async authorizeDownload(
     @Req() req: AuthRequest,
     @Body() authorizeDownloadRequestDto: AuthorizeDownloadRequestDto,
@@ -91,13 +92,17 @@ export class UploadsController {
 
     const { url } = authorizeDownloadRequestDto;
 
-    const { url: downloadUrl, fileType } =
-      await this.uploadsService.verifyUrlAndDownloadLink(url);
+    const {
+      url: downloadUrl,
+      fileType,
+      size,
+    } = await this.uploadsService.verifyUrlAndDownloadLink(url);
 
     return reply.status(HttpStatus.ACCEPTED).send({
       allowed: true,
       downloadUrl,
       fileType,
+      size,
     });
   }
 }
