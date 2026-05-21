@@ -39,11 +39,14 @@ export class ChatGroupController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @ApiCreatedResponse({ type: CreateConversationGroupResponseDto })
+  @ApiCreatedResponse({
+    type: CreateConversationGroupResponseDto,
+  })
   @Post()
   async create(
     @Req() req: AuthRequest,
-    @Body() createConversationGroupDto: CreateConversationGroupDto,
+    @Body()
+    createConversationGroupDto: CreateConversationGroupDto,
     @Res() reply: FastifyReply,
   ) {
     const userId = req.user.id;
@@ -64,7 +67,7 @@ export class ChatGroupController {
     const participantRooms = participants.map((id) => `user:${id}`);
 
     /**
-     * Group created payload
+     * Group metadata
      */
     const conversationCreatedPayload = {
       id: result.id,
@@ -77,7 +80,7 @@ export class ChatGroupController {
     };
 
     /**
-     * Emit conversation creation
+     * Sidebar/conversation list sync
      */
     if (participantRooms.length > 0) {
       this.chatGateway.server
@@ -86,23 +89,15 @@ export class ChatGroupController {
     }
 
     /**
-     * Emit first timeline event
+     * First timeline item
      */
     if (participantRooms.length > 0) {
       this.chatGateway.server
         .to(participantRooms)
-        .emit('conversation-group:event', result.chat);
+        .emit('message-group:receive', result.chat);
     }
 
     return reply.status(HttpStatus.CREATED).send(result);
-  }
-
-  @Get(':id')
-  @ApiAcceptedResponse({ type: ConversationGroupDto })
-  public async getGroup(@Param('id') id: string, @Res() reply: FastifyReply) {
-    const result = await this.conversationGroupService.get(BigInt(id));
-
-    return reply.status(HttpStatus.ACCEPTED).send(result);
   }
 
   @UseGuards(JwtAuthGuard)

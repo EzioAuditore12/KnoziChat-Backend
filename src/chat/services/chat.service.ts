@@ -178,7 +178,7 @@ export class ChatService {
 
   public async saveGroupMessage(
     insertGroupChatContentDto: InsertGroupChatContentDto,
-  ): Promise<ChatsGroupDto> {
+  ): Promise<Omit<ChatsGroupDto, 'createdAt' | 'updatedAt'>> {
     return await this.chatsGroupService.insert(insertGroupChatContentDto);
   }
 
