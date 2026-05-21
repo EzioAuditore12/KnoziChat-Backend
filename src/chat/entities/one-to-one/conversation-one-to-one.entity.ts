@@ -40,5 +40,7 @@ export class ConversationOneToOne {
 export const ConversationOneToOneSchema =
   SchemaFactory.createForClass(ConversationOneToOne);
 
+ConversationOneToOneSchema.index({ updatedAt: 1 });
+
 export type ConversationOneToOneDocument =
   HydratedDocument<ConversationOneToOne>;

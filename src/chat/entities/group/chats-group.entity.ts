@@ -60,6 +60,13 @@ export class ChatsGroup {
   attachmentUrl: string | null;
 
   @Prop({
+    type: String,
+    enum: ['DELIVERED', 'SEEN'],
+    default: 'DELIVERED',
+  })
+  status: 'DELIVERED' | 'SEEN';
+
+  @Prop({
     type: Object,
     default: null,
   })

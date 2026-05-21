@@ -27,4 +27,6 @@ export class ConversationGroup {
 export const ConversationGroupSchema =
   SchemaFactory.createForClass(ConversationGroup);
 
+ConversationGroupSchema.index({ updatedAt: 1 });
+
 export type ConversationGroupDocument = HydratedDocument<ConversationGroup>;

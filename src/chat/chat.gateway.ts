@@ -187,6 +187,11 @@ export class ChatGateway
         .except(`conversation-group:${savedMessage.conversationId}`)
         .emit('message-group:receive', savedMessage);
     }
+
+    return {
+      success: true,
+      messageId: savedMessage.id,
+    };
   }
 
   @SubscribeMessage('conversation:typing')
