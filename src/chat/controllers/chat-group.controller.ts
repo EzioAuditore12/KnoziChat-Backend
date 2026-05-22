@@ -8,7 +8,9 @@ import {
   Post,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ConversationGroupService } from '../services/group/conversation-group.service';
 import { ChatGateway } from '../chat.gateway';
@@ -16,6 +18,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import {
   ApiAcceptedResponse,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
 } from '@nestjs/swagger';
 import type { AuthRequest } from 'src/auth/types/auth-jwt-payload';
@@ -26,6 +29,10 @@ import { ConversationGroupMemberDto } from '../dto/group/conversation-group/conv
 import { ConversationGroupMemberService } from '../services/group/conversation-group-member.service';
 import { ConversationGroupOrchestratorService } from '../services/conversation-group-orchestrator.service';
 import { CreateConversationGroupResponseDto } from '../dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
+import {
+  FileInterceptor,
+  type MulterFile,
+} from '@webundsoehne/nest-fastify-file-upload';
 
 @Controller('chat/group')
 export class ChatGroupController {
@@ -39,6 +46,8 @@ export class ChatGroupController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('avatar'))
   @ApiCreatedResponse({
     type: CreateConversationGroupResponseDto,
   })
@@ -47,14 +56,22 @@ export class ChatGroupController {
     @Req() req: AuthRequest,
     @Body()
     createConversationGroupDto: CreateConversationGroupDto,
+
+    @UploadedFile()
+    avatar: MulterFile | undefined,
+
     @Res() reply: FastifyReply,
   ) {
     const userId = req.user.id;
 
-    const result = await this.conversationGroupService.create(
-      userId,
-      createConversationGroupDto,
-    );
+    const { name, participants: chosenParticipants } =
+      createConversationGroupDto;
+
+    const result = await this.conversationGroupService.create(userId, {
+      name,
+      avatar,
+      participants: chosenParticipants,
+    });
 
     /**
      * Active participants except creator

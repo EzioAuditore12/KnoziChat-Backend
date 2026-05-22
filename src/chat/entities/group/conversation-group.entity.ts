@@ -17,7 +17,7 @@ export class ConversationGroup {
   @Prop({ type: String, maxLength: 50, trim: true })
   name: string;
 
-  @Prop({ type: String, allowNull: true })
+  @Prop({ type: String, default: null })
   avatar: string | null;
 
   createdAt: Date;

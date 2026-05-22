@@ -21,6 +21,8 @@ import {
 import { UserService } from 'src/user/user.service';
 import { ChatsGroupService } from './chats-group.service';
 import { ConversationGroupMemberService } from './conversation-group-member.service';
+import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import { UploadsService } from 'src/uploads/uploads.service';
 
 @Injectable()
 export class ConversationGroupService {
@@ -34,13 +36,15 @@ export class ConversationGroupService {
     private readonly chatGroupService: ChatsGroupService,
     @Inject(forwardRef(() => ConversationGroupMemberService))
     private readonly conversationGroupMemberService: ConversationGroupMemberService,
-
+    private readonly uploadsService: UploadsService,
     private readonly userService: UserService,
   ) {}
 
   public async create(
     creatorId: string,
-    createConversationGroupDto: CreateConversationGroupDto,
+    createConversationGroupDto: Omit<CreateConversationGroupDto, 'avatar'> & {
+      avatar: MulterFile | undefined;
+    },
   ): Promise<CreateConversationGroupResponseDto> {
     const session = await this.connection.startSession();
 
@@ -48,6 +52,11 @@ export class ConversationGroupService {
 
     try {
       const { name, avatar, participants } = createConversationGroupDto;
+
+      let uploadedAvatarUrl: null | string = null;
+
+      if (avatar && avatar.path && avatar.originalname)
+        uploadedAvatarUrl = await this.uploadsService.uploadAvatar(avatar);
 
       const areExistingUsers =
         await this.userService.areExistingUsers(participants);
@@ -66,7 +75,7 @@ export class ConversationGroupService {
         [
           {
             name,
-            avatar: avatar ?? null,
+            avatar: uploadedAvatarUrl ?? null,
           },
         ],
         { session },
@@ -97,7 +106,7 @@ export class ConversationGroupService {
       return {
         id: conversation._id.toString(),
         adminIds: [creatorId],
-        avatar: conversation.avatar,
+        avatar: conversation.avatar ?? null,
         name: conversation.name,
         participantIds: uniqueParticipants,
         chat: firstChat,

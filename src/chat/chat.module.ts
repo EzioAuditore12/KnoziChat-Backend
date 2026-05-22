@@ -36,11 +36,13 @@ import { ChatDirectController } from './controllers/chat-direct.controller';
 import { ChatGroupController } from './controllers/chat-group.controller';
 import { ConversationGroupMemberService } from './services/group/conversation-group-member.service';
 import { ConversationGroupOrchestratorService } from './services/conversation-group-orchestrator.service';
+import { UploadsModule } from 'src/uploads/uploads.module';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 
 @Module({
   imports: [
     UserModule,
-
+    UploadsModule,
     MongooseModule.forFeature([
       { name: ConversationOneToOne.name, schema: ConversationOneToOneSchema },
       { name: ChatsOneToOne.name, schema: ChatsOneToOneSchema },
@@ -51,6 +53,7 @@ import { ConversationGroupOrchestratorService } from './services/conversation-gr
       },
       { name: ChatsGroup.name, schema: ChatsGroupSchema },
     ]),
+    MulterModule.register({ dest: './public' }),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
