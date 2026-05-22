@@ -124,42 +124,25 @@ export class ChatGroupController {
       (participantId) => `user:${participantId}`,
     );
 
-    /**
-     * Member left
-     */
-    const memberLeftPayload = {
-      groupId: id,
-      userId,
-      deletedAt: result.deletedAt,
-    };
-
     this.chatGateway.server
       .to(`conversation:${id}`)
-      .emit('conversation-group:member-left', memberLeftPayload);
+      .emit('message-group:receive', result.memberLeftChat);
 
     if (participantRooms.length > 0) {
       this.chatGateway.server
         .to(participantRooms)
-        .emit('conversation-group:member-left', memberLeftPayload);
+        .emit('message-group:receive', result.memberLeftChat);
     }
 
-    /**
-     * Admin changed
-     */
-    if (result.newAdminId) {
-      const adminChangedPayload = {
-        groupId: id,
-        userId: result.newAdminId,
-      };
-
+    if (result.adminChangedChat) {
       this.chatGateway.server
         .to(`conversation:${id}`)
-        .emit('conversation-group:admin-changed', adminChangedPayload);
+        .emit('message-group:receive', result.adminChangedChat);
 
       if (participantRooms.length > 0) {
         this.chatGateway.server
           .to(participantRooms)
-          .emit('conversation-group:admin-changed', adminChangedPayload);
+          .emit('message-group:receive', result.adminChangedChat);
       }
     }
 

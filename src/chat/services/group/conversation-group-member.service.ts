@@ -10,6 +10,7 @@ import {
   ConversationGroupMemberDto,
   convertConversationGroupMemberSchemaFromMongoose,
 } from 'src/chat/dto/group/conversation-group/conversation-group-member.dto';
+import { ChatsGroupDto } from 'src/chat/dto/group/chats-group/chats-group.dto';
 import {
   InsertConversationGroupMemberDto,
   insertConversationGroupMemberSchemaForMonoose,
@@ -136,6 +137,8 @@ export class ConversationGroupMemberService {
   ): Promise<{
     deletedAt: Date;
     newAdminId?: string;
+    memberLeftChat: ChatsGroupDto;
+    adminChangedChat?: ChatsGroupDto;
   }> {
     const session = await this.connection.startSession();
 
@@ -147,12 +150,15 @@ export class ConversationGroupMemberService {
       const deletedAt = new Date();
 
       let newAdminId: string | undefined;
+      let adminChangedChat: ChatsGroupDto | undefined;
 
       /**
        * Transfer admin
        */
       if (member.isAdmin) {
-        newAdminId = await this.reassignAdminIfNeeded(id, userId, session);
+        const result = await this.reassignAdminIfNeeded(id, userId, session);
+        newAdminId = result.newAdminId;
+        adminChangedChat = result.adminChangedChat;
       }
 
       /**
@@ -163,13 +169,19 @@ export class ConversationGroupMemberService {
       /**
        * Timeline event
        */
-      await this.insertMemberLeftEvent(id, userId, session);
+      const memberLeftChat = await this.insertMemberLeftEvent(
+        id,
+        userId,
+        session,
+      );
 
       await session.commitTransaction();
 
       return {
         deletedAt,
         newAdminId,
+        memberLeftChat,
+        adminChangedChat,
       };
     } catch (error) {
       if (session.inTransaction()) {
@@ -239,7 +251,7 @@ export class ConversationGroupMemberService {
     groupId: bigint,
     currentUserId: string,
     session: ClientSession,
-  ): Promise<string | undefined> {
+  ): Promise<{ newAdminId?: string; adminChangedChat?: ChatsGroupDto }> {
     const eligibleMembers = await this.conversationGroupMemberModel.find(
       {
         groupId,
@@ -253,7 +265,7 @@ export class ConversationGroupMemberService {
     );
 
     if (eligibleMembers.length === 0) {
-      return undefined;
+      return {};
     }
 
     const randomMember =
@@ -271,7 +283,7 @@ export class ConversationGroupMemberService {
       { session },
     );
 
-    await this.chatsGroupService.insertSystemEvent(
+    const adminChangedChat = await this.chatsGroupService.insertSystemEvent(
       {
         conversationId: groupId.toString(),
 
@@ -288,7 +300,10 @@ export class ConversationGroupMemberService {
       session,
     );
 
-    return randomMember.userId;
+    return {
+      newAdminId: randomMember.userId,
+      adminChangedChat,
+    };
   }
 
   private async softLeaveMember(
@@ -317,8 +332,8 @@ export class ConversationGroupMemberService {
     groupId: bigint,
     userId: string,
     session: ClientSession,
-  ): Promise<void> {
-    await this.chatsGroupService.insertSystemEvent(
+  ): Promise<ChatsGroupDto> {
+    return this.chatsGroupService.insertSystemEvent(
       {
         conversationId: groupId.toString(),
 
