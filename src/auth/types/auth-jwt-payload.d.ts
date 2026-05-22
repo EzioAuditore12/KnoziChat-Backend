@@ -3,6 +3,7 @@ import { Socket } from 'socket.io';
 
 export type AuthJwtPayload = {
   sub: string;
+  username: string;
   iat: number;
   exp: number;
 };
@@ -12,7 +13,13 @@ export interface AuthRequest extends FastifyRequest {
 }
 
 export interface RefreshTokenStratergyReqParameters {
-  user: { id: string; refreshToken: string; issuedAt: Date; expiredAt: Date };
+  user: {
+    id: string;
+    userName: string;
+    refreshToken: string;
+    issuedAt: Date;
+    expiredAt: Date;
+  };
 }
 
 export type SocketError = Error & { data: { status: number } };

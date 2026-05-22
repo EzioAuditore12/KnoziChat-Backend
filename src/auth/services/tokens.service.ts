@@ -15,8 +15,11 @@ export class TokenService {
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  generateTokens(userId: string): TokensDto {
-    const payload: Pick<AuthJwtPayload, 'sub'> = { sub: userId };
+  generateTokens(userId: string, userName: string): TokensDto {
+    const payload: Pick<AuthJwtPayload, 'sub' | 'username'> = {
+      sub: userId,
+      username: userName,
+    };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
     return { accessToken, refreshToken };

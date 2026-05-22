@@ -27,6 +27,7 @@ export class RefreshController {
   refreshTokens(@Req() req: RefreshTokenStratergyReqParameters) {
     return this.refreshService.refreshToken({
       userId: req.user.id,
+      userName: req.user.userName,
       refreshToken: req.user.refreshToken,
       expiredAt: req.user.expiredAt,
       createdAt: req.user.issuedAt,

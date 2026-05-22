@@ -39,11 +39,13 @@ export class RefreshService {
 
   async refreshToken({
     userId,
+    userName,
     expiredAt,
     createdAt,
     refreshToken,
   }: {
     userId: string;
+    userName: string;
     refreshToken: string;
     createdAt: Date;
     expiredAt: Date;
@@ -54,6 +56,6 @@ export class RefreshService {
       expiredAt,
     });
 
-    return this.tokenService.generateTokens(userId);
+    return this.tokenService.generateTokens(userId, userName);
   }
 }
