@@ -4,8 +4,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export const conversationOneToOneSchema = z.object({
   id: z.any().transform((val) => String(val)),
-  participants: z.array(z.uuid()).length(2),
-  lastSeenAt: z.any().default({}),
+  participant1: z.uuid(),
+  participant2: z.uuid(),
+  lastSeenAt: z.preprocess(
+    (value) => (value instanceof Map ? Object.fromEntries(value) : value),
+    z.record(z.string(), z.any()).default({}),
+  ),
   createdAt: z.any(),
   updatedAt: z.any(),
 });
@@ -14,11 +18,8 @@ export const convertConversationOneToOneSchemaFromMongoose =
   conversationOneToOneSchema
     .omit({ id: true })
     .extend({ _id: z.any().transform((val) => String(val)) })
-    .transform(({ _id, lastSeenAt, ...rest }) => ({
-      // Ensure lastSeenAt passes through
+    .transform(({ _id, ...rest }) => ({
       id: _id,
-      lastSeenAt:
-        lastSeenAt instanceof Map ? Object.fromEntries(lastSeenAt) : lastSeenAt, // Safely handle Mongoose Maps
       ...rest,
     }));
 
@@ -32,12 +33,18 @@ export class ConversationOneToOneDto extends createZodDto(
   })
   id: string;
 
+  @ApiProperty({ type: 'string', format: 'uuid' })
+  participant1: string;
+
+  @ApiProperty({ type: 'string', format: 'uuid' })
+  participant2: string;
+
   @ApiProperty({
     type: 'object',
     additionalProperties: { type: 'string', format: 'date-time' },
     example: { 'user-uuid-1': '2025-09-14T12:34:56.789Z' },
   })
-  lastSeenAt: Record<string, Date>; // Add this property
+  lastSeenAt: Record<string, Date>;
 
   @ApiProperty({ example: '2025-09-14T12:34:56.789Z', format: 'date-time' })
   createdAt: Date;

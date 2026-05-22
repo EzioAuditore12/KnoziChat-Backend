@@ -4,7 +4,7 @@ import { createZodDto } from 'nestjs-zod';
 import { conversationOneToOneSchema } from 'src/chat/dto/one-to-one/conversation-one-to-one/conversation-one-to-one.dto';
 
 export const conversationOneToOneSyncSchema = conversationOneToOneSchema
-  .omit({ participants: true, lastSeenAt: true })
+  .omit({ lastSeenAt: true, participant1: true, participant2: true })
   .extend({
     userId: z.uuid(),
     createdAt: z.number(),

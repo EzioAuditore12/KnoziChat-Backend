@@ -15,16 +15,24 @@ export class ConversationOneToOne {
   _id: bigint;
 
   @Prop({
-    type: [String],
+    type: String,
     required: true,
-    index: true,
-    unique: true,
-    validate: [
-      (val: string[]) => val.length === 2,
-      'Must have exactly 2 participants',
-    ],
   })
-  participants: string[];
+  participant1: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  participant2: string;
+
+  @Prop({
+    type: String,
+    required: true,
+    unique: true,
+    index: true,
+  })
+  participantsKey: string;
 
   @Prop({
     type: Map,

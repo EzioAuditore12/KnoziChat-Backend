@@ -35,11 +35,14 @@ export class ChatDirectController {
   @ApiCreatedResponse({ type: StartNewConversationResponseDto })
   async create(
     @Req() req: AuthRequest,
-    @Param('id') receiverId: string,
+    @Param('id') id: string,
     @Body() startNewConversationDto: StartNewConversationDto,
     @Res() reply: FastifyReply,
   ) {
     const userId = req.user.id;
+    const receiverId = id;
+
+    console.log(receiverId, startNewConversationDto, userId);
 
     const result = await this.chatsOneToOneService.startNewConversation(
       userId,

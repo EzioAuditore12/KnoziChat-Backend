@@ -136,8 +136,8 @@ export class SyncService {
     const updated: ConversationOneToOneSyncDto[] = [];
 
     for (const c of conversations) {
-      const { participants, lastSeenAt, ...rest } = c;
-      const otherUserId = participants.find((id) => id !== userId) as string;
+      const { participant1, participant2, lastSeenAt, ...rest } = c;
+      const otherUserId = participant1 === userId ? participant2 : participant1;
 
       // Extract my read receipt and their read receipt
       let myLastSeenAt = 0;
