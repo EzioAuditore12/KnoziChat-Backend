@@ -4,8 +4,14 @@ import { createZodDto } from 'nestjs-zod';
 import { conversationOneToOneSchema } from 'src/chat/dto/one-to-one/conversation-one-to-one/conversation-one-to-one.dto';
 
 export const conversationOneToOneSyncSchema = conversationOneToOneSchema
-  .omit({ participants: true })
-  .extend({ userId: z.uuid(), createdAt: z.number(), updatedAt: z.number() });
+  .omit({ lastSeenAt: true, participant1: true, participant2: true })
+  .extend({
+    userId: z.uuid(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+    myLastSeenAt: z.number(),
+    theirLastSeenAt: z.number(),
+  });
 
 export const conversationOneToOneSyncChangeSchema = z.object({
   created: conversationOneToOneSyncSchema.array(),

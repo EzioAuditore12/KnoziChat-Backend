@@ -5,6 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 const startNewConversationResponseSchema = chatsOneToOneSchema.extend({
   receiverId: z.uuid(),
+  lastSeenAt: z.record(z.uuid(), z.any()).default({}),
 });
 
 export class StartNewConversationResponseDto extends createZodDto(

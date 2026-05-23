@@ -3,12 +3,12 @@ import { ConversationOneToOneService } from './conversation-one-to-one.service';
 
 import { StartNewConversationDto } from 'src/chat/dto/one-to-one/start-new-conversation/start-new-conversation.dto';
 import { InsertOneToOneChatDto } from 'src/chat/dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import {
   ChatsOneToOne,
   ChatsOneToOneDocument,
 } from 'src/chat/entities/one-to-one/chats-one-to-one.entity';
-import { Model } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import {
   ChatsOneToOneDto,
   convertChatsOneToOneFromMongoose,
@@ -19,6 +19,8 @@ import { StartNewConversationResponseDto } from 'src/chat/dto/one-to-one/start-n
 @Injectable()
 export class ChatsOneToOneService {
   constructor(
+    @InjectConnection()
+    private readonly connection: Connection,
     private readonly conversationOneToOneService: ConversationOneToOneService,
     @InjectModel(ChatsOneToOne.name)
     private readonly chatsOneToOneRepository: Model<ChatsOneToOneDocument>,
@@ -51,6 +53,7 @@ export class ChatsOneToOneService {
 
     return {
       ...insertedChat,
+      lastSeenAt: conversation.lastSeenAt,
       receiverId,
     };
   }
@@ -102,13 +105,16 @@ export class ChatsOneToOneService {
     id: bigint,
     status: ChatsOneToOne['status'],
   ): Promise<ChatsOneToOneDto> {
+    const now = new Date();
+
     const message = await this.chatsOneToOneRepository.findByIdAndUpdate(
       id,
       {
         status,
+        updatedAt: now,
       },
       {
-        new: true,
+        returnDocument: 'after',
       },
     );
 
@@ -118,39 +124,32 @@ export class ChatsOneToOneService {
   public async markConversationMessagesSeen(
     conversationId: bigint,
     userId: string,
-  ): Promise<ChatsOneToOneDto[]> {
-    const messages = await this.chatsOneToOneRepository.find({
+  ): Promise<{ conversationId: string; userId: string; lastSeenAt: Date }> {
+    const lastSeenAt = await this.conversationOneToOneService.updateLastSeenAt(
       conversationId,
-
-      senderId: {
-        $ne: userId,
-      },
-
-      status: {
-        $ne: 'SEEN',
-      },
-    });
-
-    if (!messages.length) {
-      return [];
-    }
-
-    const messageIds = messages.map((message) => message._id);
+      userId,
+    );
 
     await this.chatsOneToOneRepository.updateMany(
       {
-        _id: {
-          $in: messageIds,
-        },
+        conversationId,
+        senderId: { $ne: userId },
+        status: { $ne: 'SEEN' },
+        createdAt: { $lte: lastSeenAt },
       },
       {
         $set: {
           status: 'SEEN',
+          updatedAt: lastSeenAt,
         },
       },
     );
 
-    return convertChatsOneToOneFromMongoose.array().parse(messages);
+    return {
+      conversationId: conversationId.toString(),
+      userId,
+      lastSeenAt,
+    };
   }
 
   public async findChatsSince(
@@ -159,7 +158,10 @@ export class ChatsOneToOneService {
   ): Promise<ChatsOneToOneDto[]> {
     const chats = await this.chatsOneToOneRepository.find({
       conversationId,
-      createdAt: { $gt: timestamp },
+      $or: [
+        { createdAt: { $gt: timestamp } },
+        { updatedAt: { $gt: timestamp } },
+      ],
     });
 
     return convertChatsOneToOneFromMongoose.array().parse(chats);
@@ -174,7 +176,10 @@ export class ChatsOneToOneService {
       conversationId: {
         $in: conversationIds.map((val) => BigInt(val)),
       },
-      createdAt: { $gt: timestamp },
+      $or: [
+        { createdAt: { $gt: timestamp } },
+        { updatedAt: { $gt: timestamp } },
+      ],
     });
 
     return convertChatsOneToOneFromMongoose.array().parse(chats);

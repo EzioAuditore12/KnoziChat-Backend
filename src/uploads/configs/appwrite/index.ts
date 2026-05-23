@@ -1,4 +1,4 @@
-import { Client, Storage, Users } from 'node-appwrite';
+import { Client, Storage, Tokens, Users } from 'node-appwrite';
 
 import { env } from 'src/env';
 
@@ -13,6 +13,12 @@ const storage = new Storage(appWriteClient);
 
 const users = new Users(appWriteClient);
 
+export const tokens = new Tokens(appWriteClient);
+
 export default appWriteClient;
 
-export { storage as appWriteStorage, users as appWriteUsers };
+export {
+  storage as appWriteStorage,
+  users as appWriteUsers,
+  tokens as appWriteTokens,
+};

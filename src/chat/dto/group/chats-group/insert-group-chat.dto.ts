@@ -6,6 +6,10 @@ export const insertGroupChatSchema = chatsGroupSchema.partial({
   id: true,
   createdAt: true,
   updatedAt: true,
+  metadata: true,
+  attachmentUrl: true,
+  content: true,
+  systemEventType: true,
 });
 
 export class InsertGroupChatDto extends createZodDto(insertGroupChatSchema) {

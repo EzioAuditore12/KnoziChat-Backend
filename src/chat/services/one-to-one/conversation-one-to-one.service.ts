@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  OnModuleInit,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -20,11 +25,21 @@ export class ConversationOneToOneService {
     private readonly userService: UserService,
   ) {}
 
+  public async onModuleInit(): Promise<void> {
+    await this.conversationsOneToOneModel.syncIndexes();
+  }
+
   public async create(
     createConversationOneToOneDto: CreateConversationOneToOneDto,
   ): Promise<ConversationOneToOneDto> {
     const { participant1, participant2, createdAt, updatedAt } =
       createConversationOneToOneDto;
+
+    if (participant1 === participant2) {
+      throw new BadRequestException(
+        'Cannot start a conversation with yourself',
+      );
+    }
 
     let conversation = await this.findConversationBetweenParicipants(
       participant1,
@@ -72,18 +87,21 @@ export class ConversationOneToOneService {
   ): Promise<{ conversationIds: string[]; contactIds: string[] }> {
     const allUserConversations = await this.conversationsOneToOneModel
       .find({
-        participants: userId,
+        $or: [{ participant1: userId }, { participant2: userId }],
       })
-      .select('_id participants');
+      .select('_id participant1 participant2');
     const contactIds = new Set<string>();
     const conversationIds: string[] = [];
 
     allUserConversations.forEach((c) => {
       conversationIds.push(c._id.toString());
-      c.participants.forEach((p) => {
-        const participantId = p.toString();
-        if (participantId !== userId) {
-          contactIds.add(participantId);
+      const plainConversation = this.toPlainConversation(c);
+      const participant1 = String(plainConversation.participant1);
+      const participant2 = String(plainConversation.participant2);
+
+      [participant1, participant2].forEach((p) => {
+        if (p !== userId) {
+          contactIds.add(p);
         }
       });
     });
@@ -99,26 +117,34 @@ export class ConversationOneToOneService {
     timestamp: Date,
   ): Promise<ConversationOneToOneDto[]> {
     const conversations = await this.conversationsOneToOneModel.find({
-      participants: userId,
+      $or: [{ participant1: userId }, { participant2: userId }],
       updatedAt: { $gt: timestamp },
     });
 
     return convertConversationOneToOneSchemaFromMongoose
       .array()
-      .parse(conversations);
+      .parse(
+        conversations.map((conversation) =>
+          this.toPlainConversation(conversation),
+        ),
+      );
   }
 
   private async findConversationBetweenParicipants(
     participant1: string,
     participant2: string,
   ): Promise<ConversationOneToOneDto | null> {
+    const participantsKey = this.getParticipantsKey(participant1, participant2);
+
     const conversation = await this.conversationsOneToOneModel.findOne({
-      participants: { $all: [participant1, participant2] },
+      participantsKey,
     });
 
     if (!conversation) return null;
 
-    return convertConversationOneToOneSchemaFromMongoose.parse(conversation);
+    return convertConversationOneToOneSchemaFromMongoose.parse(
+      this.toPlainConversation(conversation),
+    );
   }
 
   private async createConversationBetweenParticipants(
@@ -127,12 +153,80 @@ export class ConversationOneToOneService {
     createdAt?: Date,
     updatedAt?: Date,
   ): Promise<ConversationOneToOneDto> {
-    const conversation = await this.conversationsOneToOneModel.create({
-      participants: [participant1, participant2].sort(),
-      createdAt: createdAt ?? new Date(),
-      updatedAt: updatedAt ?? new Date(),
-    });
+    const [sortedParticipant1, sortedParticipant2] = [
+      participant1,
+      participant2,
+    ].sort();
+    const participantsKey = [sortedParticipant1, sortedParticipant2].join(':');
 
-    return convertConversationOneToOneSchemaFromMongoose.parse(conversation);
+    try {
+      const conversation = await this.conversationsOneToOneModel.create({
+        participant1: sortedParticipant1,
+        participant2: sortedParticipant2,
+        participantsKey,
+        createdAt: createdAt ?? new Date(),
+        updatedAt: updatedAt ?? new Date(),
+      });
+
+      return convertConversationOneToOneSchemaFromMongoose.parse(
+        this.toPlainConversation(conversation),
+      );
+    } catch (error) {
+      if ((error as { code?: number }).code === 11000) {
+        const existingConversation =
+          await this.conversationsOneToOneModel.findOne({ participantsKey });
+
+        if (existingConversation) {
+          return convertConversationOneToOneSchemaFromMongoose.parse(
+            this.toPlainConversation(existingConversation),
+          );
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  private getParticipantsKey(
+    participant1: string,
+    participant2: string,
+  ): string {
+    return [participant1, participant2].sort().join(':');
+  }
+
+  private toPlainConversation(conversation: unknown): Record<string, unknown> {
+    if (
+      conversation &&
+      typeof conversation === 'object' &&
+      'toObject' in conversation &&
+      typeof (conversation as { toObject: () => Record<string, unknown> })
+        .toObject === 'function'
+    ) {
+      return (
+        conversation as { toObject: () => Record<string, unknown> }
+      ).toObject();
+    }
+
+    return (conversation ?? {}) as Record<string, unknown>;
+  }
+
+  public async updateLastSeenAt(
+    conversationId: bigint,
+    userId: string,
+  ): Promise<Date> {
+    const now = new Date();
+
+    await this.conversationsOneToOneModel.findByIdAndUpdate(
+      conversationId,
+      {
+        $set: {
+          [`lastSeenAt.${userId}`]: now,
+          updatedAt: now,
+        },
+      },
+      { returnDocument: 'after' },
+    );
+
+    return now;
   }
 }

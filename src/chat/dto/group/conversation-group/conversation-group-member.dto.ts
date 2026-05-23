@@ -7,7 +7,9 @@ export const conversationGroupMemberSchema = z.object({
   groupId: z.any().transform((val) => String(val)),
   userId: z.uuid(),
   isAdmin: z.boolean(),
-  joinedAt: z.any(),
+  createdAt: z.any(),
+  updatedAt: z.any(),
+  deletedAt: z.any().nullable(),
 });
 
 export const convertConversationGroupMemberSchemaFromMongoose =
@@ -30,5 +32,15 @@ export class ConversationGroupMemberDto extends createZodDto(
   id: string;
 
   @ApiProperty({ example: '2025-09-14T12:34:56.789Z', format: 'date-time' })
-  joinedAt: Date;
+  createdAt: Date;
+
+  @ApiProperty({ example: '2025-09-14T12:34:56.789Z', format: 'date-time' })
+  updatedAt: Date;
+
+  @ApiProperty({
+    example: '2025-09-14T12:34:56.789Z',
+    format: 'date-time',
+    nullable: true,
+  })
+  deletedAt: Date | null;
 }

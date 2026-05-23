@@ -16,6 +16,7 @@ import type { AuthenticatedSocket } from 'src/auth/types/auth-jwt-payload';
 import { InsertOneToOneChatDto } from './dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
 
 import { InsertGroupChatDto } from './dto/group/chats-group/insert-group-chat.dto';
+import { InsertGroupChatContentDto } from './dto/group/chats-group/insert-group-chat-content.dto';
 
 @WebSocketGateway()
 export class ChatGateway
@@ -116,35 +117,27 @@ export class ChatGateway
   ) {
     const userId = client.handshake.user.id;
 
-    const updatedMessages = await this.chatService.markConversationMessagesSeen(
+    // 1. Get the new watermark from the service layer
+    const { lastSeenAt } = await this.chatService.markConversationMessagesSeen(
       payload.conversationId,
       userId,
     );
 
-    if (!updatedMessages.length) {
-      return;
-    }
-
+    // 2. Broadcast the watermark update to everyone currently in the conversation room
     this.server
       .to(`conversation:${payload.conversationId}`)
       .emit('message:seen:update', {
         conversationId: payload.conversationId,
         userId,
-        messageIds: updatedMessages.map((m) => m.id),
+        lastSeenAt, // Broadcast the datetime instead of messageIds
       });
 
-    const senderIds = [
-      ...new Set(updatedMessages.map((message) => message.senderId)),
-    ];
-
-    senderIds.forEach((senderId) => {
-      this.server
-        .to(`user:${senderId}`)
-        .except(`conversation:${payload.conversationId}`)
-        .emit('message:seen:update', {
-          conversationId: payload.conversationId,
-        });
-    });
+    // 3. (Optional but recommended) If you need the other user to get the update
+    // even if they don't currently have the chat window open (e.g. to update the home screen list):
+    // Note: Since we don't have exactly who the other user is directly from this payload anymore,
+    // you might need to rely on the Sync API to update them when they open the app,
+    // OR fetch the conversation participants to send to their specific user channel.
+    // For now, emitting to the conversation room handles active watchers.
   }
 
   @SubscribeMessage('conversation-group:join')
@@ -166,20 +159,20 @@ export class ChatGateway
   @SubscribeMessage('message-group:send')
   async sendGroupMessage(
     client: AuthenticatedSocket,
-    insertGroupChatDto: Omit<InsertGroupChatDto, 'senderId'>,
+    insertGroupChatContentDto: Omit<InsertGroupChatContentDto, 'senderId'>,
   ) {
     const senderId = client.handshake.user.id;
 
     const savedMessage = await this.chatService.saveGroupMessage({
       senderId,
-      ...insertGroupChatDto,
+      ...insertGroupChatContentDto,
     });
 
     client.broadcast
       .to(`conversation-group:${savedMessage.conversationId}`)
       .emit('message-group:receive', savedMessage);
 
-    const conversationId = insertGroupChatDto.conversationId;
+    const conversationId = insertGroupChatContentDto.conversationId;
 
     const participants =
       await this.chatService.getGroupParticipantIds(conversationId);
@@ -194,6 +187,11 @@ export class ChatGateway
         .except(`conversation-group:${savedMessage.conversationId}`)
         .emit('message-group:receive', savedMessage);
     }
+
+    return {
+      success: true,
+      messageId: savedMessage.id,
+    };
   }
 
   @SubscribeMessage('conversation:typing')

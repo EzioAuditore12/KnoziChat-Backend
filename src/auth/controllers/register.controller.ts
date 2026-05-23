@@ -1,12 +1,7 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   HttpStatus,
-  Logger,
-  MaxFileSizeValidator,
-  ParseFilePipe,
-  ParseFilePipeBuilder,
   Post,
   Res,
   UploadedFile,
@@ -94,7 +89,10 @@ export class RegisterController {
   ) {
     const user = await this.userAuthService.verifyUser(verifyRegisterUserDto);
 
-    const tokens = this.tokenService.generateTokens(user.id);
+    const tokens = this.tokenService.generateTokens(
+      user.id,
+      `${user.firstName} ${user.lastName}`,
+    );
 
     return reply.status(HttpStatus.CREATED).send({
       status: 'success',
