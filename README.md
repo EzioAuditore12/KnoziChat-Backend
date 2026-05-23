@@ -1,98 +1,364 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# KnoziChat-Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> Backend repository for KnoziChat, powering real-time one-to-one chats, group conversations, AI interactions, and device synchronization.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+KnoziChat is a scalable Android chat application built around:
 
-## Description
+- real-time communication
+- local-first synchronization
+- AI-powered conversations
+- distributed backend systems
+- event-driven architecture
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This repository contains the backend services for the KnoziChat project.
 
-## Project setup
+## Frontend Repository
 
-```bash
-$ pnpm install
+https://github.com/EzioAuditore12/KnoziChat
+
+---
+
+# Android APK
+
+Download APK:
+
+https://expo.dev/artifacts/eas/jD1GYnAXZ8PgSLRyHE3TST.apk
+
+---
+
+# Backend & API Services
+
+KnoziChat is powered by:
+
+- NestJS + Fastify backend
+- FastAPI AI service
+- Socket.IO realtime infrastructure
+
+## Backend Repository
+
+https://github.com/EzioAuditore12/KnoziChat-Backend
+
+---
+
+# Hosted API Documentation
+
+## NestJS Swagger Docs
+
+https://knozichat.online/api
+
+---
+
+## FastAPI AI Service Docs
+
+https://knozify.space/docs
+
+---
+
+# Architecture Diagrams
+
+## Authentication System
+
+![](./docs/images/auth.png)
+
+---
+
+## Socket.IO Handshake & Real-Time Communication
+
+![](./docs/images/socket-io.png)
+
+---
+
+## AI Group Conversation System
+
+![](./docs/images/ai.png)
+
+---
+
+## Database Architecture & Synchronization Flow
+
+![](./docs/images/database-sync.png)
+
+---
+
+# System Overview
+
+KnoziChat follows a hybrid polyglot persistence architecture designed for scalable real-time communication.
+
+| Technology | Responsibility                        |
+| ---------- | ------------------------------------- |
+| PostgreSQL | User metadata and relational entities |
+| MongoDB    | Chat and conversation persistence     |
+| Redis      | Session caching and event propagation |
+| SQLite     | Local-first mobile synchronization    |
+
+---
+
+# Database Architecture
+
+The system separates concerns across multiple services and storage layers.
+
+## Direct Conversations
+
+Handles one-to-one communication with support for:
+
+- text messages
+- image sharing
+- file attachments
+- media synchronization
+
+---
+
+## Group Conversations
+
+KnoziChat uses a dedicated membership architecture instead of storing participants directly inside groups.
+
+This enables:
+
+- scalable group management
+- admin permissions
+- membership tracking
+- synchronization optimization
+
+---
+
+## Unified Message Architecture
+
+Both:
+
+- direct chats
+- group chats
+
+support:
+
+- text
+- images
+- videos
+- file attachments
+- future media formats
+
+through a unified content system.
+
+---
+
+# Offline-First Synchronization
+
+KnoziChat uses a Local-First synchronization architecture powered by SQLite.
+
+Messages are:
+
+1. stored locally first
+2. rendered instantly
+3. synchronized asynchronously with backend services
+
+This enables:
+
+- low-latency communication
+- offline messaging
+- network recovery synchronization
+- better user experience under unstable connectivity
+
+---
+
+# Synchronization Flow
+
+## 1. Local Persistence
+
+Messages are immediately written to SQLite before network synchronization occurs.
+
+The UI updates instantly without waiting for backend acknowledgment.
+
+---
+
+## 2. Socket.IO Synchronization
+
+The client emits synchronization events through Socket.IO.
+
+The backend:
+
+- validates authentication
+- processes changes
+- persists messages
+- broadcasts updates to connected users
+
+---
+
+## 3. Real-Time Communication
+
+Connected users receive:
+
+- live messages
+- typing indicators
+- message seen updates
+- synchronization events
+
+through bidirectional WebSocket communication.
+
+---
+
+## 4. Reconnection Handling
+
+When connectivity returns:
+
+- pending local messages synchronize automatically
+- remote updates are fetched incrementally
+- SQLite cache is updated
+- synchronization conflicts are resolved
+
+---
+
+## 5. Media Synchronization
+
+Attachments are synchronized separately from text payloads to improve:
+
+- bandwidth efficiency
+- retry reliability
+- synchronization stability
+
+---
+
+# Socket.IO Communication Flow
+
+The communication layer uses:
+
+- Engine.IO handshake
+- JWT authentication
+- Socket.IO rooms
+- bidirectional event streams
+
+Each:
+
+- user
+- direct conversation
+- group
+
+operates within isolated Socket.IO rooms for efficient event broadcasting.
+
+---
+
+# AI-Powered Group Conversations
+
+KnoziChat integrates FastAPI and LangChain for contextual AI interactions.
+
+The AI system can:
+
+- understand group context
+- summarize conversations
+- generate contextual replies
+- maintain conversational awareness
+
+---
+
+# Redis Integration
+
+Redis is used for:
+
+- Socket session caching
+- transient state management
+- distributed event propagation
+- conversational session persistence
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- React Native
+- Expo
+- TypeScript
+- NativeWind
+- SQLite
+
+## Backend
+
+- NestJS
+- Fastify
+- Socket.IO
+- FastAPI
+- LangChain
+
+## Databases & Infrastructure
+
+- PostgreSQL
+- MongoDB
+- Redis
+- Docker
+- PM2
+- Apache2
+
+---
+
+# Installation
+
+## Clone Frontend Repository
+
+```bash id="t2n7z0"
+git clone https://github.com/EzioAuditore12/KnoziChat
+cd KnoziChat
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ pnpm run start
+## Install Dependencies
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```bash id="e3gmk6"
+pnpm install
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ pnpm run test
+## Start Expo Development Server
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+```bash id="e6wkgw"
+pnpm start
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Clone Backend Repository
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+```bash id="i7f5vf"
+git clone https://github.com/EzioAuditore12/KnoziChat-Backend
+cd KnoziChat-Backend
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Install Backend Dependencies
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash id="yz6u4r"
+pnpm install
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## Start Backend Server
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash id="8yo3mp"
+pnpm run start:dev
+```
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Future Improvements
 
-## License
+- [ ] Publish application to Google Play Store
+- [ ] Push notification support
+- [ ] Offline media synchronization
+- [ ] Distributed WebSocket scaling
+- [ ] Kafka-based event streaming
+- [ ] Voice and video communication
+- [ ] Advanced AI memory persistence
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+# Why KnoziChat?
+
+KnoziChat was built to explore:
+
+- Offline-first mobile systems
+- Real-time distributed communication
+- AI-assisted messaging
+- Scalable backend infrastructure
+- Event-driven architectures
+- Polyglot persistence systems
