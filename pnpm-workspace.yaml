@@ -2,4 +2,4 @@ onlyBuiltDependencies:
   - '@nestjs/core'
   - '@scarf/scarf'
   - msgpackr-extract
-  - unrs-resolver
+  - protobufjs
