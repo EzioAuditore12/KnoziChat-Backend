@@ -39,12 +39,23 @@ class AIServiceStub(object):
                 request_serializer=ai__pb2.AIRequest.SerializeToString,
                 response_deserializer=ai__pb2.AIResponse.FromString,
                 _registered_method=True)
+        self.ProcessQuery = channel.unary_unary(
+                '/ai.AIService/ProcessQuery',
+                request_serializer=ai__pb2.ProcessQueryRequest.SerializeToString,
+                response_deserializer=ai__pb2.ProcessQueryResponse.FromString,
+                _registered_method=True)
 
 
 class AIServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def AskAI(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ProcessQuery(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,6 +68,11 @@ def add_AIServiceServicer_to_server(servicer, server):
                     servicer.AskAI,
                     request_deserializer=ai__pb2.AIRequest.FromString,
                     response_serializer=ai__pb2.AIResponse.SerializeToString,
+            ),
+            'ProcessQuery': grpc.unary_unary_rpc_method_handler(
+                    servicer.ProcessQuery,
+                    request_deserializer=ai__pb2.ProcessQueryRequest.FromString,
+                    response_serializer=ai__pb2.ProcessQueryResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +102,33 @@ class AIService(object):
             '/ai.AIService/AskAI',
             ai__pb2.AIRequest.SerializeToString,
             ai__pb2.AIResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ProcessQuery(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ai.AIService/ProcessQuery',
+            ai__pb2.ProcessQueryRequest.SerializeToString,
+            ai__pb2.ProcessQueryResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -5,10 +5,10 @@
 // source: ai.proto
 
 /* eslint-disable */
-import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
-import { Observable } from "rxjs";
+import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
+import { Observable } from 'rxjs';
 
-export const protobufPackage = "ai";
+export const protobufPackage = 'ai';
 
 export interface AIRequest {
   prompt: string;
@@ -18,29 +18,77 @@ export interface AIResponse {
   response: string;
 }
 
-export const AI_PACKAGE_NAME = "ai";
+export interface ChatMessage {
+  username: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface GroupDetails {
+  groupId: number;
+  groupName: string;
+}
+
+export interface ProcessQueryRequest {
+  group: GroupDetails | undefined;
+  chats: ChatMessage[];
+  query: string;
+  userId: string;
+  username: string;
+}
+
+export interface ProcessQueryResponse {
+  response: string;
+}
+
+export const AI_PACKAGE_NAME = 'ai';
 
 export interface AIServiceClient {
   askAi(request: AIRequest): Observable<AIResponse>;
+
+  processQuery(request: ProcessQueryRequest): Observable<ProcessQueryResponse>;
 }
 
 export interface AIServiceController {
-  askAi(request: AIRequest): Promise<AIResponse> | Observable<AIResponse> | AIResponse;
+  askAi(
+    request: AIRequest,
+  ): Promise<AIResponse> | Observable<AIResponse> | AIResponse;
+
+  processQuery(
+    request: ProcessQueryRequest,
+  ):
+    | Promise<ProcessQueryResponse>
+    | Observable<ProcessQueryResponse>
+    | ProcessQueryResponse;
 }
 
 export function AIServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["askAi"];
+    const grpcMethods: string[] = ['askAi', 'processQuery'];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("AIService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcMethod('AIService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("AIService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(
+        constructor.prototype,
+        method,
+      );
+      GrpcStreamMethod('AIService', method)(
+        constructor.prototype[method],
+        method,
+        descriptor,
+      );
     }
   };
 }
 
-export const AI_SERVICE_NAME = "AIService";
+export const AI_SERVICE_NAME = 'AIService';

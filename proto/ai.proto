@@ -4,6 +4,7 @@ package ai;
 
 service AIService {
   rpc AskAI (AIRequest) returns (AIResponse);
+  rpc ProcessQuery (ProcessQueryRequest) returns (ProcessQueryResponse);
 }
 
 message AIRequest {
@@ -13,3 +14,26 @@ message AIRequest {
 message AIResponse {
   string response = 1;
 }
+
+message ChatMessage {
+  string username = 1;
+  string message = 2;
+  string created_at = 3;
+}
+
+message GroupDetails {
+  int32 group_id = 1;
+  string group_name = 2;
+}
+
+message ProcessQueryRequest {
+  GroupDetails group = 1;
+  repeated ChatMessage chats = 2;
+  string query = 3;
+  string user_id = 4;
+  string username = 5;
+}
+
+message ProcessQueryResponse {
+  string response = 1;
+}

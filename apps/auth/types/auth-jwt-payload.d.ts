@@ -9,7 +9,7 @@ export type AuthJwtPayload = {
 };
 
 export interface AuthRequest extends FastifyRequest {
-  user: { id: string };
+  user: { id: string; username: string };
 }
 
 export interface RefreshTokenStratergyReqParameters {

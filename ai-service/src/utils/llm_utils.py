@@ -1,0 +1,187 @@
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from dotenv import load_dotenv
+import os
+from sqlalchemy.ext.asyncio import AsyncSession
+from settings import engine
+from models import ChatTranscript, Group
+from sqlalchemy import select
+from uuid import UUID
+from .extras import async_timer
+from pprint import pprint
+from pydantic import BaseModel
+import json
+import redis
+
+
+load_dotenv()
+GEMINI_API_KEY=os.environ.get("GEMINI_API_KEY")
+GEMINI_LLM_MODEL=os.environ.get("GEMINI_LLM_MODEL", "gemini-2.5-flash")
+GEMINI_EMBEDDING_MODEL=os.environ.get("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
+
+class ChatHistorySchema(BaseModel):
+    human_response: str
+    llm_response: str
+
+
+class HandleLLM:
+    def __init__(
+        self, 
+        query: str,
+        user_id: str,
+        username: str,
+        group_id: int,
+        
+    ) -> None:
+        
+        self.query = query
+        self.user_id = user_id
+        self.group_id = group_id
+        self.username = username
+        
+        self.REDIS_KEY = f"{self.user_id}_chats"
+        self.cache = redis.Redis(host="127.0.0.1", port=6379, db=0, decode_responses=True)
+        
+    
+    async def _get_embedding(self, text: str):
+        embedding_model = GoogleGenerativeAIEmbeddings(model=GEMINI_EMBEDDING_MODEL, output_dimensionality=768)
+        
+        embedding = embedding_model.embed_query(text)
+        return embedding
+    
+    
+    @async_timer
+    async def _retrieve_context(self, k: int = 3):
+        """
+        Retrieve top-k most similar chat transcripts using cosine similarity.
+        Returns the k most contextually relevant chat transcripts for the query.
+        """
+        
+        try:
+            query_embedding = await self._get_embedding(self.query)
+            
+            async with AsyncSession(bind=engine) as session:
+                result = await session.execute(
+                    select(ChatTranscript)
+                    .join(Group)
+                    .where(Group.g_id_client == self.group_id)
+                    .order_by(ChatTranscript.embedding.cosine_distance(query_embedding))
+                    .limit(k)
+                )
+                
+                
+                similar_transcripts = result.scalars().all()
+                
+                context = "\n---\n".join([
+                        f"Users: {', '.join(t.sent_by_users)}\n"
+                        f"Time: {t.start_time_stamp} to {t.end_time_stamp}\n"
+                        f"Content:\n{t.chats_set_transcript}"
+                        for t in similar_transcripts
+                    ])
+                
+                return context, similar_transcripts
+            
+        except Exception as e:
+            print("Error came during retrieving context: ", e)
+            raise
+        
+        
+    @async_timer
+    async def _get_previous_chats(self) -> tuple[str, list[ChatHistorySchema]]:
+        """
+        Returns 
+        """
+        
+        chat_history_json = self.cache.get(self.REDIS_KEY)
+        chat_history: list[ChatHistorySchema] = []
+        
+        if chat_history_json:
+            try:
+                # Deserialize JSON from Redis
+                chat_history_data = json.loads(chat_history_json)
+                chat_history = [ChatHistorySchema(**chat) for chat in chat_history_data]
+            except Exception as e:
+                print(f"Error deserializing chat history: {e}")
+                chat_history = []
+                
+        formatted_history = ""
+        if chat_history:
+            formatted_history = "\n".join([
+                f"User: {chat.human_response}\nAI: {chat.llm_response}\n---"
+                for chat in chat_history
+            ])
+            
+            formatted_history += "\nSince there their are chat history of user with you, do not give any salutations and give straight answer like in normal chats"
+        else:
+            formatted_history = "No previous chat history"
+            
+        return formatted_history, chat_history
+    
+    
+    
+    @async_timer
+    async def _generate_response(self):
+        context, _ = await self._retrieve_context()
+        formatted_history, chat_history = await self._get_previous_chats()
+              
+        final_prompt = f"""
+        You are a chatting model and your goal is to answer user's query by generating a casual short or medium size chat response for user.\n
+        
+        User's name who asked query: {self.username}
+        Context: {context}
+        
+        Your Previous Chat History with user:
+        {formatted_history}
+        
+        Current Query: {self.query}
+        """
+        
+        print("Final Prompt: ")
+        pprint(final_prompt)
+        
+        
+        
+        llm = ChatGoogleGenerativeAI(
+            # model="gemini-3.1-flash-lite-preview",
+            model=GEMINI_LLM_MODEL,
+            max_retries=2,
+        )
+        
+        response = llm.invoke([final_prompt])
+        
+        
+        # async for chunk in llm.astream(final_prompt):
+        #     yield f"data: {chunk.content}\n\n"
+        
+        
+        response = response.content
+
+        
+        if isinstance(response, str):
+            response = response
+        
+        elif isinstance(response, list) and response and isinstance(response[0], dict):
+            response = response[0].get('text', str(response))
+        
+        response = str(response)
+        
+                
+        new_chat_set = ChatHistorySchema(
+            human_response=self.query,
+            llm_response=response,
+        )
+        
+        chat_history.append(new_chat_set)
+
+        chat_history_json = json.dumps([chat.model_dump() for chat in chat_history])
+        self.cache.set(self.REDIS_KEY, chat_history_json, 3600 * 3)
+        
+        # self.cache.set("Heythere", "This is key 2")
+        
+        return response
+    
+        
+    
+    async def resolve_query(self):
+        response = await self._generate_response()
+        
+        return str(response)

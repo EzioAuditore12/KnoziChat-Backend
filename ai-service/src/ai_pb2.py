@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x61i.proto\x12\x02\x61i\"\x1b\n\tAIRequest\x12\x0e\n\x06prompt\x18\x01 \x01(\t\"\x1e\n\nAIResponse\x12\x10\n\x08response\x18\x01 \x01(\t23\n\tAIService\x12&\n\x05\x41skAI\x12\r.ai.AIRequest\x1a\x0e.ai.AIResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08\x61i.proto\x12\x02\x61i\"\x1b\n\tAIRequest\x12\x0e\n\x06prompt\x18\x01 \x01(\t\"\x1e\n\nAIResponse\x12\x10\n\x08response\x18\x01 \x01(\t\"D\n\x0b\x43hatMessage\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x12\n\ncreated_at\x18\x03 \x01(\t\"4\n\x0cGroupDetails\x12\x10\n\x08group_id\x18\x01 \x01(\x05\x12\x12\n\ngroup_name\x18\x02 \x01(\t\"\x88\x01\n\x13ProcessQueryRequest\x12\x1f\n\x05group\x18\x01 \x01(\x0b\x32\x10.ai.GroupDetails\x12\x1e\n\x05\x63hats\x18\x02 \x03(\x0b\x32\x0f.ai.ChatMessage\x12\r\n\x05query\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x10\n\x08username\x18\x05 \x01(\t\"(\n\x14ProcessQueryResponse\x12\x10\n\x08response\x18\x01 \x01(\t2v\n\tAIService\x12&\n\x05\x41skAI\x12\r.ai.AIRequest\x1a\x0e.ai.AIResponse\x12\x41\n\x0cProcessQuery\x12\x17.ai.ProcessQueryRequest\x1a\x18.ai.ProcessQueryResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,6 +35,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_AIREQUEST']._serialized_end=43
   _globals['_AIRESPONSE']._serialized_start=45
   _globals['_AIRESPONSE']._serialized_end=75
-  _globals['_AISERVICE']._serialized_start=77
-  _globals['_AISERVICE']._serialized_end=128
+  _globals['_CHATMESSAGE']._serialized_start=77
+  _globals['_CHATMESSAGE']._serialized_end=145
+  _globals['_GROUPDETAILS']._serialized_start=147
+  _globals['_GROUPDETAILS']._serialized_end=199
+  _globals['_PROCESSQUERYREQUEST']._serialized_start=202
+  _globals['_PROCESSQUERYREQUEST']._serialized_end=338
+  _globals['_PROCESSQUERYRESPONSE']._serialized_start=340
+  _globals['_PROCESSQUERYRESPONSE']._serialized_end=380
+  _globals['_AISERVICE']._serialized_start=382
+  _globals['_AISERVICE']._serialized_end=500
 # @@protoc_insertion_point(module_scope)

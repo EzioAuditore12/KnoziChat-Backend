@@ -22,4 +22,17 @@ export class AiService implements OnModuleInit {
       prompt,
     });
   }
+
+  processQuery(
+    processQueryDto: import('./dto/process-query.dto').ProcessQueryDto,
+    userId: string,
+    username: string,
+  ) {
+    return this.aiService.processQuery({
+      ...processQueryDto,
+      chats: processQueryDto.chats || [],
+      userId,
+      username,
+    });
+  }
 }
