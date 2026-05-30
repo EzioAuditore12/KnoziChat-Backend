@@ -1,0 +1,164 @@
+import {
+  ForbiddenException,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
+import { InjectModel, InjectConnection } from '@nestjs/mongoose';
+import { Connection, Model } from 'mongoose';
+
+import {
+  ConversationGroupDto,
+  convertConversationGroupSchemaFromMongoose,
+} from 'apps/chat/dto/group/conversation-group/conversation-group.dto';
+import { CreateConversationGroupResponseDto } from 'apps/chat/dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
+import { CreateConversationGroupDto } from 'apps/chat/dto/group/conversation-group/create-conversation/create-conversation.dto';
+
+import {
+  ConversationGroup,
+  ConversationGroupDocument,
+} from 'apps/chat/entities/group/conversation-group.entity';
+import { UserService } from 'apps/user/user.service';
+import { ChatsGroupService } from './chats-group.service';
+import { ConversationGroupMemberService } from './conversation-group-member.service';
+import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import { UploadsService } from 'apps/uploads/uploads.service';
+
+@Injectable()
+export class ConversationGroupService {
+  constructor(
+    @InjectConnection()
+    private readonly connection: Connection,
+    @InjectModel(ConversationGroup.name)
+    private readonly conversationsGroupModel: Model<ConversationGroupDocument>,
+
+    @Inject(forwardRef(() => ChatsGroupService))
+    private readonly chatGroupService: ChatsGroupService,
+    @Inject(forwardRef(() => ConversationGroupMemberService))
+    private readonly conversationGroupMemberService: ConversationGroupMemberService,
+    private readonly uploadsService: UploadsService,
+    private readonly userService: UserService,
+  ) {}
+
+  public async create(
+    creatorId: string,
+    createConversationGroupDto: Omit<CreateConversationGroupDto, 'avatar'> & {
+      avatar: MulterFile | undefined;
+    },
+  ): Promise<CreateConversationGroupResponseDto> {
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    try {
+      const { name, avatar, participants } = createConversationGroupDto;
+
+      let uploadedAvatarUrl: null | string = null;
+
+      if (avatar && avatar.path && avatar.originalname)
+        uploadedAvatarUrl = await this.uploadsService.uploadAvatar(avatar);
+
+      const areExistingUsers =
+        await this.userService.areExistingUsers(participants);
+
+      if (!areExistingUsers) {
+        throw new ForbiddenException(
+          'Given participants are not registered with us',
+        );
+      }
+
+      const uniqueParticipants = Array.from(
+        new Set([...participants, creatorId]),
+      );
+
+      const [conversation] = await this.conversationsGroupModel.create(
+        [
+          {
+            name,
+            avatar: uploadedAvatarUrl ?? null,
+          },
+        ],
+        { session },
+      );
+
+      await this.conversationGroupMemberService.insertGroupParticipants(
+        conversation._id,
+        uniqueParticipants,
+        [creatorId],
+        conversation.createdAt,
+        session,
+      );
+
+      const firstChat = await this.chatGroupService.insert({
+        contentType: 'system',
+        conversationId: conversation._id.toString(),
+        senderId: creatorId,
+        systemEventType: 'group_created',
+        metadata: {
+          creatorId,
+          uniqueParticipants,
+          groupName: conversation.name,
+        },
+      });
+
+      await session.commitTransaction();
+
+      return {
+        id: conversation._id.toString(),
+        adminIds: [creatorId],
+        avatar: conversation.avatar ?? null,
+        name: conversation.name,
+        participantIds: uniqueParticipants,
+        chat: firstChat,
+        createdAt: conversation.createdAt,
+        updatedAt: conversation.updatedAt,
+      };
+    } catch (error) {
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
+
+      throw error;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  public async get(id: bigint): Promise<ConversationGroupDto> {
+    const conversation = await this.conversationsGroupModel.findById(id);
+
+    return convertConversationGroupSchemaFromMongoose.parse(conversation);
+  }
+
+  public async isExistingConversation(id: bigint): Promise<boolean> {
+    const exists = await this.conversationsGroupModel.exists({ _id: id });
+    return !!exists;
+  }
+
+  public async updateTime(id: bigint, time?: Date) {
+    await this.conversationsGroupModel.updateOne(
+      { _id: id },
+      { $max: { updatedAt: time ?? new Date() } },
+      { timestamps: false },
+    );
+  }
+
+  public async findConversationsContainingUser(
+    userId: string,
+    timestamp: Date,
+  ): Promise<ConversationGroupDto[]> {
+    const groupIds =
+      await this.conversationGroupMemberService.findUserMemberShipInGroups(
+        userId,
+      );
+
+    const conversations = await this.conversationsGroupModel.find({
+      _id: { $in: groupIds },
+      updatedAt: { $gt: timestamp },
+    });
+
+    return convertConversationGroupSchemaFromMongoose
+      .array()
+      .parse(conversations);
+  }
+}
