@@ -9,6 +9,7 @@ export const userSchema = z.object({
   lastName: z.string().nonempty().max(50),
   avatar: z.url().nullable().optional(),
   password: z.string().max(16),
+  username: z.string().max(30),
   phoneNumber: z.string().max(20).nullable().optional(),
   email: z.email().toLowerCase().max(240),
   expoPushToken: z.string().nullable().optional(),

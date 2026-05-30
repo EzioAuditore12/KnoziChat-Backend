@@ -14,6 +14,9 @@ export class User {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 
+  @Column({ name: 'username', type: 'varchar', length: 30, unique: true })
+  username: string;
+
   @Column({ name: 'first_name', type: 'varchar', length: 50 })
   firstName: string;
 
@@ -62,5 +65,12 @@ export class User {
   @BeforeInsert()
   async hashPassword() {
     this.password = await hash(this.password);
+  }
+
+  @BeforeInsert()
+  generateUsername() {
+    const base = this.firstName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const suffix = Math.floor(1000 + Math.random() * 9000);
+    this.username = `${base}${suffix}`;
   }
 }

@@ -25,7 +25,7 @@ export interface ChatMessage {
 }
 
 export interface GroupDetails {
-  groupId: number;
+  groupId: bigint;
   groupName: string;
 }
 

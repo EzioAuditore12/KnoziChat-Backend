@@ -33,10 +33,7 @@ export class LoginController {
   async login(@Body() loginUserDto: LoginUserDto, @Res() reply: FastifyReply) {
     const user = await this.userAuthService.validateUser(loginUserDto);
 
-    const tokens = this.tokenService.generateTokens(
-      user.id,
-      `${user.firstName} ${user.lastName}`,
-    );
+    const tokens = this.tokenService.generateTokens(user.id, user.username);
 
     return reply.status(HttpStatus.ACCEPTED).send({
       status: 'success',

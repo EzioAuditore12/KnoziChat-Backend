@@ -9,7 +9,7 @@ export const chatSchema = z.object({
 });
 
 export const groupSchema = z.object({
-  groupId: z.number(),
+  groupId: z.string(),
   groupName: z.string(),
 });
 

@@ -26,21 +26,26 @@ export class UserService {
     private readonly uploadsService: UploadsService,
   ) {}
 
-  private normalizeCreateNullableFields(data: CreateUserDto): CreateUserDto {
-    return {
-      ...data,
-      middleName: data.middleName ?? null,
-      phoneNumber: data.phoneNumber ?? null,
-      avatar: data.avatar ?? null,
-      expoPushToken: data.expoPushToken ?? null,
-    };
-  }
-
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const user = this.userRepository.create(
-      this.normalizeCreateNullableFields(createUserDto),
-    );
-    return await this.userRepository.save(user);
+    const maxRetries = 5;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const user = this.userRepository.create(
+          this.normalizeCreateNullableFields(createUserDto),
+        );
+        return await this.userRepository.save(user);
+      } catch (error: any) {
+        // 23505 = unique_violation in PostgreSQL (username collision)
+        const isUsernameCollision =
+          error?.code === '23505' && error?.detail?.includes('username');
+
+        if (!isUsernameCollision || attempt === maxRetries - 1) throw error;
+      }
+    }
+
+    // Should never reach here, but TypeScript needs it
+    throw new Error('Failed to create user after max retries');
   }
 
   async findOne(id: string): Promise<UserDto | null> {
@@ -72,6 +77,7 @@ export class UserService {
       searchableColumns: ['firstName', 'middleName', 'lastName'],
       select: [
         'id',
+        'username',
         'avatar',
         'firstName',
         'middleName',
@@ -118,6 +124,7 @@ export class UserService {
       },
       select: [
         'id',
+        'username',
         'avatar',
         'firstName',
         'middleName',
@@ -167,5 +174,15 @@ export class UserService {
     const savedUser = await this.userRepository.save(entityToSave);
 
     return publicUserSchema.strip().parse(savedUser);
+  }
+
+  private normalizeCreateNullableFields(data: CreateUserDto): CreateUserDto {
+    return {
+      ...data,
+      middleName: data.middleName ?? null,
+      phoneNumber: data.phoneNumber ?? null,
+      avatar: data.avatar ?? null,
+      expoPushToken: data.expoPushToken ?? null,
+    };
   }
 }

@@ -3,6 +3,7 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 
 import { AIServiceClient } from './generated/ai';
+import { ProcessQueryDto } from './dto/process-query.dto';
 
 @Injectable()
 export class AiService implements OnModuleInit {
@@ -24,12 +25,16 @@ export class AiService implements OnModuleInit {
   }
 
   processQuery(
-    processQueryDto: import('./dto/process-query.dto').ProcessQueryDto,
+    processQueryDto: ProcessQueryDto,
     userId: string,
     username: string,
   ) {
     return this.aiService.processQuery({
       ...processQueryDto,
+      group: {
+        ...processQueryDto.group,
+        groupId: BigInt(processQueryDto.group.groupId),
+      },
       chats: processQueryDto.chats || [],
       userId,
       username,

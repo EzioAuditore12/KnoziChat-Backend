@@ -89,10 +89,7 @@ export class RegisterController {
   ) {
     const user = await this.userAuthService.verifyUser(verifyRegisterUserDto);
 
-    const tokens = this.tokenService.generateTokens(
-      user.id,
-      `${user.firstName} ${user.lastName}`,
-    );
+    const tokens = this.tokenService.generateTokens(user.id, user.username);
 
     return reply.status(HttpStatus.CREATED).send({
       status: 'success',

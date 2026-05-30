@@ -72,6 +72,8 @@ export class UserAuthService {
 
     const otp = generateOtp();
 
+    console.log(otp);
+
     // Set OTP with 5 minutes (300 seconds) TTL
     await this.cacheManager.set(
       `${regiseration_cache_key}:${registerUserDto.email}`,

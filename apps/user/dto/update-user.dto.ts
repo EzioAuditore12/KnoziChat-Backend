@@ -9,6 +9,7 @@ export const updateUserSchema = userSchema
     createdAt: true,
     updatedAt: true,
     email: true,
+    username: true,
     phoneNumber: true,
     password: true,
     expoPushToken: true,
