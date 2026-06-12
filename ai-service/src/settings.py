@@ -29,7 +29,9 @@ async def init_db():
     async with engine.begin() as conn:
         print("CREATING VECTOR EXTENSION===================================")
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        await conn.run_sync(lambda sync_conn: register_vector_async(sync_conn))
+        
+        raw_conn = await conn.get_raw_connection()
+        await register_vector_async(raw_conn.driver_connection)
 
         if DROP_ALL_TABLES:
             await conn.run_sync(Base.metadata.drop_all)

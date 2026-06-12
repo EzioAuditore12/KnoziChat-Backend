@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   Logger,
@@ -7,6 +6,9 @@ import {
   Query,
   Req,
   UseGuards,
+  Sse,
+  MessageEvent,
+  Body,
 } from '@nestjs/common';
 import { ApiHeader } from '@nestjs/swagger';
 import { AiService } from './ai.service';
@@ -14,6 +16,10 @@ import { ProcessQueryDto } from './dto/process-query.dto';
 import { SeedChatsDto } from './dto/seed-chats.dto';
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+
+import { ProcessQueryResponse } from './generated/ai';
 
 @Controller('ai')
 export class AiController {
@@ -25,7 +31,7 @@ export class AiController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('send')
+  @Sse('send')
   @ApiHeader({
     name: 'Authorization',
     description: 'Bearer JWT token',
@@ -33,14 +39,30 @@ export class AiController {
   })
   async processQuery(
     @Req() req: AuthRequest,
-    @Body() processQueryDto: ProcessQueryDto,
-  ) {
+    @Query() processQueryDto: ProcessQueryDto,
+  ): Promise<Observable<MessageEvent>> {
     const userId = req.user.id;
     const userName = req.user.username;
 
     Logger.log(userId);
 
-    return await this.aiService.processQuery(processQueryDto, userId, userName);
+    const stream = await this.aiService.processQuery(
+      processQueryDto,
+      userId,
+      userName,
+    );
+    return (stream as Observable<ProcessQueryResponse>).pipe(
+      map(
+        (chunk: ProcessQueryResponse) =>
+          ({ data: { response: chunk.response } }) as MessageEvent,
+      ),
+      catchError((err) => {
+        Logger.error(`Stream error: ${err.message}`, err.stack);
+        return of({
+          data: { error: err.message || 'Stream processing failed' },
+        } as MessageEvent);
+      }),
+    );
   }
 
   @UseGuards(JwtAuthGuard)

@@ -83,12 +83,7 @@ export interface AIServiceController {
     request: AIRequest,
   ): Promise<AIResponse> | Observable<AIResponse> | AIResponse;
 
-  processQuery(
-    request: ProcessQueryRequest,
-  ):
-    | Promise<ProcessQueryResponse>
-    | Observable<ProcessQueryResponse>
-    | ProcessQueryResponse;
+  processQuery(request: ProcessQueryRequest): Observable<ProcessQueryResponse>;
 
   embedMessage(
     request: EmbedMessageRequest,

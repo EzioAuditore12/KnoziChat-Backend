@@ -39,7 +39,7 @@ class AIServiceStub(object):
                 request_serializer=ai__pb2.AIRequest.SerializeToString,
                 response_deserializer=ai__pb2.AIResponse.FromString,
                 _registered_method=True)
-        self.ProcessQuery = channel.unary_unary(
+        self.ProcessQuery = channel.unary_stream(
                 '/ai.AIService/ProcessQuery',
                 request_serializer=ai__pb2.ProcessQueryRequest.SerializeToString,
                 response_deserializer=ai__pb2.ProcessQueryResponse.FromString,
@@ -91,7 +91,7 @@ def add_AIServiceServicer_to_server(servicer, server):
                     request_deserializer=ai__pb2.AIRequest.FromString,
                     response_serializer=ai__pb2.AIResponse.SerializeToString,
             ),
-            'ProcessQuery': grpc.unary_unary_rpc_method_handler(
+            'ProcessQuery': grpc.unary_stream_rpc_method_handler(
                     servicer.ProcessQuery,
                     request_deserializer=ai__pb2.ProcessQueryRequest.FromString,
                     response_serializer=ai__pb2.ProcessQueryResponse.SerializeToString,
@@ -155,7 +155,7 @@ class AIService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
+        return grpc.experimental.unary_stream(
             request,
             target,
             '/ai.AIService/ProcessQuery',

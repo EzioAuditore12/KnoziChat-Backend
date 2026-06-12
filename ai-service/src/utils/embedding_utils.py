@@ -160,7 +160,7 @@ class HandleParsing:
         chat_sets = [chunk.chats_set for chunk in chat_chunks]
         
         print("Chat sets: ", chat_sets)
-        vectors = embedding_model.embed_documents(chat_sets)
+        vectors = await embedding_model.aembed_documents(chat_sets)
         
         print("List of vector size: ", len(vectors))
         

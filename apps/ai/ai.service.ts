@@ -44,18 +44,16 @@ export class AiService implements OnModuleInit {
 
     await this.verifyUserMembership(conversationId, userId, isGroup);
 
-    return firstValueFrom(
-      this.aiService.processQuery({
-        query,
-        group: {
-          groupId: BigInt(conversationId),
-          groupName: isGroup ? 'Group Chat' : 'Direct Chat',
-        },
-        chats: [],
-        userId,
-        username,
-      }),
-    );
+    return this.aiService.processQuery({
+      query,
+      group: {
+        groupId: BigInt(conversationId),
+        groupName: isGroup ? 'Group Chat' : 'Direct Chat',
+      },
+      chats: [],
+      userId,
+      username,
+    });
   }
 
   public embedMessage(data: EmbedMessageRequest) {

@@ -67,9 +67,10 @@ class AIService(ai_pb2_grpc.AIServiceServicer):
         
         service = RealAIService()
         
-        result = await service.process_query(request_body, request.user_id, request.username)
-        
-        return ai_pb2.ProcessQueryResponse(response=result.get("response", "") if result and result.get("response") else "")
+        async for result in service.process_query(request_body, request.user_id, request.username):
+            yield ai_pb2.ProcessQueryResponse(
+                response=result.get("response", "") if result and result.get("response") else ""
+            )
 
     async def EmbedMessage(self, request, context):
         try:

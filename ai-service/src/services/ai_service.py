@@ -29,9 +29,8 @@ class AIService:
                 username=username,
             )
 
-            response = await llm_handle.resolve_query()
-
-            return {"response": response}
+            async for chunk in llm_handle.resolve_query():
+                yield {"response": chunk}
 
         except HTTPException:
             raise

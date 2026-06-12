@@ -118,7 +118,6 @@ class HandleLLM:
     
     
     
-    @async_timer
     async def _generate_response(self):
         context, _ = await self._retrieve_context()
         formatted_history, chat_history = await self._get_previous_chats()
@@ -146,28 +145,17 @@ class HandleLLM:
             max_retries=2,
         )
         
-        response = llm.invoke([final_prompt])
-        
-        
-        # async for chunk in llm.astream(final_prompt):
-        #     yield f"data: {chunk.content}\n\n"
-        
-        
-        response = response.content
-
-        
-        if isinstance(response, str):
-            response = response
-        
-        elif isinstance(response, list) and response and isinstance(response[0], dict):
-            response = response[0].get('text', str(response))
-        
-        response = str(response)
-        
+        full_response = ""
+        async for chunk in llm.astream([final_prompt]):
+            if chunk.content:
+                # content can be a string or list of dicts depending on the model, but usually string for astream
+                content = str(chunk.content)
+                full_response += content
+                yield content
                 
         new_chat_set = ChatHistorySchema(
             human_response=self.query,
-            llm_response=response,
+            llm_response=full_response,
         )
         
         chat_history.append(new_chat_set)
@@ -175,13 +163,7 @@ class HandleLLM:
         chat_history_json = json.dumps([chat.model_dump() for chat in chat_history])
         self.cache.set(self.REDIS_KEY, chat_history_json, 3600 * 3)
         
-        # self.cache.set("Heythere", "This is key 2")
-        
-        return response
-    
-        
     
     async def resolve_query(self):
-        response = await self._generate_response()
-        
-        return str(response)
+        async for chunk in self._generate_response():
+            yield str(chunk)
