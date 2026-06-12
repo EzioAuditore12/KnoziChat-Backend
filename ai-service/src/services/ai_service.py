@@ -1,6 +1,6 @@
 from uuid import UUID
 from fastapi import HTTPException
-from schemas import BaseUserSchema, QueryProcessRequestSchema
+from schemas import QueryProcessRequestSchema
 from utils import HandleParsing, HandleLLM
 
 
@@ -11,12 +11,9 @@ class AIService:
         try:
             user_id_uuid = UUID(user_id)
 
-            user = BaseUserSchema(user_id=user_id_uuid, username=username)
-
             if request_body.chats:
                 setup_completed = await HandleParsing(
-                    user_details=user,
-                    group_details=request_body.group,
+                    conversation_details=request_body.conversation,
                     chats=request_body.chats,
                 ).setup()
 
@@ -25,18 +22,16 @@ class AIService:
                         "error": "Something went wrong while saving chats...",
                     })
 
-                llm_handle = HandleLLM(
-                    user_id=str(user_id_uuid),
-                    group_id=request_body.group.group_id,
-                    query=request_body.query,
-                    username=username,
-                )
+            llm_handle = HandleLLM(
+                user_id=str(user_id_uuid),
+                conversation_id=request_body.conversation.conversation_id,
+                query=request_body.query,
+                username=username,
+            )
 
-                response = await llm_handle.resolve_query()
+            response = await llm_handle.resolve_query()
 
-                return {"response": response}
-
-            return {"response": None}
+            return {"response": response}
 
         except HTTPException:
             raise

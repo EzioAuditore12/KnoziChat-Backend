@@ -55,3 +55,45 @@ class ProcessQueryResponse(_message.Message):
     RESPONSE_FIELD_NUMBER: _ClassVar[int]
     response: str
     def __init__(self, response: _Optional[str] = ...) -> None: ...
+
+class EmbedMessageRequest(_message.Message):
+    __slots__ = ("message_id", "conversation_id", "sender_id", "content", "created_at", "is_group")
+    MESSAGE_ID_FIELD_NUMBER: _ClassVar[int]
+    CONVERSATION_ID_FIELD_NUMBER: _ClassVar[int]
+    SENDER_ID_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    CREATED_AT_FIELD_NUMBER: _ClassVar[int]
+    IS_GROUP_FIELD_NUMBER: _ClassVar[int]
+    message_id: str
+    conversation_id: str
+    sender_id: str
+    content: str
+    created_at: str
+    is_group: bool
+    def __init__(self, message_id: _Optional[str] = ..., conversation_id: _Optional[str] = ..., sender_id: _Optional[str] = ..., content: _Optional[str] = ..., created_at: _Optional[str] = ..., is_group: bool = ...) -> None: ...
+
+class EmbedMessageResponse(_message.Message):
+    __slots__ = ("success", "error")
+    SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    ERROR_FIELD_NUMBER: _ClassVar[int]
+    success: bool
+    error: str
+    def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
+
+class SeedChatsRequest(_message.Message):
+    __slots__ = ("conversation_id", "is_group", "chats")
+    CONVERSATION_ID_FIELD_NUMBER: _ClassVar[int]
+    IS_GROUP_FIELD_NUMBER: _ClassVar[int]
+    CHATS_FIELD_NUMBER: _ClassVar[int]
+    conversation_id: str
+    is_group: bool
+    chats: _containers.RepeatedCompositeFieldContainer[ChatMessage]
+    def __init__(self, conversation_id: _Optional[str] = ..., is_group: bool = ..., chats: _Optional[_Iterable[_Union[ChatMessage, _Mapping]]] = ...) -> None: ...
+
+class SeedChatsResponse(_message.Message):
+    __slots__ = ("success", "message")
+    SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    success: bool
+    message: str
+    def __init__(self, success: bool = ..., message: _Optional[str] = ...) -> None: ...

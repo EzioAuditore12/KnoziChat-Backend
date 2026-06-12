@@ -131,7 +131,9 @@ export class ChatService {
   ): Promise<ChatsOneToOneDto> {
     const { createdAt, updatedAt, ...rest } = insertOneToOneChatDto;
 
-    return await this.chatsOneToOneService.insert({ ...rest });
+    const chat = await this.chatsOneToOneService.insert({ ...rest });
+
+    return chat;
   }
 
   public async updateMessageStatus(
@@ -179,7 +181,9 @@ export class ChatService {
   public async saveGroupMessage(
     insertGroupChatContentDto: InsertGroupChatContentDto,
   ): Promise<Omit<ChatsGroupDto, 'createdAt' | 'updatedAt'>> {
-    return await this.chatsGroupService.insert(insertGroupChatContentDto);
+    const chat = await this.chatsGroupService.insert(insertGroupChatContentDto);
+
+    return chat;
   }
 
   public async getGroupParticipantIds(groupId: string): Promise<string[]> {

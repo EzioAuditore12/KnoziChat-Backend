@@ -1,7 +1,7 @@
 import { MongooseModuleOptions } from '@nestjs/mongoose';
 
-process.loadEnvFile();
+import { env } from 'apps/env';
 
 export const mongooseConfig: MongooseModuleOptions = {
-  uri: process.env.DATABASE_MONGODB_URL!,
+  uri: env.DATABASE_MONGODB_URL,
 };

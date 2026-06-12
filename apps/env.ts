@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import { config } from 'dotenv';
 
-process.loadEnvFile();
+config();
 
 const timeSchema = z.custom<`${number}${'ms' | 's' | 'm' | 'h' | 'd'}`>(
   (val) => typeof val === 'string',

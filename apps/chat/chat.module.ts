@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { ChatGateway } from './chat.gateway';
 
 import {
@@ -41,6 +42,7 @@ import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 
 @Module({
   imports: [
+    BullModule.registerQueue({ name: 'embed-messages' }),
     UserModule,
     UploadsModule,
     MongooseModule.forFeature([

@@ -15,6 +15,9 @@ import {
 import { InsertGroupChatsSystemEventDto } from 'apps/chat/dto/group/chats-group/insert-group-chat-system-event.dto';
 import { InsertGroupChatContentDto } from 'apps/chat/dto/group/chats-group/insert-group-chat-content.dto';
 
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+
 @Injectable()
 export class ChatsGroupService {
   constructor(
@@ -22,6 +25,7 @@ export class ChatsGroupService {
     private readonly conversationGroupService: ConversationGroupService,
     @InjectModel(ChatsGroup.name)
     private readonly chatsGroupModel: Model<ChatsGroupDocument>,
+    @InjectQueue('embed-messages') private readonly embedQueue: Queue,
   ) {}
 
   public async insert(
@@ -47,7 +51,22 @@ export class ChatsGroupService {
       insertionTime,
     );
 
-    return convertChatsGroupFromMongoose.parse(insertedChat);
+    const chatDto = convertChatsGroupFromMongoose.parse(insertedChat);
+
+    if (chatDto.content) {
+      await this.embedQueue.add('embed-message', {
+        messageId: String(chatDto.id),
+        conversationId: String(chatDto.conversationId),
+        senderId: chatDto.senderId,
+        content: chatDto.content,
+        createdAt: chatDto.createdAt
+          ? new Date(chatDto.createdAt).toISOString()
+          : new Date().toISOString(),
+        isGroup: true,
+      });
+    }
+
+    return chatDto;
   }
 
   public async findChatsByConversationId(

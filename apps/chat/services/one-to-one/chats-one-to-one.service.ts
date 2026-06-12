@@ -16,6 +16,9 @@ import {
 import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { StartNewConversationResponseDto } from 'apps/chat/dto/one-to-one/start-new-conversation/start-new-conversation-response.dto';
 
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+
 @Injectable()
 export class ChatsOneToOneService {
   constructor(
@@ -24,6 +27,7 @@ export class ChatsOneToOneService {
     private readonly conversationOneToOneService: ConversationOneToOneService,
     @InjectModel(ChatsOneToOne.name)
     private readonly chatsOneToOneRepository: Model<ChatsOneToOneDocument>,
+    @InjectQueue('embed-messages') private readonly embedQueue: Queue,
   ) {}
 
   public async startNewConversation(
@@ -90,7 +94,22 @@ export class ChatsOneToOneService {
       createdAt,
     );
 
-    return convertChatsOneToOneFromMongoose.parse(insertedChat);
+    const chatDto = convertChatsOneToOneFromMongoose.parse(insertedChat);
+
+    if (chatDto.content) {
+      await this.embedQueue.add('embed-message', {
+        messageId: String(chatDto.id),
+        conversationId: String(chatDto.conversationId),
+        senderId: chatDto.senderId,
+        content: chatDto.content,
+        createdAt: chatDto.createdAt
+          ? new Date(chatDto.createdAt).toISOString()
+          : new Date().toISOString(),
+        isGroup: false,
+      });
+    }
+
+    return chatDto;
   }
 
   public async findChatsByConversationId(

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from datetime import datetime
 
 if TYPE_CHECKING:
-    from .group import Group
+    from .conversation import Conversation
     
     
     
@@ -25,9 +25,9 @@ class ChatTranscript(Base):
     start_time_stamp: Mapped[datetime] = mapped_column(DateTime())
     end_time_stamp: Mapped[datetime] = mapped_column(DateTime())
     
-    group_id: Mapped[int] = mapped_column(ForeignKey("group.id"))
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversation.id"))
     
-    group: Mapped["Group"] = relationship(back_populates='chat_transcripts')
+    conversation: Mapped["Conversation"] = relationship(back_populates='chat_transcripts')
     
     # Will add it if required
     __table_args__ = (

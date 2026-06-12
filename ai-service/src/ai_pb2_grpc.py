@@ -44,6 +44,16 @@ class AIServiceStub(object):
                 request_serializer=ai__pb2.ProcessQueryRequest.SerializeToString,
                 response_deserializer=ai__pb2.ProcessQueryResponse.FromString,
                 _registered_method=True)
+        self.EmbedMessage = channel.unary_unary(
+                '/ai.AIService/EmbedMessage',
+                request_serializer=ai__pb2.EmbedMessageRequest.SerializeToString,
+                response_deserializer=ai__pb2.EmbedMessageResponse.FromString,
+                _registered_method=True)
+        self.SeedChats = channel.unary_unary(
+                '/ai.AIService/SeedChats',
+                request_serializer=ai__pb2.SeedChatsRequest.SerializeToString,
+                response_deserializer=ai__pb2.SeedChatsResponse.FromString,
+                _registered_method=True)
 
 
 class AIServiceServicer(object):
@@ -61,6 +71,18 @@ class AIServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def EmbedMessage(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SeedChats(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AIServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +95,16 @@ def add_AIServiceServicer_to_server(servicer, server):
                     servicer.ProcessQuery,
                     request_deserializer=ai__pb2.ProcessQueryRequest.FromString,
                     response_serializer=ai__pb2.ProcessQueryResponse.SerializeToString,
+            ),
+            'EmbedMessage': grpc.unary_unary_rpc_method_handler(
+                    servicer.EmbedMessage,
+                    request_deserializer=ai__pb2.EmbedMessageRequest.FromString,
+                    response_serializer=ai__pb2.EmbedMessageResponse.SerializeToString,
+            ),
+            'SeedChats': grpc.unary_unary_rpc_method_handler(
+                    servicer.SeedChats,
+                    request_deserializer=ai__pb2.SeedChatsRequest.FromString,
+                    response_serializer=ai__pb2.SeedChatsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,6 +161,60 @@ class AIService(object):
             '/ai.AIService/ProcessQuery',
             ai__pb2.ProcessQueryRequest.SerializeToString,
             ai__pb2.ProcessQueryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EmbedMessage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ai.AIService/EmbedMessage',
+            ai__pb2.EmbedMessageRequest.SerializeToString,
+            ai__pb2.EmbedMessageResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SeedChats(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ai.AIService/SeedChats',
+            ai__pb2.SeedChatsRequest.SerializeToString,
+            ai__pb2.SeedChatsResponse.FromString,
             options,
             channel_credentials,
             insecure,

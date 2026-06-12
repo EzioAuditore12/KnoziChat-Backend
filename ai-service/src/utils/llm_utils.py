@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from settings import engine
-from models import ChatTranscript, Group
+from models import ChatTranscript, Conversation
 from sqlalchemy import select
 from uuid import UUID
 from .extras import async_timer
@@ -29,13 +29,13 @@ class HandleLLM:
         query: str,
         user_id: str,
         username: str,
-        group_id: int,
+        conversation_id: int,
         
     ) -> None:
         
         self.query = query
         self.user_id = user_id
-        self.group_id = group_id
+        self.conversation_id = conversation_id
         self.username = username
         
         self.REDIS_KEY = f"{self.user_id}_chats"
@@ -62,8 +62,8 @@ class HandleLLM:
             async with AsyncSession(bind=engine) as session:
                 result = await session.execute(
                     select(ChatTranscript)
-                    .join(Group)
-                    .where(Group.g_id_client == self.group_id)
+                    .join(Conversation)
+                    .where(Conversation.conversation_id_client == self.conversation_id)
                     .order_by(ChatTranscript.embedding.cosine_distance(query_embedding))
                     .limit(k)
                 )

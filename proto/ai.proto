@@ -5,6 +5,8 @@ package ai;
 service AIService {
   rpc AskAI (AIRequest) returns (AIResponse);
   rpc ProcessQuery (ProcessQueryRequest) returns (ProcessQueryResponse);
+  rpc EmbedMessage (EmbedMessageRequest) returns (EmbedMessageResponse);
+  rpc SeedChats (SeedChatsRequest) returns (SeedChatsResponse);
 }
 
 message AIRequest {
@@ -36,4 +38,29 @@ message ProcessQueryRequest {
 
 message ProcessQueryResponse {
   string response = 1;
+}
+
+message EmbedMessageRequest {
+  string message_id = 1;
+  string conversation_id = 2;
+  string sender_id = 3;
+  string content = 4;
+  string created_at = 5;
+  bool is_group = 6;
+}
+
+message EmbedMessageResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message SeedChatsRequest {
+  string conversation_id = 1;
+  bool is_group = 2;
+  repeated ChatMessage chats = 3;
+}
+
+message SeedChatsResponse {
+  bool success = 1;
+  string message = 2;
 }

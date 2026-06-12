@@ -82,6 +82,17 @@ export class ConversationOneToOneService {
     return !!exists;
   }
 
+  public async isExistingConversationParticipant(
+    id: bigint,
+    userId: string,
+  ): Promise<boolean> {
+    const exists = await this.conversationsOneToOneModel.exists({
+      _id: id,
+      $or: [{ participant1: userId }, { participant2: userId }],
+    });
+    return !!exists;
+  }
+
   public async findAllUserConversationsAndContacts(
     userId: string,
   ): Promise<{ conversationIds: string[]; contactIds: string[] }> {

@@ -1,5 +1,5 @@
 from schemas import ChatSchema
-from models import User, Group, ChatTranscript
+from models import Conversation, ChatTranscript
 from dotenv import load_dotenv
 import os
 from sqlalchemy import insert, select
@@ -10,7 +10,7 @@ from datetime import timedelta, datetime
 from pydantic import BaseModel
 from typing import Optional
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from schemas import BaseUserSchema, BaseGroupSchema
+from schemas import ConversationSchema
 from .extras import async_timer
 
 
@@ -37,13 +37,11 @@ class ChatChunkSchema(BaseModel):
 class HandleParsing:
     def __init__(
         self, 
-        user_details: BaseUserSchema,
-        group_details: BaseGroupSchema, 
+        conversation_details: ConversationSchema, 
         chats: list[ChatSchema]
     ) -> None:
         
-        self.user_details = user_details
-        self.group_details = group_details
+        self.conversation_details = conversation_details
         self.chats = chats
         
         self.MAX_TIME_GAP_MINUTES = 5
@@ -56,78 +54,45 @@ class HandleParsing:
         Initializes async components and variables
         (had to do it since all functions are async not normal sync)
         """
-        print("Saving User....")
-        user = await self._find_or_save_user_record()
-        
-        print("Saving Group Information....")
-        group = await self._find_or_save_group(user)
+        print("Saving Conversation Information....")
+        conversation = await self._find_or_save_conversation()
         
         print("Saving and embedding chats...")
-        result = await self._save_chats(group)
+        result = await self._save_chats(conversation)
         
         return result
         
     
     @async_timer
-    async def _find_or_save_user_record(self) -> User:
+    async def _find_or_save_conversation(self) -> Conversation:
         '''
-        if user exists, returned, otherwise saved and returned
-        '''
-        
-        async with AsyncSession(bind=engine) as session:
-            result = await session.execute(
-                select(User)
-                .where(User.id == self.user_details.user_id)
-            )
-            user = result.scalar()
-            
-            if user:
-                return user
-                
-            user = User(
-                id=self.user_details.user_id,
-                username=self.user_details.username
-            )
-            
-            session.add(user)
-            await session.commit()
-            
-            return user
-                   
-        
-    @async_timer
-    async def _find_or_save_group(self, user: User) -> Group:
-        '''
-        If `Group` exists, return it.
+        If `Conversation` exists, return it.
         Otherwise, create, save and return it.
         '''
         
         async with AsyncSession(bind=engine) as session:
-            
-            user = await session.merge(user)
-            
+                        
             result = await session.execute(
-                select(Group).where(
-                    (Group.g_id_client == self.group_details.group_id) & (Group.user_id == user.id)
+                select(Conversation).where(
+                    (Conversation.conversation_id_client == self.conversation_details.conversation_id)
                 )
             )
             
-            group = result.scalar()
+            conversation = result.scalar()
             
-            if group:
-                return group
+            if conversation:
+                return conversation
             
             
-            group = Group(
-                g_id_client = self.group_details.group_id,
-                group_name=self.group_details.group_name,
-                user=user
+            conversation = Conversation(
+                conversation_id_client = self.conversation_details.conversation_id,
+                conversation_name=self.conversation_details.conversation_name,
             )
             
-            session.add(group)
+            session.add(conversation)
             await session.commit()
             
-            return group
+            return conversation
             
         
     
@@ -203,12 +168,12 @@ class HandleParsing:
         
     
     @async_timer
-    async def _get_last_chat_timestamp(self, group: Group) -> datetime | None:
+    async def _get_last_chat_timestamp(self, conversation: Conversation) -> datetime | None:
         
         async with AsyncSession(bind=engine) as session:
             result = await session.execute(
                 select(ChatTranscript.end_time_stamp)
-                .where(ChatTranscript.group_id == group.id)
+                .where(ChatTranscript.conversation_id == conversation.id)
                 .order_by(ChatTranscript.end_time_stamp.desc())
                 .limit(1)
             )
@@ -216,8 +181,8 @@ class HandleParsing:
         
         
     @async_timer
-    async def _filter_new_chats(self, chats: list[ChatSchema], group: Group) -> list[ChatSchema]:
-        last_timestamp = await self._get_last_chat_timestamp(group)
+    async def _filter_new_chats(self, chats: list[ChatSchema], conversation: Conversation) -> list[ChatSchema]:
+        last_timestamp = await self._get_last_chat_timestamp(conversation)
         
         print(f"Last timestamp in DB: {last_timestamp}")
         print(f"Received {len(chats)} total chats")
@@ -234,7 +199,7 @@ class HandleParsing:
         return new_chats
     
     @async_timer
-    async def _save_chats(self, group: Group) -> bool:
+    async def _save_chats(self, conversation: Conversation) -> bool:
         '''
         - If Chat saved successfully: `True`.
         - Else: `False`.
@@ -242,36 +207,69 @@ class HandleParsing:
         
         try:    
             async with AsyncSession(bind=engine) as session:
-                group = await session.merge(group)
+                conversation = await session.merge(conversation)
                 
-                new_chats = await self._filter_new_chats(self.chats, group)
+                # Fetch last transcript to potentially append to it
+                result = await session.execute(
+                    select(ChatTranscript)
+                    .where(ChatTranscript.conversation_id == conversation.id)
+                    .order_by(ChatTranscript.end_time_stamp.desc())
+                    .limit(1)
+                )
+                last_transcript = result.scalar()
+                
+                new_chats = await self._filter_new_chats(self.chats, conversation)
                 
                 if not new_chats:
                     print("No new chats to save")
                     return True
                 
-                chat_transcripts: list[ChatTranscript] = []
                 chunks = await self._chunk_chat_history(new_chats)
-                embeddings = await self._get_embeddings(chunks)
                 
-                for emb in embeddings:
-                    print(str(emb[:10]) + "...")
-                print("Chunks received: ", chunks)
-                
-                
-                for chat_chunk, vector in zip(chunks, embeddings):
-                    chat_transcripts.append(
-                        ChatTranscript(
-                            sent_by_users = list(set(chat_chunk.sent_by_users)),
-                            chats_set_transcript=chat_chunk.chats_set,
-                            embedding = vector,
-                            start_time_stamp=chat_chunk.start_time,
-                            end_time_stamp = chat_chunk.end_time,
-                            group_id=group.id,
+                # Check if we should merge the first chunk with the last transcript
+                if last_transcript and chunks:
+                    first_chunk = chunks[0]
+                    # If the gap between last transcript end time and first chunk start time is <= 5 minutes
+                    if (first_chunk.start_time - last_transcript.end_time_stamp) <= timedelta(minutes=self.MAX_TIME_GAP_MINUTES):
+                        print(f"Merging first chunk with previous transcript (gap: {first_chunk.start_time - last_transcript.end_time_stamp})")
+                        
+                        last_transcript.chats_set_transcript += "\n" + first_chunk.chats_set
+                        last_transcript.end_time_stamp = first_chunk.end_time
+                        last_transcript.sent_by_users = list(set(last_transcript.sent_by_users + first_chunk.sent_by_users))
+                        
+                        # Recompute embedding for the merged transcript
+                        temp_chunk = ChatChunkSchema(
+                            chats_set=last_transcript.chats_set_transcript, 
+                            sent_by_users=[], 
+                            start_time=None, 
+                            end_time=None
                         )
-                    )
+                        new_embedding = (await self._get_embeddings([temp_chunk]))[0]
+                        last_transcript.embedding = new_embedding
+                        
+                        session.add(last_transcript)
+                        
+                        # Remove the merged chunk
+                        chunks.pop(0)
 
-                await session.run_sync(lambda sync_session: sync_session.bulk_save_objects(chat_transcripts))
+                chat_transcripts: list[ChatTranscript] = []
+                if chunks:
+                    embeddings = await self._get_embeddings(chunks)
+                    
+                    for chat_chunk, vector in zip(chunks, embeddings):
+                        chat_transcripts.append(
+                            ChatTranscript(
+                                sent_by_users = list(set(chat_chunk.sent_by_users)),
+                                chats_set_transcript=chat_chunk.chats_set,
+                                embedding = vector,
+                                start_time_stamp=chat_chunk.start_time,
+                                end_time_stamp = chat_chunk.end_time,
+                                conversation_id=conversation.id,
+                            )
+                        )
+
+                    session.add_all(chat_transcripts)
+
                 await session.commit()
                 return True
         

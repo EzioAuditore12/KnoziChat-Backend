@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Post,
   Query,
   Req,
@@ -10,6 +11,7 @@ import {
 import { ApiHeader } from '@nestjs/swagger';
 import { AiService } from './ai.service';
 import { ProcessQueryDto } from './dto/process-query.dto';
+import { SeedChatsDto } from './dto/seed-chats.dto';
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
 
@@ -29,14 +31,26 @@ export class AiController {
     description: 'Bearer JWT token',
     required: true,
   })
-  processQuery(
+  async processQuery(
     @Req() req: AuthRequest,
     @Body() processQueryDto: ProcessQueryDto,
   ) {
-    return this.aiService.processQuery(
-      processQueryDto,
-      req.user.id,
-      req.user.username,
-    );
+    const userId = req.user.id;
+    const userName = req.user.username;
+
+    Logger.log(userId);
+
+    return await this.aiService.processQuery(processQueryDto, userId, userName);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('seed')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer JWT token',
+    required: true,
+  })
+  seedChats(@Body() seedChatsDto: SeedChatsDto) {
+    return this.aiService.seedChats(seedChatsDto);
   }
 }

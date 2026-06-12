@@ -41,12 +41,41 @@ export interface ProcessQueryResponse {
   response: string;
 }
 
+export interface EmbedMessageRequest {
+  messageId: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  isGroup: boolean;
+}
+
+export interface EmbedMessageResponse {
+  success: boolean;
+  error: string;
+}
+
+export interface SeedChatsRequest {
+  conversationId: string;
+  isGroup: boolean;
+  chats: ChatMessage[];
+}
+
+export interface SeedChatsResponse {
+  success: boolean;
+  message: string;
+}
+
 export const AI_PACKAGE_NAME = 'ai';
 
 export interface AIServiceClient {
   askAi(request: AIRequest): Observable<AIResponse>;
 
   processQuery(request: ProcessQueryRequest): Observable<ProcessQueryResponse>;
+
+  embedMessage(request: EmbedMessageRequest): Observable<EmbedMessageResponse>;
+
+  seedChats(request: SeedChatsRequest): Observable<SeedChatsResponse>;
 }
 
 export interface AIServiceController {
@@ -60,11 +89,30 @@ export interface AIServiceController {
     | Promise<ProcessQueryResponse>
     | Observable<ProcessQueryResponse>
     | ProcessQueryResponse;
+
+  embedMessage(
+    request: EmbedMessageRequest,
+  ):
+    | Promise<EmbedMessageResponse>
+    | Observable<EmbedMessageResponse>
+    | EmbedMessageResponse;
+
+  seedChats(
+    request: SeedChatsRequest,
+  ):
+    | Promise<SeedChatsResponse>
+    | Observable<SeedChatsResponse>
+    | SeedChatsResponse;
 }
 
 export function AIServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ['askAi', 'processQuery'];
+    const grpcMethods: string[] = [
+      'askAi',
+      'processQuery',
+      'embedMessage',
+      'seedChats',
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(
         constructor.prototype,
