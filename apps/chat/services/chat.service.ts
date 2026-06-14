@@ -49,11 +49,15 @@ export class ChatService {
 
     const sockets = (await onlineUsers.get<string[]>(key)) || [];
 
-    if (!sockets.includes(client.id)) {
-      sockets.push(client.id);
-    }
+    if (!sockets.includes(client.id)) sockets.push(client.id);
 
     await onlineUsers.set(key, sockets, 0);
+
+    const onlineUsersList =
+      (await onlineUsers.get<string[]>('online_users_list')) || [];
+
+    if (!onlineUsersList.includes(userId)) onlineUsersList.push(userId);
+    await onlineUsers.set('online_users_list', onlineUsersList, 0);
 
     client.join(`user:${userId}`);
 
@@ -86,6 +90,11 @@ export class ChatService {
 
     if (updatedSockets.length === 0) {
       await onlineUsers.del(key);
+
+      const onlineUsersList =
+        (await onlineUsers.get<string[]>('online_users_list')) || [];
+      const newOnlineUsersList = onlineUsersList.filter((id) => id !== userId);
+      await onlineUsers.set('online_users_list', newOnlineUsersList, 0);
 
       server.to(`presence:${userId}`).emit('presence:update', {
         userId,
@@ -193,16 +202,6 @@ export class ChatService {
   }
 
   private async getOnlineUsers(onlineUsers: Cache): Promise<string[]> {
-    const store = (onlineUsers as any).store;
-
-    if (!store || !store.keys) {
-      return [];
-    }
-
-    const keys: string[] = await store.keys();
-
-    return keys
-      .filter((key) => key.startsWith('online:'))
-      .map((key) => key.replace('online:', ''));
+    return (await onlineUsers.get<string[]>('online_users_list')) || [];
   }
 }
