@@ -11,7 +11,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiHeader, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
 import { Paginate, type PaginateQuery } from 'nestjs-paginate';
 import { FileInterceptor } from '@webundsoehne/nest-fastify-file-upload';
 
@@ -26,11 +33,13 @@ import { MultipleUuidDto } from 'apps/common/dto/multiple-uuid.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 
+@ApiTags('Users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Find all users' })
   @ApiQuery({ type: SearchUserDto })
   @ApiResponse({ type: SerachUserResponseDto })
   findAll(
@@ -40,6 +49,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Find user by ID' })
   @ApiResponse({ type: PublicUserDto })
   async findOne(@Param('id') id: string): Promise<PublicUserDto> {
     const user = await this.userService.findOne(id);
@@ -51,6 +61,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
+  @ApiOperation({ summary: 'Update user profile' })
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ type: PublicUserDto })
@@ -76,12 +87,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer JWT token',
-    required: true,
-    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiAuthHeader()
   @ApiResponse({ type: PublicUserDto })
   async getProfile(@Req() req: AuthRequest) {
     const user = await this.userService.findOne(req.user.id);
@@ -90,6 +97,7 @@ export class UserController {
   }
 
   @Post('multiple')
+  @ApiOperation({ summary: 'Find multiple users by ID' })
   @ApiResponse({ type: [PublicUserDto] })
   async findMutilple(@Body() multipleUuidDto: MultipleUuidDto) {
     const users = await this.userService.findMultipleById(

@@ -14,17 +14,19 @@ import {
 } from '@webundsoehne/nest-fastify-file-upload';
 
 import { AppService } from './app.service';
-import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import appWriteClient, { appWriteStorage } from './uploads/configs/appwrite';
 import { env } from './env';
 import { ID, Permission, Role } from 'node-appwrite';
 import { InputFile } from 'node-appwrite/file';
 
+@ApiTags('App')
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get hello message' })
   getHello(): string {
     return this.appService.getHello();
   }

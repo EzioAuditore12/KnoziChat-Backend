@@ -10,7 +10,8 @@ import {
   MessageEvent,
   Body,
 } from '@nestjs/common';
-import { ApiHeader } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
 import { AiService } from './ai.service';
 import { ProcessQueryDto } from './dto/process-query.dto';
 import { SeedChatsDto } from './dto/seed-chats.dto';
@@ -21,22 +22,25 @@ import { map, catchError } from 'rxjs/operators';
 
 import { ProcessQueryResponse } from './generated/ai';
 
+@ApiTags('AI')
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Ask AI a prompt' })
   askAI(@Query('prompt') prompt: string) {
     return this.aiService.askAI(prompt);
   }
 
   @UseGuards(JwtAuthGuard)
   @Sse('send')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer JWT token',
-    required: true,
+  @ApiOperation({
+    summary: 'Process AI query via SSE',
+    description:
+      'Establishes a Server-Sent Events (SSE) connection to stream back AI responses in real-time.',
   })
+  @ApiAuthHeader()
   async processQuery(
     @Req() req: AuthRequest,
     @Query() processQueryDto: ProcessQueryDto,
@@ -67,11 +71,12 @@ export class AiController {
 
   @UseGuards(JwtAuthGuard)
   @Post('seed')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer JWT token',
-    required: true,
+  @ApiOperation({
+    summary: 'Seed AI chats',
+    description:
+      'Seeds predefined AI chat history into the database for testing or initialization.',
   })
+  @ApiAuthHeader()
   seedChats(@Body() seedChatsDto: SeedChatsDto) {
     return this.aiService.seedChats(seedChatsDto);
   }

@@ -11,12 +11,14 @@ import {
 import { ChatsOneToOneService } from '../services/one-to-one/chats-one-to-one.service';
 import { ChatGateway } from '../chat.gateway';
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
-import { ApiCreatedResponse, ApiHeader } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
 import { StartNewConversationResponseDto } from '../dto/one-to-one/start-new-conversation/start-new-conversation-response.dto';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
 import { StartNewConversationDto } from '../dto/one-to-one/start-new-conversation/start-new-conversation.dto';
 import type { FastifyReply } from 'fastify';
 
+@ApiTags('Chat Direct')
 @Controller('chat')
 export class ChatDirectController {
   constructor(
@@ -26,12 +28,8 @@ export class ChatDirectController {
 
   @UseGuards(JwtAuthGuard)
   @Post(':id')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer JWT token',
-    required: true,
-    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
+  @ApiOperation({ summary: 'Start new direct conversation' })
+  @ApiAuthHeader()
   @ApiCreatedResponse({ type: StartNewConversationResponseDto })
   async create(
     @Req() req: AuthRequest,

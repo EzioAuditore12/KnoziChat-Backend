@@ -7,7 +7,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiAcceptedResponse } from '@nestjs/swagger';
+import { ApiAcceptedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
@@ -20,12 +20,18 @@ import { UploadsService } from './uploads.service';
 import { AuthorizeDownloadRequestDto } from './dto/authorize/authorize-download-request.dto';
 import { AuthorizeDownloadResponseDto } from './dto/authorize/authorize-download-response.dto';
 
+@ApiTags('Uploads')
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('image')
+  @ApiOperation({
+    summary: 'Authorize image upload',
+    description:
+      'Generates a temporary Appwrite JWT and returns the required project, bucket, and endpoint details to directly upload an image.',
+  })
   @ApiAcceptedResponse({ type: AuthorizeUploadResponseDto })
   public async authorizeUploadImage(
     @Req() req: AuthRequest,
@@ -54,6 +60,11 @@ export class UploadsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('video')
+  @ApiOperation({
+    summary: 'Authorize video upload',
+    description:
+      'Generates a temporary Appwrite JWT and returns the required project, bucket, and endpoint details to directly upload a video.',
+  })
   @ApiAcceptedResponse({ type: AuthorizeUploadResponseDto })
   public async authorizeUploadVideo(
     @Req() req: AuthRequest,
@@ -82,6 +93,11 @@ export class UploadsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('download')
+  @ApiOperation({
+    summary: 'Authorize file download',
+    description:
+      'Verifies the provided Appwrite file URL and returns a valid download URL with file metadata.',
+  })
   @ApiAcceptedResponse({ type: AuthorizeDownloadResponseDto })
   public async authorizeDownload(
     @Req() req: AuthRequest,

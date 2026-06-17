@@ -17,9 +17,10 @@ import { ChatGateway } from '../chat.gateway';
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import {
   ApiAcceptedResponse,
-  ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
 import type { FastifyReply } from 'fastify';
@@ -34,6 +35,7 @@ import {
   type MulterFile,
 } from '@webundsoehne/nest-fastify-file-upload';
 
+@ApiTags('Chat Group')
 @Controller('chat/group')
 export class ChatGroupController {
   constructor(
@@ -47,6 +49,11 @@ export class ChatGroupController {
 
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Create a new group conversation',
+    description:
+      'Creates a new group conversation, adds the specified participants, and notifies them via WebSockets.',
+  })
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiCreatedResponse({
     type: CreateConversationGroupResponseDto,
@@ -119,6 +126,11 @@ export class ChatGroupController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('member/:id')
+  @ApiOperation({
+    summary: 'Leave a group conversation',
+    description:
+      'Allows a user to leave a group. Reassigns the admin role if the leaving user was the only admin and notifies the group via WebSockets.',
+  })
   public async leaveGroup(
     @Req() req: AuthRequest,
     @Param('id') id: string,
@@ -171,6 +183,7 @@ export class ChatGroupController {
   }
 
   @Get('members/:id')
+  @ApiOperation({ summary: 'Get members of a group conversation' })
   @ApiAcceptedResponse({ type: [ConversationGroupMemberDto] })
   public async getGroupMembers(
     @Param('id') id: string,
