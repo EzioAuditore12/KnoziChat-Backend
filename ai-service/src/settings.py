@@ -1,24 +1,12 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from models import Base
-from urllib.parse import quote_plus
 from pgvector.psycopg import register_vector_async
 from sqlalchemy import text
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+from env import DB_HOST, DB_USERNAME, DB_PASSWORD, DB_DATABASE_NAME, DB_PORT, DROP_ALL_TABLES
 
-HOST = os.environ.get("DB_HOST")
-USERNAME = os.environ.get("DB_USERNAME")
-PASSWORD = quote_plus(os.environ.get("DB_PASSWORD", ""))
-DATABASE = os.environ.get("DB_DATABASE_NAME")
-PORT = os.environ.get("DB_PORT")
+URL_DATABASE = f'postgresql+psycopg://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE_NAME}'
 
-
-DROP_ALL_TABLES = os.environ.get("DROP_ALL_TABLES", "").lower() == "true"
-
-
-URL_DATABASE = f'postgresql+psycopg://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
 
 engine = create_async_engine(URL_DATABASE, echo=True)
 

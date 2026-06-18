@@ -1,9 +1,6 @@
 from schemas import ChatSchema
 from models import Conversation, ChatTranscript
-from dotenv import load_dotenv
-import os
-from sqlalchemy import insert, select
-from uuid import UUID
+from sqlalchemy import  select
 from sqlalchemy.ext.asyncio import AsyncSession
 from settings import engine
 from datetime import timedelta, datetime
@@ -14,10 +11,7 @@ from schemas import ConversationSchema
 from .extras import async_timer
 
 
-
-load_dotenv()
-GEMINI_API_KEY=os.environ.get("GEMINI_API_KEY")
-GEMINI_EMBEDDING_MODEL=os.environ.get("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
+from env import GEMINI_EMBEDDING_MODEL
 
 '''
 (chat_set TYPE)

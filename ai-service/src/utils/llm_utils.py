@@ -1,11 +1,8 @@
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
-from dotenv import load_dotenv
-import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from settings import engine
 from models import ChatTranscript, Conversation
 from sqlalchemy import select
-from uuid import UUID
 from .extras import async_timer
 from pprint import pprint
 from pydantic import BaseModel
@@ -13,10 +10,8 @@ import json
 import redis
 
 
-load_dotenv()
-GEMINI_API_KEY=os.environ.get("GEMINI_API_KEY")
-GEMINI_LLM_MODEL=os.environ.get("GEMINI_LLM_MODEL", "gemini-2.5-flash")
-GEMINI_EMBEDDING_MODEL=os.environ.get("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
+
+from env import GEMINI_LLM_MODEL_ONE, GEMINI_LLM_MODEL_TWO, GEMINI_LLM_MODEL_THREE, GEMINI_EMBEDDING_MODEL, REDIS_URL
 
 class ChatHistorySchema(BaseModel):
     human_response: str
@@ -39,7 +34,7 @@ class HandleLLM:
         self.username = username
         
         self.REDIS_KEY = f"{self.user_id}_chats"
-        self.cache = redis.Redis(host="127.0.0.1", port=6379, db=0, decode_responses=True)
+        self.cache = redis.from_url(REDIS_URL, decode_responses=True)
         
     
     async def _get_embedding(self, text: str):
@@ -139,11 +134,14 @@ class HandleLLM:
         
         
         
-        llm = ChatGoogleGenerativeAI(
-            # model="gemini-3.1-flash-lite-preview",
-            model=GEMINI_LLM_MODEL,
-            max_retries=2,
-        )
+        llms = []
+        for model_name in [GEMINI_LLM_MODEL_ONE, GEMINI_LLM_MODEL_TWO, GEMINI_LLM_MODEL_THREE]:
+            if model_name:
+                llms.append(ChatGoogleGenerativeAI(model=model_name, max_retries=1))
+        
+        llm = llms[0]
+        if len(llms) > 1:
+            llm = llms[0].with_fallbacks(llms[1:])
         
         full_response = ""
         async for chunk in llm.astream([final_prompt]):
