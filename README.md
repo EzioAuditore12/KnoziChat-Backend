@@ -2,6 +2,21 @@
 
 > Backend repository for KnoziChat, powering real-time one-to-one chats, group conversations, AI interactions, and device synchronization.
 
+## Problem and Solution
+
+**The Problem:** When users return to the app after a long period of inactivity, keeping track of what happened in the chat can be difficult. Scrolling through and reading every single missed message is a time-consuming and tedious process.
+
+**The Solution:** KnoziChat integrates an AI-powered context engine built with a Python gRPC server and LangChain. This intelligent assistant helps users quickly catch up on missed discussions without needing to manually read through the entire chat history.
+
+The AI system can:
+
+- understand group context
+- summarize conversations
+- generate contextual replies
+- maintain conversational awareness
+
+---
+
 KnoziChat is a scalable Android chat application built around:
 
 - real-time communication
@@ -31,7 +46,7 @@ https://expo.dev/artifacts/eas/jD1GYnAXZ8PgSLRyHE3TST.apk
 KnoziChat is powered by:
 
 - NestJS + Fastify backend
-- FastAPI AI service
+- Python gRPC AI server
 - Socket.IO realtime infrastructure
 
 ## Backend Repository
@@ -48,17 +63,17 @@ https://knozichat.online/api
 
 ---
 
-## FastAPI AI Service Docs
-
-https://knozify.space/docs
-
----
-
 # Architecture Diagrams
 
 ## Authentication System
 
 ![](./docs/images/auth.png)
+
+---
+
+## Database Architecture & Synchronization Flow
+
+![](./docs/images/database-sync.png)
 
 ---
 
@@ -68,15 +83,25 @@ https://knozify.space/docs
 
 ---
 
+## Chat Insert Flow (End-to-End)
+
+![](./docs/images/chat-flow.png)
+
+---
+
 ## AI Group Conversation System
 
 ![](./docs/images/ai.png)
 
----
+### Flow Summary
 
-## Database Architecture & Synchronization Flow
-
-![](./docs/images/database-sync.png)
+1. User sends message via Socket.IO from the chat app.
+2. NestJS Socket.IO Gateway receives the message, validates it, and prepares data.
+3. Message is inserted into MongoDB (chat store).
+4. Acknowledgment is emitted back to the user via Socket.IO.
+5. A job with necessary payload is added to BullMQ queue.
+6. Queue Service (BullMQ Worker) picks the job and sends payload to Python gRPC Server.
+7. Python gRPC Server receives the payload for embedding processing and stores the result in PostgreSQL.
 
 ---
 
@@ -235,18 +260,6 @@ operates within isolated Socket.IO rooms for efficient event broadcasting.
 
 ---
 
-# AI-Powered Group Conversations
-
-KnoziChat integrates FastAPI and LangChain for contextual AI interactions.
-
-The AI system can:
-
-- understand group context
-- summarize conversations
-- generate contextual replies
-- maintain conversational awareness
-
----
 
 # Redis Integration
 
@@ -274,7 +287,7 @@ Redis is used for:
 - NestJS
 - Fastify
 - Socket.IO
-- FastAPI
+- Python gRPC
 - LangChain
 
 ## Databases & Infrastructure
