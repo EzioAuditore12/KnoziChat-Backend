@@ -1,28 +1,27 @@
 import {
   ForbiddenException,
-  Injectable,
-  Inject,
   forwardRef,
+  Inject,
+  Injectable,
 } from '@nestjs/common';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { Connection, Model } from 'mongoose';
-
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import {
   ConversationGroupDto,
   convertConversationGroupSchemaFromMongoose,
 } from 'apps/chat/dto/group/conversation-group/conversation-group.dto';
 import { CreateConversationGroupResponseDto } from 'apps/chat/dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
 import { CreateConversationGroupDto } from 'apps/chat/dto/group/conversation-group/create-conversation/create-conversation.dto';
-
 import {
   ConversationGroup,
   ConversationGroupDocument,
 } from 'apps/chat/entities/group/conversation-group.entity';
+import { UploadsService } from 'apps/uploads/uploads.service';
 import { UserService } from 'apps/user/user.service';
+import { Connection, Model } from 'mongoose';
+
 import { ChatsGroupService } from './chats-group.service';
 import { ConversationGroupMemberService } from './conversation-group-member.service';
-import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
-import { UploadsService } from 'apps/uploads/uploads.service';
 
 @Injectable()
 export class ConversationGroupService {

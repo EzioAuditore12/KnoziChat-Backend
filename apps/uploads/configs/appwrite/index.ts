@@ -1,6 +1,5 @@
-import { Client, Storage, Tokens, Users } from 'node-appwrite';
-
 import { env } from 'apps/env';
+import { Client, Storage, Tokens, Users } from 'node-appwrite';
 
 const appWriteClient = new Client();
 

@@ -1,5 +1,4 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
-import type { FastifyReply } from 'fastify';
 import {
   ApiAcceptedResponse,
   ApiNotFoundResponse,
@@ -7,15 +6,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-
-import { UserAuthService } from '../services/user-auth.service';
-import { TokenService } from '../services/tokens.service';
-
 import { NotFoundDto } from 'apps/common/dto/not-found.dto';
-
-import { LoginUserDto } from '../dto/login/login-user.dto';
-import { LoginUserResponseDto } from '../dto/login/login-user-response.dto';
 import { UnauthorizedDto } from 'apps/common/dto/unauthorized.dto';
+import type { FastifyReply } from 'fastify';
+
+import { LoginUserResponseDto } from '../dto/login/login-user-response.dto';
+import { LoginUserDto } from '../dto/login/login-user.dto';
+import { TokenService } from '../services/tokens.service';
+import { UserAuthService } from '../services/user-auth.service';
 
 @ApiTags('Authentication')
 @Controller('auth')

@@ -1,6 +1,7 @@
-import { createZodDto } from 'nestjs-zod';
-import { userSchema } from './user.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
+
+import { userSchema } from './user.dto';
 
 export const publicUserSchema = userSchema.omit({
   password: true,

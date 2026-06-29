@@ -8,17 +8,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiAcceptedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { FastifyReply } from 'fastify';
-
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
-
-import { AuthorizeUploadRequestDto } from './dto/authorize/authorize-upload-request.dto';
-import { AuthorizeUploadResponseDto } from './dto/authorize/authorize-upload-response.dto';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
-import { UploadsService } from './uploads.service';
+import type { FastifyReply } from 'fastify';
 
 import { AuthorizeDownloadRequestDto } from './dto/authorize/authorize-download-request.dto';
 import { AuthorizeDownloadResponseDto } from './dto/authorize/authorize-download-response.dto';
+import { AuthorizeUploadRequestDto } from './dto/authorize/authorize-upload-request.dto';
+import { AuthorizeUploadResponseDto } from './dto/authorize/authorize-upload-response.dto';
+import { UploadsService } from './uploads.service';
 
 @ApiTags('Uploads')
 @Controller('uploads')

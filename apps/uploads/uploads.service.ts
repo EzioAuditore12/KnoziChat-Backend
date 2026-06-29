@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ID, type Models } from 'node-appwrite';
-import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import { unlink } from 'node:fs/promises';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import { env } from 'apps/env';
+import { ID, type Models } from 'node-appwrite';
 import { InputFile } from 'node-appwrite/file';
 
 import {
@@ -9,7 +10,6 @@ import {
   appWriteTokens,
   appWriteUsers,
 } from './configs/appwrite';
-import { env } from 'apps/env';
 
 @Injectable()
 export class UploadsService {

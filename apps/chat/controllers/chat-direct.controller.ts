@@ -8,15 +8,16 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ChatsOneToOneService } from '../services/one-to-one/chats-one-to-one.service';
-import { ChatGateway } from '../chat.gateway';
-import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
-import { StartNewConversationResponseDto } from '../dto/one-to-one/start-new-conversation/start-new-conversation-response.dto';
+import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
-import { StartNewConversationDto } from '../dto/one-to-one/start-new-conversation/start-new-conversation.dto';
+import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
 import type { FastifyReply } from 'fastify';
+
+import { ChatGateway } from '../chat.gateway';
+import { StartNewConversationResponseDto } from '../dto/one-to-one/start-new-conversation/start-new-conversation-response.dto';
+import { StartNewConversationDto } from '../dto/one-to-one/start-new-conversation/start-new-conversation.dto';
+import { ChatsOneToOneService } from '../services/one-to-one/chats-one-to-one.service';
 
 @ApiTags('Chat Direct')
 @Controller('chat')

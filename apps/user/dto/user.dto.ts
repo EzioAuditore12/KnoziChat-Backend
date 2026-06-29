@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
 import { ApiParam, ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const userSchema = z.object({
   id: z.uuid(),

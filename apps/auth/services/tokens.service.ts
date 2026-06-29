@@ -1,11 +1,10 @@
+import { Inject, Injectable } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
-import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-
-import { AuthJwtPayload } from '../types/auth-jwt-payload';
 
 import refreshJwtConfig from '../configs/refresh-jwt.config';
 import { TokensDto } from '../dto/tokens.dto';
+import { AuthJwtPayload } from '../types/auth-jwt-payload';
 
 @Injectable()
 export class TokenService {

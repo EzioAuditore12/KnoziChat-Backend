@@ -1,16 +1,15 @@
 import {
   ForbiddenException,
-  Injectable,
-  Inject,
   forwardRef,
+  Inject,
+  Injectable,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model } from 'mongoose';
+import { ChatsGroupDto } from 'apps/chat/dto/group/chats-group/chats-group.dto';
 import {
   ConversationGroupMemberDto,
   convertConversationGroupMemberSchemaFromMongoose,
 } from 'apps/chat/dto/group/conversation-group/conversation-group-member.dto';
-import { ChatsGroupDto } from 'apps/chat/dto/group/chats-group/chats-group.dto';
 import {
   InsertConversationGroupMemberDto,
   insertConversationGroupMemberSchemaForMonoose,
@@ -19,6 +18,8 @@ import {
   ConversationGroupMember,
   ConversationGroupMemberDocument,
 } from 'apps/chat/entities/group/conversation-group-members.entity';
+import { ClientSession, Connection, Model } from 'mongoose';
+
 import { ChatsGroupService } from './chats-group.service';
 
 @Injectable()

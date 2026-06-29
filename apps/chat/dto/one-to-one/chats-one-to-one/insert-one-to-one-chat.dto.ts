@@ -1,6 +1,7 @@
-import { createZodDto } from 'nestjs-zod';
-import { chatsOneToOneSchema } from './chats-one-to-one.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
+
+import { chatsOneToOneSchema } from './chats-one-to-one.dto';
 
 export const insertOneToOneChatSchema = chatsOneToOneSchema.partial({
   id: true,

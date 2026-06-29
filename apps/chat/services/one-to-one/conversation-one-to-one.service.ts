@@ -1,11 +1,10 @@
 import {
   BadRequestException,
-  OnModuleInit,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import {
   ConversationOneToOneDto,
   convertConversationOneToOneSchemaFromMongoose,
@@ -16,6 +15,7 @@ import {
   ConversationOneToOneDocument,
 } from 'apps/chat/entities/one-to-one/conversation-one-to-one.entity';
 import { UserService } from 'apps/user/user.service';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class ConversationOneToOneService {

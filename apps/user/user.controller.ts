@@ -13,25 +13,26 @@ import {
 } from '@nestjs/common';
 import {
   ApiConsumes,
+  ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
-  ApiOperation,
 } from '@nestjs/swagger';
-import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
-import { Paginate, type PaginateQuery } from 'nestjs-paginate';
-import { FileInterceptor } from '@webundsoehne/nest-fastify-file-upload';
-
-import { UserService } from './user.service';
-
-import { PublicUserDto, publicUserSchema } from './dto/public-user.dto';
-import { SearchUserDto } from './dto/search-user/search-user.dto';
-import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
+import {
+  FileInterceptor,
+  MulterFile,
+} from '@webundsoehne/nest-fastify-file-upload';
 import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
+import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
 import { MultipleUuidDto } from 'apps/common/dto/multiple-uuid.dto';
+import { Paginate, type PaginateQuery } from 'nestjs-paginate';
+
+import { PublicUserDto, publicUserSchema } from './dto/public-user.dto';
+import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
+import { SearchUserDto } from './dto/search-user/search-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import { UserService } from './user.service';
 
 @ApiTags('Users')
 @Controller('user')

@@ -1,11 +1,11 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BullModule } from '@nestjs/bullmq';
+import { ChatModule } from 'apps/chat/chat.module';
 
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { EmbedProcessor } from './embed.processor';
-import { ChatModule } from 'apps/chat/chat.module';
 
 @Module({
   imports: [

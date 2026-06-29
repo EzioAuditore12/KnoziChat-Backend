@@ -1,7 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
 import { conversationOneToOneSchema } from 'apps/chat/dto/one-to-one/conversation-one-to-one/conversation-one-to-one.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const conversationOneToOneSyncSchema = conversationOneToOneSchema
   .omit({ lastSeenAt: true, participant1: true, participant2: true })

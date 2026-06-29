@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 
 import { ConversationGroup } from './conversation-group.entity';
-import { HydratedDocument } from 'mongoose';
 
 export const CONVERSATION_GROUP_MEMBER_TABLE_NAME = 'conversation_group_member';
 

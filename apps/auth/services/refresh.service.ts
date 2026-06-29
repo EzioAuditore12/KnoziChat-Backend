@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { BlackListedRefreshToken } from '../entities/blacklist-refresh-token.entity';
-
 import { TokenService } from './tokens.service';
 
 @Injectable()

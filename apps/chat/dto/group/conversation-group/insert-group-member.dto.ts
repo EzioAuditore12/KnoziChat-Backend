@@ -1,5 +1,6 @@
-import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
+
 import { conversationGroupMemberSchema } from './conversation-group-member.dto';
 
 export const insertConversationGroupMemberSchema = conversationGroupMemberSchema

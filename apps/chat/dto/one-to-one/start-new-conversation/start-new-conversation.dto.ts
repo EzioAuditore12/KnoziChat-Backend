@@ -1,5 +1,5 @@
-import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 import { chatsOneToOneSchema } from '../chats-one-to-one/chats-one-to-one.dto';

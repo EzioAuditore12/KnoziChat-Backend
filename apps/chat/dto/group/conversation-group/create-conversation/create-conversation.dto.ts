@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const createConversationGroupSchema = z.object({
   name: z.string().nonempty().max(50),

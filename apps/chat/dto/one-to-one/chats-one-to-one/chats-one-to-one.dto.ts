@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const chatsOneToOneSchema = z.object({
   id: z.any().transform((val) => String(val)),

@@ -1,44 +1,43 @@
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { ChatGateway } from './chat.gateway';
-
-import {
-  ConversationOneToOne,
-  ConversationOneToOneSchema,
-} from './entities/one-to-one/conversation-one-to-one.entity';
-import {
-  ChatsOneToOne,
-  ChatsOneToOneSchema,
-} from './entities/one-to-one/chats-one-to-one.entity';
-import { MongooseModule } from '@nestjs/mongoose';
-
-import { ChatsOneToOneService } from './services/one-to-one/chats-one-to-one.service';
-import { ConversationOneToOneService } from './services/one-to-one/conversation-one-to-one.service';
-import { ChatService } from './services/chat.service';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import jwtConfig from 'apps/auth/configs/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
+import jwtConfig from 'apps/auth/configs/jwt.config';
+import { UploadsModule } from 'apps/uploads/uploads.module';
+import { UserModule } from 'apps/user/user.module';
+
+import { ChatGateway } from './chat.gateway';
+import { ChatDirectController } from './controllers/chat-direct.controller';
+import { ChatGroupController } from './controllers/chat-group.controller';
+import {
+  ChatsGroup,
+  ChatsGroupSchema,
+} from './entities/group/chats-group.entity';
+import {
+  ConversationGroupMember,
+  ConversationGroupMemberSchema,
+} from './entities/group/conversation-group-members.entity';
 import {
   ConversationGroup,
   ConversationGroupSchema,
 } from './entities/group/conversation-group.entity';
 import {
-  ChatsGroup,
-  ChatsGroupSchema,
-} from './entities/group/chats-group.entity';
-import { ConversationGroupService } from './services/group/conversation-group.service';
-import { ChatsGroupService } from './services/group/chats-group.service';
-import { UserModule } from 'apps/user/user.module';
+  ChatsOneToOne,
+  ChatsOneToOneSchema,
+} from './entities/one-to-one/chats-one-to-one.entity';
 import {
-  ConversationGroupMember,
-  ConversationGroupMemberSchema,
-} from './entities/group/conversation-group-members.entity';
-import { ChatDirectController } from './controllers/chat-direct.controller';
-import { ChatGroupController } from './controllers/chat-group.controller';
-import { ConversationGroupMemberService } from './services/group/conversation-group-member.service';
+  ConversationOneToOne,
+  ConversationOneToOneSchema,
+} from './entities/one-to-one/conversation-one-to-one.entity';
+import { ChatService } from './services/chat.service';
 import { ConversationGroupOrchestratorService } from './services/conversation-group-orchestrator.service';
-import { UploadsModule } from 'apps/uploads/uploads.module';
-import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
+import { ChatsGroupService } from './services/group/chats-group.service';
+import { ConversationGroupMemberService } from './services/group/conversation-group-member.service';
+import { ConversationGroupService } from './services/group/conversation-group.service';
+import { ChatsOneToOneService } from './services/one-to-one/chats-one-to-one.service';
+import { ConversationOneToOneService } from './services/one-to-one/conversation-one-to-one.service';
 
 @Module({
   imports: [

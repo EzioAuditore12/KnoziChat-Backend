@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { config } from 'dotenv';
+import { z } from 'zod';
 
 config();
 
@@ -15,6 +15,8 @@ export const envSchema = z.object({
   DATABASE_MONGODB_URL: z.string(),
 
   REDIS_URL: z.string(),
+
+  CORS_ORIGIN: z.string().default('*'),
 
   JWT_SECRET: z.string(),
   JWT_EXPIRE_IN: timeSchema.default('15m'),

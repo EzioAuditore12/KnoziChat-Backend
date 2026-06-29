@@ -7,7 +7,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import type { FastifyReply } from 'fastify';
 import {
   ApiConflictResponse,
   ApiConsumes,
@@ -19,18 +18,16 @@ import {
   FileInterceptor,
   type MulterFile,
 } from '@webundsoehne/nest-fastify-file-upload';
-
-import { UserAuthService } from '../services/user-auth.service';
-
 import { ConflictDto } from 'apps/common/dto/conflict.dto';
 import { NotFoundDto } from 'apps/common/dto/not-found.dto';
+import type { FastifyReply } from 'fastify';
 
 import { RegisterUserDto } from '../dto/register/register-user.dto';
 import { RegisterUserResponseDto } from '../dto/register/register-user.response.dto';
-
-import { VerifyRegisterUserDto } from '../dto/register/verify-register-user.dto';
 import { VerifyRegisterUserResponseDto } from '../dto/register/verify-register-user-response.dto';
+import { VerifyRegisterUserDto } from '../dto/register/verify-register-user.dto';
 import { TokenService } from '../services/tokens.service';
+import { UserAuthService } from '../services/user-auth.service';
 
 @ApiTags('Authentication')
 @Controller('auth')

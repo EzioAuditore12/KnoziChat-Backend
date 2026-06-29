@@ -1,24 +1,24 @@
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-
-import { SEND_SMS_QUEUE_NAME } from './workers/send-sms.worker';
-import { UserAuthService } from './services/user-auth.service';
-import { TokenService } from './services/tokens.service';
-import { RefreshService } from './services/refresh.service';
-import { BlackListedRefreshToken } from './entities/blacklist-refresh-token.entity';
-import jwtConfig from './configs/jwt.config';
-import { JwtModule } from '@nestjs/jwt';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
+import { UploadsModule } from 'apps/uploads/uploads.module';
+import { UserModule } from 'apps/user/user.module';
+
+import jwtConfig from './configs/jwt.config';
 import refreshJwtConfig from './configs/refresh-jwt.config';
-import { RegisterController } from './controllers/register.controller';
 import { LoginController } from './controllers/login.controller';
 import { RefreshController } from './controllers/refresh.controller';
+import { RegisterController } from './controllers/register.controller';
+import { BlackListedRefreshToken } from './entities/blacklist-refresh-token.entity';
+import { RefreshService } from './services/refresh.service';
+import { TokenService } from './services/tokens.service';
+import { UserAuthService } from './services/user-auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.stratergy';
-import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
-import { UserModule } from 'apps/user/user.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UploadsModule } from 'apps/uploads/uploads.module';
+import { SEND_SMS_QUEUE_NAME } from './workers/send-sms.worker';
 
 @Module({
   imports: [

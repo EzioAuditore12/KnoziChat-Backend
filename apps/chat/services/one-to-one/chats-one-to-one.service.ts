@@ -1,23 +1,22 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { ConversationOneToOneService } from './conversation-one-to-one.service';
-
-import { StartNewConversationDto } from 'apps/chat/dto/one-to-one/start-new-conversation/start-new-conversation.dto';
-import { InsertOneToOneChatDto } from 'apps/chat/dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import {
-  ChatsOneToOne,
-  ChatsOneToOneDocument,
-} from 'apps/chat/entities/one-to-one/chats-one-to-one.entity';
-import { Connection, Model } from 'mongoose';
 import {
   ChatsOneToOneDto,
   convertChatsOneToOneFromMongoose,
 } from 'apps/chat/dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
-import { SnowFlakeId } from 'apps/common/utils/snowflake';
+import { InsertOneToOneChatDto } from 'apps/chat/dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
 import { StartNewConversationResponseDto } from 'apps/chat/dto/one-to-one/start-new-conversation/start-new-conversation-response.dto';
-
-import { InjectQueue } from '@nestjs/bullmq';
+import { StartNewConversationDto } from 'apps/chat/dto/one-to-one/start-new-conversation/start-new-conversation.dto';
+import {
+  ChatsOneToOne,
+  ChatsOneToOneDocument,
+} from 'apps/chat/entities/one-to-one/chats-one-to-one.entity';
+import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { Queue } from 'bullmq';
+import { Connection, Model } from 'mongoose';
+
+import { ConversationOneToOneService } from './conversation-one-to-one.service';
 
 @Injectable()
 export class ChatsOneToOneService {

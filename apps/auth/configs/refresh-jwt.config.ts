@@ -1,6 +1,5 @@
 import { registerAs } from '@nestjs/config';
 import { JwtSignOptions } from '@nestjs/jwt';
-
 import { env } from 'apps/env';
 
 export default registerAs(

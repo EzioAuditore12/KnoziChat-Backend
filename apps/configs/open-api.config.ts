@@ -1,5 +1,5 @@
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 
 const openApiConfig = new DocumentBuilder()

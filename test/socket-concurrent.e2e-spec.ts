@@ -1,15 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
-import { io } from 'socket.io-client';
 import { faker } from '@faker-js/faker';
+import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { io } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { In, Repository } from 'typeorm';
 
 import { AppModule } from '../apps/app.module';
-import { User } from '../apps/user/entities/user.entity';
 import { TokenService } from '../apps/auth/services/tokens.service';
-
-import type { Socket } from 'socket.io-client';
+import { User } from '../apps/user/entities/user.entity';
 
 describe('Concurrent Sockets (e2e)', () => {
   let app: INestApplication;

@@ -1,37 +1,38 @@
 import { Injectable } from '@nestjs/common';
+import { ChatsGroupService } from 'apps/chat/services/group/chats-group.service';
+import { ConversationGroupMemberService } from 'apps/chat/services/group/conversation-group-member.service';
+import { ConversationGroupService } from 'apps/chat/services/group/conversation-group.service';
 import { ChatsOneToOneService } from 'apps/chat/services/one-to-one/chats-one-to-one.service';
 import { ConversationOneToOneService } from 'apps/chat/services/one-to-one/conversation-one-to-one.service';
 import { UserService } from 'apps/user/user.service';
-import { PullChangesRequestDto } from './dto/pull-changes/pull-changes-request.dto';
-import { PullChangesResponseDto } from './dto/pull-changes/pull-changes-response.dto';
-import {
-  ConversationOneToOneSyncChangeDto,
-  ConversationOneToOneSyncDto,
-} from './dto/conversation-one-to-one-sync.dto';
-import { UserSyncChangeDto, UserSyncDto } from './dto/user-sync.dto';
-import {
-  ChatsOneToOneSyncChangeDto,
-  ChatsOneToOneSyncDto,
-} from './dto/chats-one-to-one-sync.dto';
-import { ConversationGroupService } from 'apps/chat/services/group/conversation-group.service';
-import { ChatsGroupService } from 'apps/chat/services/group/chats-group.service';
-import {
-  ChatsGroupSyncChangeDto,
-  ChatsGroupSyncDto,
-} from './dto/chats-group-sync.dto';
-import {
-  ConversationGroupSyncChangeDto,
-  ConversationGroupSyncDto,
-} from './dto/conversation-group-sync.shema';
+
 import {
   ChatsAttachmentSyncChangeDto,
   ChatsAttachmentSyncDto,
 } from './dto/chat-attachment-sync.dto';
 import {
+  ChatsGroupSyncChangeDto,
+  ChatsGroupSyncDto,
+} from './dto/chats-group-sync.dto';
+import {
+  ChatsOneToOneSyncChangeDto,
+  ChatsOneToOneSyncDto,
+} from './dto/chats-one-to-one-sync.dto';
+import {
   ConversationGroupMemberSyncChangeDto,
   ConversationGroupMemberSyncDto,
 } from './dto/conversation-group-member-sync.dto';
-import { ConversationGroupMemberService } from 'apps/chat/services/group/conversation-group-member.service';
+import {
+  ConversationGroupSyncChangeDto,
+  ConversationGroupSyncDto,
+} from './dto/conversation-group-sync.shema';
+import {
+  ConversationOneToOneSyncChangeDto,
+  ConversationOneToOneSyncDto,
+} from './dto/conversation-one-to-one-sync.dto';
+import { PullChangesRequestDto } from './dto/pull-changes/pull-changes-request.dto';
+import { PullChangesResponseDto } from './dto/pull-changes/pull-changes-response.dto';
+import { UserSyncChangeDto, UserSyncDto } from './dto/user-sync.dto';
 
 @Injectable()
 export class SyncService {

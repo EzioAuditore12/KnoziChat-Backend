@@ -1,8 +1,7 @@
-import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
-
 import { baseResponseSchema } from 'apps/common/dto/base-respose.dto';
 import { userSchema } from 'apps/user/dto/user.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const registerUserResponseSchema = userSchema
   .pick({

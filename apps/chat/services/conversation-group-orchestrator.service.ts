@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { ConversationGroupService } from './group/conversation-group.service';
 import { ConversationGroupMemberService } from './group/conversation-group-member.service';
+import { ConversationGroupService } from './group/conversation-group.service';
 
 @Injectable()
 export class ConversationGroupOrchestratorService {

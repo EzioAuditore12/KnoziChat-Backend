@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
+import { UploadsModule } from 'apps/uploads/uploads.module';
+import { UploadsService } from 'apps/uploads/uploads.service';
 
 import { User } from './entities/user.entity';
-import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
-
-import { UploadsService } from 'apps/uploads/uploads.service';
-import { UploadsModule } from 'apps/uploads/uploads.module';
+import { UserService } from './user.service';
 
 @Module({
   imports: [

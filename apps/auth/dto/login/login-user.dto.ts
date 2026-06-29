@@ -1,7 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
 import { userSchema } from 'apps/user/dto/user.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 const loginUserSchema = userSchema
   .pick({

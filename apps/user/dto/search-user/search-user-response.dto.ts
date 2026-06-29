@@ -1,12 +1,11 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
-import { publicUserSchema } from '../public-user.dto';
-
 import {
   linkPaginatedSchema,
   metaPaginatedSchema,
 } from 'apps/common/dto/pagination.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
+
+import { publicUserSchema } from '../public-user.dto';
 
 export const searchUserResponseSchema = z.object({
   data: z.array(publicUserSchema),

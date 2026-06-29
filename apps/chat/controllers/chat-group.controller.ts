@@ -12,9 +12,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ConversationGroupService } from '../services/group/conversation-group.service';
-import { ChatGateway } from '../chat.gateway';
-import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
 import {
   ApiAcceptedResponse,
   ApiConsumes,
@@ -22,18 +19,22 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
-import type { FastifyReply } from 'fastify';
-import { CreateConversationGroupDto } from '../dto/group/conversation-group/create-conversation/create-conversation.dto';
-import { ConversationGroupDto } from '../dto/group/conversation-group/conversation-group.dto';
-import { ConversationGroupMemberDto } from '../dto/group/conversation-group/conversation-group-member.dto';
-import { ConversationGroupMemberService } from '../services/group/conversation-group-member.service';
-import { ConversationGroupOrchestratorService } from '../services/conversation-group-orchestrator.service';
-import { CreateConversationGroupResponseDto } from '../dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
 import {
   FileInterceptor,
   type MulterFile,
 } from '@webundsoehne/nest-fastify-file-upload';
+import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
+import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
+import type { FastifyReply } from 'fastify';
+
+import { ChatGateway } from '../chat.gateway';
+import { ConversationGroupMemberDto } from '../dto/group/conversation-group/conversation-group-member.dto';
+import { ConversationGroupDto } from '../dto/group/conversation-group/conversation-group.dto';
+import { CreateConversationGroupResponseDto } from '../dto/group/conversation-group/create-conversation/create-conversation-responses.dto';
+import { CreateConversationGroupDto } from '../dto/group/conversation-group/create-conversation/create-conversation.dto';
+import { ConversationGroupOrchestratorService } from '../services/conversation-group-orchestrator.service';
+import { ConversationGroupMemberService } from '../services/group/conversation-group-member.service';
+import { ConversationGroupService } from '../services/group/conversation-group.service';
 
 @ApiTags('Chat Group')
 @Controller('chat/group')

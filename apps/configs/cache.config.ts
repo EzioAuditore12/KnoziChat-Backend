@@ -1,7 +1,7 @@
-import { Keyv } from 'keyv';
 import KeyvRedis from '@keyv/redis';
-import { CacheableMemory } from 'cacheable';
 import { env } from 'apps/env';
+import { CacheableMemory } from 'cacheable';
+import { Keyv } from 'keyv';
 
 export const createCacheOptions = () => ({
   stores: [

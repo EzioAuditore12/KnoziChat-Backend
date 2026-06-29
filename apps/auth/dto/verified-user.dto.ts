@@ -1,9 +1,9 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
-import { userSchema } from 'apps/user/dto/user.dto';
-import { tokensSchema } from './tokens.dto';
 import { baseResponseSchema } from 'apps/common/dto/base-respose.dto';
+import { userSchema } from 'apps/user/dto/user.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
+
+import { tokensSchema } from './tokens.dto';
 
 export const verifiedUserSchema = z
   .object({

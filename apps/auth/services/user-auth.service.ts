@@ -1,32 +1,30 @@
+import { InjectQueue } from '@nestjs/bullmq';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
-  Injectable,
   ConflictException,
+  Inject,
+  Injectable,
   NotFoundException,
   UnauthorizedException,
-  Inject,
 } from '@nestjs/common';
-import { verify } from '@node-rs/argon2';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { minutes } from '@nestjs/throttler';
-import type { Cache } from 'cache-manager';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { verify } from '@node-rs/argon2';
 import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import Zavudev from '@zavudev/sdk';
-
+import { UploadsService } from 'apps/uploads/uploads.service';
+import { PublicUserDto, publicUserSchema } from 'apps/user/dto/public-user.dto';
 import { UserService } from 'apps/user/user.service';
-
-import { RegisterUserDto } from '../dto/register/register-user.dto';
-import { VerifyRegisterUserDto } from '../dto/register/verify-register-user.dto';
+import { Queue } from 'bullmq';
+import type { Cache } from 'cache-manager';
 
 import { LoginUserDto } from '../dto/login/login-user.dto';
+import { RegisterUserDto } from '../dto/register/register-user.dto';
 import { RegisterUserResponseDto } from '../dto/register/register-user.response.dto';
+import { VerifyRegisterUserDto } from '../dto/register/verify-register-user.dto';
 import {
   SEND_SMS_QUEUE_NAME,
   SendMessageJobData,
 } from '../workers/send-sms.worker';
-import { PublicUserDto, publicUserSchema } from 'apps/user/dto/public-user.dto';
-import { UploadsService } from 'apps/uploads/uploads.service';
 
 const regiseration_cache_key = 'register';
 

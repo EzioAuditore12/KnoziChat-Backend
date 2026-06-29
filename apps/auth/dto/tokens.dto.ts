@@ -1,6 +1,6 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { jwt } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
 
 export const tokensSchema = z.object({
   accessToken: z

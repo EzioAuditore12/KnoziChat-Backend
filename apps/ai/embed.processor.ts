@@ -1,7 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Job } from 'bullmq';
-import { AiService } from './ai.service';
 import { Logger } from '@nestjs/common';
+import { Job } from 'bullmq';
+
+import { AiService } from './ai.service';
 import { EmbedMessageRequest } from './generated/ai';
 
 @Processor('embed-messages')

@@ -1,7 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
 import { publicUserSchema } from 'apps/user/dto/public-user.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const userSyncSchema = publicUserSchema.extend({
   createdAt: z.number(),

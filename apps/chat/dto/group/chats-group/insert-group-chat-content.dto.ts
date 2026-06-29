@@ -1,5 +1,5 @@
-import { createZodDto } from 'nestjs-zod';
 import { ApiProperty } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 import { insertGroupChatSchema } from './insert-group-chat.dto';

@@ -1,5 +1,4 @@
 import { paginationSchema } from 'apps/common/dto/pagination.dto';
-
 import { createZodDto } from 'nestjs-zod';
 
 const searchUserSchema = paginationSchema;

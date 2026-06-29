@@ -1,7 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
 import { chatsGroupSchema } from 'apps/chat/dto/group/chats-group/chats-group.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const chatsGroupSyncSchema = chatsGroupSchema
   .omit({ attachmentUrl: true })

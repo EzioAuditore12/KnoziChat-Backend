@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const notFoundSchema = z.object({
   message: z.string().default('Not Found Request'),

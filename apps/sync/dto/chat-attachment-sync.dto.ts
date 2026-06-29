@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const chatAttachmentSyncSchema = z.object({
   id: z.any().transform((val) => String(val)),

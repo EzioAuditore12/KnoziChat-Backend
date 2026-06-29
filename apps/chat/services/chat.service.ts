@@ -1,18 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Server } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-
-import { ChatsOneToOneService } from './one-to-one/chats-one-to-one.service';
 import { WSAuthMiddleware } from 'apps/auth/middlewares/ws-auth.middleware';
 import { AuthenticatedSocket } from 'apps/auth/types/auth-jwt-payload';
-import { InsertOneToOneChatDto } from '../dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
-import { ChatsOneToOneDto } from '../dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
-import { ChatsGroupService } from './group/chats-group.service';
-import { ChatsGroupDto } from '../dto/group/chats-group/chats-group.dto';
-import { ConversationGroupService } from './group/conversation-group.service';
 import type { Cache } from 'cache-manager';
-import { ConversationGroupMemberService } from './group/conversation-group-member.service';
+import { Server } from 'socket.io';
+
+import { ChatsGroupDto } from '../dto/group/chats-group/chats-group.dto';
 import { InsertGroupChatContentDto } from '../dto/group/chats-group/insert-group-chat-content.dto';
+import { ChatsOneToOneDto } from '../dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
+import { InsertOneToOneChatDto } from '../dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
+import { ChatsGroupService } from './group/chats-group.service';
+import { ConversationGroupMemberService } from './group/conversation-group-member.service';
+import { ConversationGroupService } from './group/conversation-group.service';
+import { ChatsOneToOneService } from './one-to-one/chats-one-to-one.service';
 
 @Injectable()
 export class ChatService {

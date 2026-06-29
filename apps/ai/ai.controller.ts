@@ -1,25 +1,25 @@
 import {
+  Body,
   Controller,
   Get,
   Logger,
+  MessageEvent,
   Post,
   Query,
   Req,
-  UseGuards,
   Sse,
-  MessageEvent,
-  Body,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
+import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
 import { ApiAuthHeader } from 'apps/common/decorators/swagger/api-auth-header.decorator';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
 import { AiService } from './ai.service';
 import { ProcessQueryDto } from './dto/process-query.dto';
 import { SeedChatsDto } from './dto/seed-chats.dto';
-import { JwtAuthGuard } from 'apps/auth/guards/jwt-auth.guard';
-import type { AuthRequest } from 'apps/auth/types/auth-jwt-payload';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-
 import { ProcessQueryResponse } from './generated/ai';
 
 @ApiTags('AI')

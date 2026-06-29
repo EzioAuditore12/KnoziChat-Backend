@@ -1,7 +1,6 @@
-import { WorkerHost, Processor, OnWorkerEvent } from '@nestjs/bullmq';
-import { Job } from 'bullmq';
-
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import Zavu from '@zavudev/sdk';
+import { Job } from 'bullmq';
 
 process.loadEnvFile();
 

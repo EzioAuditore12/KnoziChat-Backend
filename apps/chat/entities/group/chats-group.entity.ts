@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { HydratedDocument } from 'mongoose';
 
-import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { ConversationGroup } from './conversation-group.entity';
 
 export const CHAT_GROUP_TABLE_NAME = 'chat_group';

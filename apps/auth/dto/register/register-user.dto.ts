@@ -1,8 +1,7 @@
-import { z } from 'zod';
-import { isStrongPassword } from 'validator';
-
 import { CreateUserDto, createUserSchema } from 'apps/user/dto/create-user.dto';
 import { createZodDto } from 'nestjs-zod';
+import { isStrongPassword } from 'validator';
+import { z } from 'zod';
 
 export const registerUserSchema = createUserSchema.extend({
   password: z

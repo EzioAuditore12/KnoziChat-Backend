@@ -1,5 +1,4 @@
 import { BullRootModuleOptions } from '@nestjs/bullmq';
-
 import { env } from 'apps/env';
 
 export const bullMQConfig: BullRootModuleOptions = {

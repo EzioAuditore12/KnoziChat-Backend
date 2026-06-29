@@ -1,5 +1,5 @@
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
-import { ThrottlerModuleOptions, seconds } from '@nestjs/throttler';
+import { seconds, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { env } from 'apps/env';
 
 export const throttlerConfig: ThrottlerModuleOptions = {

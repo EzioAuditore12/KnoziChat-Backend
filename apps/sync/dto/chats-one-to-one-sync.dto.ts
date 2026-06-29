@@ -1,7 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
 import { chatsOneToOneSchema } from 'apps/chat/dto/one-to-one/chats-one-to-one/chats-one-to-one.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const chatsOneToOneSyncSchema = chatsOneToOneSchema
   .omit({ senderId: true, attachmentUrl: true })

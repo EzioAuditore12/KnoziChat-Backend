@@ -1,13 +1,13 @@
+import { hash } from '@node-rs/argon2';
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  BeforeInsert,
-  BeforeUpdate,
 } from 'typeorm';
-import { hash } from '@node-rs/argon2';
 
 @Entity({ name: 'user' })
 export class User {

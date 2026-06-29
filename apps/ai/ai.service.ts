@@ -1,18 +1,17 @@
 import {
-  Injectable,
-  Inject,
-  OnModuleInit,
   ForbiddenException,
+  Inject,
+  Injectable,
+  OnModuleInit,
 } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
-import { ConversationOneToOneService } from 'apps/chat/services/one-to-one/conversation-one-to-one.service';
-import { ConversationGroupMemberService } from 'apps/chat/services/group/conversation-group-member.service';
-
 import type { ClientGrpc } from '@nestjs/microservices';
+import { ConversationGroupMemberService } from 'apps/chat/services/group/conversation-group-member.service';
+import { ConversationOneToOneService } from 'apps/chat/services/one-to-one/conversation-one-to-one.service';
+import { firstValueFrom } from 'rxjs';
 
-import { AIServiceClient, EmbedMessageRequest } from './generated/ai';
 import { ProcessQueryDto } from './dto/process-query.dto';
 import { SeedChatsDto } from './dto/seed-chats.dto';
+import { AIServiceClient, EmbedMessageRequest } from './generated/ai';
 
 @Injectable()
 export class AiService implements OnModuleInit {

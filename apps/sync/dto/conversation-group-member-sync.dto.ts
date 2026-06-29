@@ -1,7 +1,6 @@
-import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
-
 import { conversationGroupMemberSchema } from 'apps/chat/dto/group/conversation-group/conversation-group-member.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
 export const conversationGroupMemberSyncSchema =
   conversationGroupMemberSchema.extend({

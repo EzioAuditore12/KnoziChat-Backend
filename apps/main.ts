@@ -1,14 +1,12 @@
+import { fastifyMultipart } from '@fastify/multipart';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { fastifyMultipart } from '@fastify/multipart';
 
 import { AppModule } from './app.module';
-
 import { openApiDocsInit } from './configs/open-api.config';
-
 import { env } from './env';
 
 async function bootstrap() {
@@ -20,6 +18,8 @@ async function bootstrap() {
   await app.register(fastifyMultipart);
 
   openApiDocsInit(app);
+
+  app.enableCors({ origin: env.CORS_ORIGIN });
 
   await app.listen(env.PORT, '0.0.0.0');
 }

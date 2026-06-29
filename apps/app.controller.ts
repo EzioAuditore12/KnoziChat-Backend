@@ -8,17 +8,17 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   FileInterceptor,
   type MulterFile,
 } from '@webundsoehne/nest-fastify-file-upload';
-
-import { AppService } from './app.service';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import appWriteClient, { appWriteStorage } from './uploads/configs/appwrite';
-import { env } from './env';
 import { ID, Permission, Role } from 'node-appwrite';
 import { InputFile } from 'node-appwrite/file';
+
+import { AppService } from './app.service';
+import { env } from './env';
+import appWriteClient, { appWriteStorage } from './uploads/configs/appwrite';
 
 @ApiTags('App')
 @Controller()

@@ -1,14 +1,11 @@
 import { Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { RefreshJwtAuthGuard } from '../guards/refresh-auth.guard';
-
 import { RefreshTokensDto } from '../dto/refresh-token.dto';
-
-import type { RefreshTokenStratergyReqParameters } from '../types/auth-jwt-payload';
-
-import { RefreshService } from '../services/refresh.service';
 import { TokensDto } from '../dto/tokens.dto';
+import { RefreshJwtAuthGuard } from '../guards/refresh-auth.guard';
+import { RefreshService } from '../services/refresh.service';
+import type { RefreshTokenStratergyReqParameters } from '../types/auth-jwt-payload';
 
 @ApiTags('Authentication')
 @Controller('auth')

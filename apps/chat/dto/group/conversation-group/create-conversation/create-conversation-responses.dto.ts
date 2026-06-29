@@ -1,8 +1,8 @@
-import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-import { conversationGroupSchema } from '../conversation-group.dto';
 import { chatsGroupSchema } from '../../chats-group/chats-group.dto';
+import { conversationGroupSchema } from '../conversation-group.dto';
 
 export const createConversationGroupResponseSchema =
   conversationGroupSchema.extend({

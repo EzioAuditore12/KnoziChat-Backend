@@ -1,22 +1,21 @@
-import {
-  WebSocketGateway,
-  OnGatewayInit,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  WebSocketServer,
-  SubscribeMessage,
-} from '@nestjs/websockets';
-import { Server } from 'socket.io';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject } from '@nestjs/common';
-import type { Cache } from 'cache-manager';
-
-import { ChatService } from './services/chat.service';
+import {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import type { AuthenticatedSocket } from 'apps/auth/types/auth-jwt-payload';
-import { InsertOneToOneChatDto } from './dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
+import type { Cache } from 'cache-manager';
+import { Server } from 'socket.io';
 
-import { InsertGroupChatDto } from './dto/group/chats-group/insert-group-chat.dto';
 import { InsertGroupChatContentDto } from './dto/group/chats-group/insert-group-chat-content.dto';
+import { InsertGroupChatDto } from './dto/group/chats-group/insert-group-chat.dto';
+import { InsertOneToOneChatDto } from './dto/one-to-one/chats-one-to-one/insert-one-to-one-chat.dto';
+import { ChatService } from './services/chat.service';
 
 @WebSocketGateway()
 export class ChatGateway

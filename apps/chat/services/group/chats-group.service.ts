@@ -1,22 +1,22 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model } from 'mongoose';
-import {
-  ChatsGroup,
-  ChatsGroupDocument,
-} from 'apps/chat/entities/group/chats-group.entity';
-import { ConversationGroupService } from './conversation-group.service';
-import { InsertGroupChatDto } from 'apps/chat/dto/group/chats-group/insert-group-chat.dto';
-import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import {
   ChatsGroupDto,
   convertChatsGroupFromMongoose,
 } from 'apps/chat/dto/group/chats-group/chats-group.dto';
-import { InsertGroupChatsSystemEventDto } from 'apps/chat/dto/group/chats-group/insert-group-chat-system-event.dto';
 import { InsertGroupChatContentDto } from 'apps/chat/dto/group/chats-group/insert-group-chat-content.dto';
-
-import { InjectQueue } from '@nestjs/bullmq';
+import { InsertGroupChatsSystemEventDto } from 'apps/chat/dto/group/chats-group/insert-group-chat-system-event.dto';
+import { InsertGroupChatDto } from 'apps/chat/dto/group/chats-group/insert-group-chat.dto';
+import {
+  ChatsGroup,
+  ChatsGroupDocument,
+} from 'apps/chat/entities/group/chats-group.entity';
+import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { Queue } from 'bullmq';
+import { ClientSession, Model } from 'mongoose';
+
+import { ConversationGroupService } from './conversation-group.service';
 
 @Injectable()
 export class ChatsGroupService {

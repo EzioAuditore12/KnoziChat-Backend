@@ -4,19 +4,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, MoreThan, Repository } from 'typeorm';
-import { PaginateQuery, PaginationType, paginate } from 'nestjs-paginate';
-import { Expo } from 'expo-server-sdk';
-
-import { User } from './entities/user.entity';
-
-import { CreateUserDto } from './dto/create-user.dto';
-import { UserDto } from './dto/user.dto';
-import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
-import { PublicUserDto, publicUserSchema } from './dto/public-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import { UploadsService } from 'apps/uploads/uploads.service';
+import { Expo } from 'expo-server-sdk';
+import { paginate, PaginateQuery, PaginationType } from 'nestjs-paginate';
+import { In, MoreThan, Repository } from 'typeorm';
+
+import { CreateUserDto } from './dto/create-user.dto';
+import { PublicUserDto, publicUserSchema } from './dto/public-user.dto';
+import { SerachUserResponseDto } from './dto/search-user/search-user-response.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDto } from './dto/user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {

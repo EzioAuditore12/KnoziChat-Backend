@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { HydratedDocument } from 'mongoose';
 
-import { SnowFlakeId } from 'apps/common/utils/snowflake';
 import { ConversationOneToOne } from './conversation-one-to-one.entity';
 
 export const CHAT_DIRECT_TABLE_NAME = 'chat_direct';

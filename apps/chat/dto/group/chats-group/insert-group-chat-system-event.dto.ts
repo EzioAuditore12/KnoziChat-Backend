@@ -1,6 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
-import { chatsGroupSchema } from './chats-group.dto';
 import { z } from 'zod';
+
+import { chatsGroupSchema } from './chats-group.dto';
 
 export const insertGroupChatsSystemEventSchema = chatsGroupSchema
   .omit({
